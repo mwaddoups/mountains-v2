@@ -1,0 +1,15 @@
+[project]
+name = "mountains-v2"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "quart>=0.19.9",
+    "sqlalchemy>=2.0.36",
+]
+
+[dependency-groups]
+dev = [
+    "djlint>=1.36.3",
+]

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Clyde Mountaineering Club</title>
+    <meta name="description"
+          content="A Glasgow mountaineering and hiking club aimed at younger people in their 20s and 30s">
+    <meta name="author" content="Clyde Mountaineering Club">
+    <meta name="keywords" content="mountaineering, glasgow">
+    {# <link rel="shortcut icon"
+       href="{{ url_for('static', filename='favicon.ico') }}"> #}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}?v=1.0" />
+    <script src="https://unpkg.com/htmx.org@2.0.4"
+            integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
+            crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/htmx-ext-preload@2.1.0/preload.js"></script>
+  </head>
+  <body>
+    <header>
+      <nav>
+        <h1>Clyde Mountaineering Club</h1>
+        <ul>
+          <li>
+            <a href="{{ url_for('index') }}">Home</a>
+          </li>
+        </ul>
+      </nav>
+    </header>
+    <main>
+      {% block content %}
+      {% endblock content %}
+    </main>
+  </body>
+</html>
