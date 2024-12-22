@@ -36,6 +36,12 @@
           </li>
         </ul>
       </nav>
+      {% if 'user' in g %}
+        <p>{{ g.user.full_name }}</p>
+        <form method="post" action="{{ url_for('logout') }}">
+          <input type="submit" value="Logout" />
+        </form>
+      {% endif %}
     </header>
     {% block content %}
     {% endblock content %}

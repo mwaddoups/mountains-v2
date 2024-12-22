@@ -1,8 +1,8 @@
-{% extends "platform/base.html.j2" %}
-{% block platform %}
+{% extends "base.html.j2" %}
+{% block content %}
   <section>
-    <h1>User Editor</h1>
-    <form method="post" action="{{ url_for('platform.register') }}">
+    <h1>Register</h1>
+    <form method="post" action="{{ url_for('register') }}">
       <label>
         Email
         <input type="email" name='email' required />
@@ -22,4 +22,4 @@
       <input type="submit" value="Register" />
     </form>
   </section>
-{% endblock platform %}
+{% endblock content %}

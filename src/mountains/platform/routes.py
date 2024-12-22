@@ -1,27 +1,50 @@
+import functools
 import logging
+from typing import Awaitable, Callable
 
-from quart import Blueprint, current_app, render_template, request
+from quart import (
+    Blueprint,
+    current_app,
+    g,
+    redirect,
+    render_template,
+    session,
+    url_for,
+)
+from werkzeug import Response
 
 from mountains.models import User
 
-from .repos import users
+from ..repos import users
 
 logger = logging.getLogger(__name__)
 
 
-def routes(blueprint: Blueprint):
-    @blueprint.route("/register", methods=["GET", "POST"])
-    async def register():
-        if request.method == "POST":
-            form = await request.form
-            logger.debug("Registration form: %r", form)
-            user = User.from_registration(**form)
-            db = users(current_app.config["DB_NAME"])
-            db.insert(user)
-            logger.info("New user registered: %s", user)
-            return await render_template("platform/register.html.j2")
+def needs_auth(method):
+    @functools.wraps(method)
+    async def _needs_auth(*args, **kwargs):
+        if session.get("user_id") is not None:
+            return await method(*args, **kwargs)
         else:
-            return await render_template("platform/register.html.j2")
+            return redirect(url_for("platform.login"))
+
+    return _needs_auth
+
+
+def routes(blueprint: Blueprint):
+    @blueprint.before_request
+    async def current_user():
+        # Ensure all requests have access to the current user
+
+        if (user_id := session.get("user_id")) is None:
+            return redirect(url_for("login"))
+        else:
+            current_user = users(current_app.config["DB_NAME"]).get(id=user_id)
+            if current_user is None:
+                # Something weird happened
+                return redirect(url_for("logout"))
+            else:
+                g.user = current_user
 
     @blueprint.route("/home")
     async def home():

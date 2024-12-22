@@ -1,0 +1,17 @@
+{% extends "base.html.j2" %}
+{% block content %}
+  <h1>Login</h1>
+  <form method="post" action="{{ url_for('login') }}">
+    <label>
+      Email
+      <input type="email" name="email" />
+    </label>
+    <label>
+      Password
+      <input type="password" name="password" />
+    </label>
+    <input type="submit" value="Login" />
+  </form>
+  {% if error %}<strong>{{ error }}</strong>{% endif %}
+  <a href="{{ url_for('register') }}">Register</a>
+{% endblock content %}

@@ -25,6 +25,10 @@ class User:
     # created_on_utc: datetime.datetime
     # last_login_utc: datetime.datetime (utc)
 
+    @property
+    def full_name(self):
+        return self.first_name + " " + self.last_name
+
     @classmethod
     def from_registration(
         cls,

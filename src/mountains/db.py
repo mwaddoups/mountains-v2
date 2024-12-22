@@ -52,15 +52,15 @@ class Repository[T]:
                 attrs.asdict(obj),
             )
 
-    def get(self, id: str) -> T | None:
+    def get(self, **kwargs) -> T | None:
         with connection(self.db_name) as conn:
             cur = conn.execute(
                 f"""
                 SELECT {",".join(self._field_names)} FROM {self.table_name}
-                WHERE {self.id_col} = ?
+                WHERE {",".join([f"{k} = :{k}" for k in kwargs])}
                 LIMIT 1
                 """,
-                (id,),
+                kwargs,
             )
             row = cur.fetchone()
 

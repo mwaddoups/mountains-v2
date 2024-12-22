@@ -9,8 +9,10 @@ wheels/
 # Virtual environments
 .venv
 
-# SQLite test DB
-test.db
+# SQLite DBs
+*.db
+*.db-wal
+*.db-shm
 
 # Environment variables for testing / prod
 .env
