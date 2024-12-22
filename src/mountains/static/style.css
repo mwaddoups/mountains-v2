@@ -1,0 +1,7 @@
+@layer typography;
+
+@layer typography {
+  :root {
+    font-family: ui-sans-serif;
+  }
+}

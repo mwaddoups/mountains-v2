@@ -25,12 +25,19 @@
           <li>
             <a href="{{ url_for('index') }}">Home</a>
           </li>
+          <li>
+            <a>FAQs</a>
+          </li>
+          <li>
+            <a>Committee</a>
+          </li>
+          <li>
+            <a href="{{ url_for('platform.home') }}">Members Area</a>
+          </li>
         </ul>
       </nav>
     </header>
-    <main>
-      {% block content %}
-      {% endblock content %}
-    </main>
+    {% block content %}
+    {% endblock content %}
   </body>
 </html>

@@ -1,0 +1,26 @@
+Authentication
+
+- token sent as cookie https://htmx.org/essays/web-security-basics-with-htmx/
+
+Database
+
+- sqlite3 (WAL? threading?)
+
+User data
+Event data
+AttendingUser data
+Audit logging
+Styling
+Preload / htmx
+Photos
+Email
+
+Serve static stuff differently
+Serve htmx directly
+
+Harder stuff:
+Payments
+Discord integration
+
+New stuff:
+CI!

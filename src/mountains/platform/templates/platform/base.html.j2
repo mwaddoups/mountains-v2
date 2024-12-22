@@ -1,0 +1,19 @@
+{% extends "base.html.j2" %}
+{% block content %}
+  <aside>
+    <nav>
+      <ul>
+        <li>
+          <a href="{{ url_for('platform.home') }}">Home</a>
+        </li>
+        <li>
+          <a href="{{ url_for('platform.members') }}">Members</a>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+  <main>
+    {% block platform %}
+    {% endblock platform %}
+  </main>
+{% endblock content %}
