@@ -17,11 +17,11 @@
             crossorigin="anonymous"></script>
     <script src="https://unpkg.com/htmx-ext-preload@2.1.0/preload.js"></script>
   </head>
-  <body>
+  <body hx-ext="preload">
     <header>
       <nav>
         <h1>Clyde Mountaineering Club</h1>
-        <ul>
+        <ul preload>
           <li>
             <a href="{{ url_for('index') }}">Home</a>
           </li>

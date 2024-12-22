@@ -11,3 +11,6 @@ wheels/
 
 # SQLite test DB
 test.db
+
+# Environment variables for testing / prod
+.env
