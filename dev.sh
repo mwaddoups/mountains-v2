@@ -1,2 +1,2 @@
 #!/bin/sh
-quart --app src/mountains --debug run
+quart -e .env --app src/mountains --debug run
