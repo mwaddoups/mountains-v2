@@ -19,8 +19,8 @@
   </head>
   <body hx-ext="preload">
     <header>
+      <h1>Clyde Mountaineering Club</h1>
       <nav>
-        <h1>Clyde Mountaineering Club</h1>
         <ul preload>
           <li>
             <a href="{{ url_for('index') }}">Home</a>
@@ -36,11 +36,13 @@
           </li>
         </ul>
       </nav>
-      {% if 'user' in g %}
-        <p>{{ g.user.full_name }}</p>
-        <form method="post" action="{{ url_for('logout') }}">
-          <input type="submit" value="Logout" />
-        </form>
+      {% if 'current_user' in g %}
+        <aside>
+          <p>{{ g.current_user.full_name }}</p>
+          <form method="post" action="{{ url_for('logout') }}">
+            <input type="submit" value="Logout" />
+          </form>
+        </aside>
       {% endif %}
     </header>
     {% block content %}

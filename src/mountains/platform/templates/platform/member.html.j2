@@ -1,0 +1,10 @@
+{% extends "platform/base.html.j2" %}
+{% block platform %}
+  <h1>{{ user.full_name }}</h1>
+  {% if g.current_user == user %}<a href="{{ url_for('platform.edit_member', id=user.id) }}">Edit</a>{% endif %}
+  <img src="" alt="profile picture" width="256" height="256" />
+  <section>
+    <h2>About</h2>
+    <p>{{ user.about }}</p>
+  </section>
+{% endblock platform %}

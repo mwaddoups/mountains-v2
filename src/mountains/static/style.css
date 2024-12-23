@@ -1,7 +1,44 @@
-@layer typography;
+@layer layout, typography;
+
+@layer reset {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  ul,
+  li {
+    margin: 0;
+    padding: 0;
+  }
+}
 
 @layer typography {
   :root {
     font-family: ui-sans-serif;
+  }
+}
+
+@layer layout {
+  body > header {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+
+    > nav > ul {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      gap: 1em;
+      list-style: none;
+    }
+
+    > aside {
+      display: flex;
+      align-items: center;
+      gap: 1em;
+      margin-left: auto;
+    }
   }
 }

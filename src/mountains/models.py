@@ -39,7 +39,7 @@ class User:
         about: str | None,
     ) -> Self:
         random_str = str(uuid.uuid4())[:6]
-        id = first_name + "-" + last_name + "-" + random_str
+        id = first_name.lower() + "-" + last_name.lower() + "-" + random_str.lower()
 
         return cls(
             id=id, email=email, first_name=first_name, last_name=last_name, about=about

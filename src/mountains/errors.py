@@ -1,0 +1,2 @@
+class MountainException(Exception):
+    pass

@@ -1,25 +1,8 @@
 {% extends "base.html.j2" %}
+{% from "_forms.html.j2" import user_form %}
 {% block content %}
   <section>
     <h1>Register</h1>
-    <form method="post" action="{{ url_for('register') }}">
-      <label>
-        Email
-        <input type="email" name='email' required />
-      </label>
-      <label>
-        First Name
-        <input type="text" name='first_name' required />
-      </label>
-      <label>
-        Last Name
-        <input type="text" name='last_name' required />
-      </label>
-      <label>
-        About You
-        <textarea name='about' placeholder="Write a bit about yourself..."></textarea>
-      </label>
-      <input type="submit" value="Register" />
-    </form>
+    {{ user_form('post', url_for('register') , 'Register') }}
   </section>
 {% endblock content %}

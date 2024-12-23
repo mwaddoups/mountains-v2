@@ -2,6 +2,12 @@
 {% block platform %}
   <h1>Members</h1>
   <section>
-    Our homepage
+    {% for member in members %}
+      <a href="{{ url_for('platform.edit_member', id=member.id) }}">
+        <article>
+          <h1>{{ member.full_name }}</h1>
+        </article>
+      </a>
+    {% endfor %}
   </section>
 {% endblock platform %}

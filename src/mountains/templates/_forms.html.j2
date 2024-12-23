@@ -1,0 +1,21 @@
+{% macro user_form(method, action, submit_str) %}
+  <form method="post" action="{{ url_for('register') }}">
+    <label>
+      Email
+      <input type="email" name='email' required />
+    </label>
+    <label>
+      First Name
+      <input type="text" name='first_name' required />
+    </label>
+    <label>
+      Last Name
+      <input type="text" name='last_name' required />
+    </label>
+    <label>
+      About You
+      <textarea name='about' placeholder="Write a bit about yourself..."></textarea>
+    </label>
+    <input type="submit" value="Register" />
+  </form>
+{% endmacro %}
