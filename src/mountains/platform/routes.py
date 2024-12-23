@@ -14,7 +14,7 @@ from quart import (
 
 from mountains.errors import MountainException
 
-from ..repos import users
+from ..users import users
 
 logger = logging.getLogger(__name__)
 

@@ -8,6 +8,8 @@ from attr import Factory
 from attrs import define, field
 from werkzeug.security import generate_password_hash
 
+from mountains.db import Repository
+
 
 @define(kw_only=True)
 class User:
@@ -59,3 +61,21 @@ class User:
             last_name=last_name,
             about=about,
         )
+
+
+def users(db_name: str) -> Repository[User]:
+    return Repository(
+        db_name=db_name,
+        table_name="users",
+        schema=[
+            "id TEXT PRIMARY KEY",
+            "email TEXT UNIQUE NOT NULL",
+            "password_hash TEXT NOT NULL",
+            "first_name TEXT NOT NULL",
+            "last_name TEXT NOT NULL",
+            "about TEXT",
+            "created_on_utc DATETIME",
+            "last_login_utc DATETIME",
+        ],
+        storage_cls=User,
+    )

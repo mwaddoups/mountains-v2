@@ -1,11 +1,12 @@
 import logging
 
+import markdown
 from quart import Quart, Response, redirect, render_template, request, session, url_for
 from quart.logging import default_handler
 from werkzeug.security import check_password_hash
 
-from . import platform, repos
-from .models import User
+from . import platform
+from .users import User, users
 
 
 def create_app():
@@ -28,6 +29,10 @@ def create_app():
 
     app.register_blueprint(platform.blueprint)
 
+    @app.template_filter("markdown")
+    def convert_markdown(s: str) -> str:
+        return markdown.markdown(s)
+
     @app.route("/")
     async def index():
         return await render_template("index.html.j2")
@@ -36,7 +41,7 @@ def create_app():
     async def login():
         if request.method == "POST":
             form = await request.form
-            db = repos.users(app.config["DB_NAME"])
+            db = users(app.config["DB_NAME"])
             # TODO: Tokens db, add token to user, etc.
             # TODO: Password
             user = db.get(email=form["email"])
@@ -69,7 +74,7 @@ def create_app():
                 last_name=form["last_name"],
                 about=form["about"],
             )
-            db = repos.users(app.config["DB_NAME"])
+            db = users(app.config["DB_NAME"])
             db.insert(user)
             logger.info("New user registered: %s", user)
             return redirect(url_for("login"))
