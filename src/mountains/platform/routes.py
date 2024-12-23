@@ -53,12 +53,18 @@ def routes(blueprint: Blueprint):
         if user is None:
             raise MountainException("User not found!")
 
-        if request.method in ("POST", "PUT"):
-            # We keep POST support for legacy forms
+        if request.method != "GET":
             form_data = await request.form
-            new_user = copy.replace(user, **form_data)
-            logger.info("Updating user %s,  %r -> %r", user, user, new_user)
-            # TODO: actually do it
+            if request.headers["HX-Request"]:
+                method = request.method
+            else:
+                method = form_data["method"]
+
+            if method == "PUT":
+                new_user = copy.replace(user, **form_data)
+                logger.info("Updating user %s,  %r -> %r", user, user, new_user)
+                # TODO: actually do it
+
         return await render_template("platform/member.html.j2", user=user)
 
     @blueprint.route("/members/<id>/edit")

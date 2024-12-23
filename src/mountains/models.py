@@ -3,14 +3,15 @@ from __future__ import annotations
 import uuid
 from typing import Self
 
-from attrs import define
+from attrs import define, field
+from werkzeug.security import generate_password_hash
 
 
 @define(kw_only=True)
 class User:
     id: str
     email: str
-    # password_hash: str
+    password_hash: str = field(repr=False)
     # mobile: str
     first_name: str
     last_name: str
@@ -34,13 +35,23 @@ class User:
         cls,
         *,
         email: str,
+        password: str,
         first_name: str,
         last_name: str,
         about: str | None,
     ) -> Self:
+        # Generate a random id that's somewhat readable
         random_str = str(uuid.uuid4())[:6]
         id = first_name.lower() + "-" + last_name.lower() + "-" + random_str.lower()
 
+        # Generate password
+        password_hash = generate_password_hash(password)
+
         return cls(
-            id=id, email=email, first_name=first_name, last_name=last_name, about=about
+            id=id,
+            email=email,
+            password_hash=password_hash,
+            first_name=first_name,
+            last_name=last_name,
+            about=about,
         )

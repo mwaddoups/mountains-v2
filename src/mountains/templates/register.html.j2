@@ -4,5 +4,6 @@
   <section>
     <h1>Register</h1>
     {{ user_form('post', url_for('register') , 'Register') }}
+    {% if error %}<strong>{{ error }}</strong>{% endif %}
   </section>
 {% endblock content %}

@@ -8,10 +8,21 @@ from cattrs import structure
 
 
 @contextmanager
-def connection(db_name: str) -> Generator[sqlite3.Connection, None, None]:
-    with sqlite3.connect(db_name, autocommit=False) as conn:
-        conn.execute("pragma journal_mode=wal")
-        conn.row_factory = sqlite3.Row
+def connection(
+    db_name: str, locked: bool = False
+) -> Generator[sqlite3.Connection, None, None]:
+    conn = sqlite3.connect(db_name, autocommit=True)
+    conn.execute("pragma journal_mode=wal")
+    conn.row_factory = sqlite3.Row
+    if locked:
+        conn.execute("BEGIN IMMEDIATE")
+        try:
+            yield conn
+        except:
+            conn.execute("ROLLBACK")
+            raise
+        conn.execute("COMMIT")
+    else:
         yield conn
 
 

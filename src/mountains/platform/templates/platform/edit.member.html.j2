@@ -2,5 +2,5 @@
 {% from "_forms.html.j2" import user_form %}
 {% block platform %}
   <h1>Editing {{ user.full_name }}</h1>
-  {{ user_form('post', url_for('platform.edit_member') , 'Update') }}
+  {{ user_form('put', url_for('platform.member', id=user.id) , 'Update') }}
 {% endblock platform %}
