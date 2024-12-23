@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import datetime
 import uuid
 from typing import Self
 
+from attr import Factory
 from attrs import define, field
 from werkzeug.security import generate_password_hash
 
@@ -23,8 +25,10 @@ class User:
     # is_on_discord: bool
     # is_winter_skills: bool
     # is_dormant: bool
-    # created_on_utc: datetime.datetime
-    # last_login_utc: datetime.datetime (utc)
+    created_on_utc: datetime.datetime = Factory(
+        lambda: datetime.datetime.now(tz=datetime.UTC)
+    )
+    last_login_utc: datetime.datetime | None = None
 
     @property
     def full_name(self):
