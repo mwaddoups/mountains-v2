@@ -40,7 +40,8 @@ def routes(blueprint: Blueprint):
             current_user = users_repo().get(id=user_id)
             if current_user is None:
                 # Something weird happened
-                return redirect(url_for("logout"))
+                del session["user_id"]
+                return redirect(url_for("index"))
             else:
                 g.current_user = current_user
 

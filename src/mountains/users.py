@@ -88,6 +88,7 @@ def users(db_name: str) -> Repository[User]:
             "last_name TEXT NOT NULL",
             "about TEXT",
             "mobile TEXT",
+            "profile_picture_url TEXT",
             "is_committee BOOLEAN DEFAULT false NOT NULL",
             "is_coordinator BOOLEAN DEFAULT false NOT NULL",
             "is_member BOOLEAN DEFAULT false NOT NULL",
