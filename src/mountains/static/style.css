@@ -16,7 +16,15 @@
   input[type="text"],
   input[type="password"],
   input[type="email"],
+  input[type="number"],
+  input[type="datetime-local"],
+  select,
   textarea {
+    display: block;
+  }
+
+  input[type="submit"],
+  button {
     display: block;
   }
 }

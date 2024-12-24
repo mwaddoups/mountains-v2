@@ -1,0 +1,35 @@
+{% extends "platform/base.html.j2" %}
+{% block platform %}
+  {% if event %}
+    <h1>Editing {{ event.title }}</h1>
+  {% else %}
+    <h1>New Event</h1>
+  {% endif %}
+  <form method="post" action="{{ url_for('platform.events') }}">
+    <label>
+      Event Title
+      <input type="text" name="title" required />
+    </label>
+    <label>
+      Start Date
+      <input type="datetime-local" name="event_dt" required />
+    </label>
+    <label>
+      End Date
+      <input type="datetime-local" name="event_end_dt" />
+    </label>
+    <label>
+      Event Type
+      <select name="event_type" required>
+        {% for event_type in event_types %}
+          <option value="{{ event_type.value }}">{{ event_type.name | replace('_', ' ') | lower | title }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      Max Attendees
+      <input type="number" name="max_attendees" value="0" />
+    </label>
+    <input type="submit" value="Submit" />
+  </form>
+{% endblock platform %}

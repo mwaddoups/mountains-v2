@@ -4,8 +4,7 @@ import datetime
 import uuid
 from typing import Self
 
-from attr import Factory
-from attrs import define, field
+from attrs import Factory, define, field
 from werkzeug.security import generate_password_hash
 
 from mountains.db import Repository
@@ -55,7 +54,13 @@ class User:
     ) -> Self:
         # Generate a random id that's somewhat readable
         random_str = str(uuid.uuid4())[:6]
-        id = first_name.lower() + "-" + last_name.lower() + "-" + random_str.lower()
+        id = (
+            first_name.lower()[:15]
+            + "-"
+            + last_name.lower()[:15]
+            + "-"
+            + random_str.lower()
+        )
 
         # Generate password
         password_hash = generate_password_hash(password)

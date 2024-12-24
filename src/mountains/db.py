@@ -1,10 +1,16 @@
+import datetime
 import sqlite3
 from contextlib import contextmanager
-from typing import Generator
+from typing import Any, Generator
 
 import attrs
 from attrs import define
-from cattrs import structure
+from cattrs import (
+    register_structure_hook,
+    register_unstructure_hook,
+    structure,
+    unstructure,
+)
 
 
 @contextmanager
@@ -24,6 +30,16 @@ def connection(
         conn.execute("COMMIT")
     else:
         yield conn
+
+
+@register_structure_hook
+def structure_datetime(val, _) -> datetime.datetime:
+    return datetime.datetime.fromisoformat(val)
+
+
+@register_unstructure_hook
+def unstructure_datetime(val: datetime.datetime) -> str:
+    return val.isoformat()
 
 
 @define
@@ -60,7 +76,7 @@ class Repository[T]:
                     {",".join(":" + f for f in self._field_names)}
                 )
             """,
-                attrs.asdict(obj),
+                unstructure(obj),
             )
 
     def get(self, **kwargs) -> T | None:
