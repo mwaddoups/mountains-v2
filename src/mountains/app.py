@@ -73,6 +73,7 @@ def create_app():
                 first_name=form["first_name"],
                 last_name=form["last_name"],
                 about=form["about"],
+                mobile=form.get("mobile", ""),
             )
             db = users(app.config["DB_NAME"])
             db.insert(user)

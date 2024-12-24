@@ -16,15 +16,15 @@ class User:
     id: str
     email: str
     password_hash: str = field(repr=False)
-    # mobile: str
     first_name: str
     last_name: str
     about: str | None
-    # profile_picture_link: str | None
-    # is_committee: bool
-    # is_coordinator: bool
-    # is_member: bool
-    # is_on_discord: bool
+    mobile: str
+    profile_picture_url: str | None = None
+    is_committee: bool = False
+    is_coordinator: bool = False
+    is_member: bool = False
+    # is_on_discord: bool = False
     # is_winter_skills: bool
     # is_dormant: bool
     created_on_utc: datetime.datetime = Factory(
@@ -45,6 +45,7 @@ class User:
         first_name: str,
         last_name: str,
         about: str | None,
+        mobile: str,
     ) -> Self:
         # Generate a random id that's somewhat readable
         random_str = str(uuid.uuid4())[:6]
@@ -60,6 +61,7 @@ class User:
             first_name=first_name,
             last_name=last_name,
             about=about,
+            mobile=mobile,
         )
 
 
@@ -74,7 +76,11 @@ def users(db_name: str) -> Repository[User]:
             "first_name TEXT NOT NULL",
             "last_name TEXT NOT NULL",
             "about TEXT",
-            "created_on_utc DATETIME",
+            "mobile TEXT",
+            "is_committee BOOLEAN DEFAULT false NOT NULL",
+            "is_coordinator BOOLEAN DEFAULT false NOT NULL",
+            "is_member BOOLEAN DEFAULT false NOT NULL",
+            "created_on_utc DATETIME NOT NULL",
             "last_login_utc DATETIME",
         ],
         storage_cls=User,
