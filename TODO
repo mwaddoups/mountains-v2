@@ -6,14 +6,21 @@ Database
 
 - sqlite3 (WAL? threading?)
 
-User data
-Event data
-AttendingUser data
-Audit logging
-Styling
-Preload / htmx
-Photos
-Email
+Members
+
+- Members list content
+- Members list interactivity
+- Members list styling
+- Member profile content
+
+  User data
+  Event data
+  AttendingUser data
+  Audit logging
+  Styling
+  Preload / htmx
+  Photos
+  Email
 
 Serve static stuff differently
 Serve htmx directly

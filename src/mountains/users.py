@@ -4,11 +4,11 @@ import datetime
 import uuid
 from typing import Self
 
-from attrs import Factory, define, field
+from attrs import define, field
 from werkzeug.security import generate_password_hash
 
 from mountains.db import Repository
-from mountains.utils import readable_id
+from mountains.utils import now_utc, readable_id
 
 
 @define(kw_only=True)
@@ -26,10 +26,9 @@ class User:
     # is_member: bool
     # is_on_discord: bool = False
     # is_winter_skills: bool
-    # is_dormant: bool
-    created_on_utc: datetime.datetime = Factory(
-        lambda: datetime.datetime.now(tz=datetime.UTC)
-    )
+    membership_expiry_utc: datetime.datetime | None
+    is_dormant: bool
+    created_on_utc: datetime.datetime
     last_login_utc: datetime.datetime | None = None
 
     @property
@@ -38,8 +37,12 @@ class User:
 
     @property
     def is_member(self) -> bool:
-        # TODO: Implement this
-        return False
+        if self.membership_expiry_utc is None:
+            return False
+        else:
+            return self.membership_expiry_utc > datetime.datetime.now(
+                tz=datetime.UTC
+            ).replace(tzinfo=None)
 
     @property
     def missing_profile_color(self) -> str:
@@ -76,6 +79,9 @@ class User:
             profile_picture_url=None,
             is_committee=False,
             is_coordinator=False,
+            membership_expiry_utc=None,
+            is_dormant=False,
+            created_on_utc=now_utc(),
         )
 
 
@@ -92,9 +98,10 @@ def users(db_name: str) -> Repository[User]:
             "about TEXT",
             "mobile TEXT",
             "profile_picture_url TEXT",
-            "is_committee BOOLEAN DEFAULT false NOT NULL",
-            "is_coordinator BOOLEAN DEFAULT false NOT NULL",
-            "is_member BOOLEAN DEFAULT false NOT NULL",
+            "is_committee BOOLEAN NOT NULL",
+            "is_coordinator BOOLEAN NOT NULL",
+            "membership_expiry_utc DATETIME",
+            "is_dormant BOOLEAN NOT NULL",
             "created_on_utc DATETIME NOT NULL",
             "last_login_utc DATETIME",
         ],

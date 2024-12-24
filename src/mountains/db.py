@@ -1,7 +1,7 @@
 import datetime
 import sqlite3
 from contextlib import contextmanager
-from typing import Any, Generator
+from typing import Generator
 
 import attrs
 from attrs import define

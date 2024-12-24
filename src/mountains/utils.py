@@ -1,5 +1,10 @@
+import datetime
 import re
 import unicodedata
+
+
+def now_utc() -> datetime.datetime:
+    return datetime.datetime.now(tz=datetime.UTC).replace(tzinfo=None)
 
 
 def readable_id(values: list[str]) -> str:
@@ -15,5 +20,5 @@ def slugify(value: str) -> str:
     value = (
         unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
     )
-    value = re.sub("[^\w\s-]", "", value).strip().lower()
-    return re.sub("[-\s]+", "-", value)
+    value = re.sub(r"[^\w\s-]", "", value).strip().lower()
+    return re.sub(r"[-\s]+", "-", value)

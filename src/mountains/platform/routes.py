@@ -1,5 +1,3 @@
-import copy
-import datetime
 import logging
 
 from quart import (
@@ -16,13 +14,9 @@ from quart import (
 from mountains.errors import MountainException
 
 from ..events import Event, events
-from ..users import users
+from .members import member_routes, users_repo
 
 logger = logging.getLogger(__name__)
-
-
-def users_repo():
-    return users(current_app.config["DB_NAME"])
 
 
 def events_repo():
@@ -49,52 +43,8 @@ def routes(blueprint: Blueprint):
     async def home():
         return await render_template("platform/home.html.j2")
 
-    @blueprint.route("/members")
-    async def members():
-        users = sorted(
-            users_repo().list(),
-            key=lambda u: (0 if u.is_coordinator else 1, u.created_on_utc),
-        )
-        if search := request.args.get("search"):
-            low_search = search.lower()
-            users = [
-                u
-                for u in users
-                if low_search in u.first_name.lower()
-                or low_search in u.last_name.lower()
-            ]
-        return await render_template(
-            "platform/members.html.j2", members=users, search=search
-        )
-
-    @blueprint.route("/members/<id>", methods=["GET", "POST", "PUT"])
-    async def member(id: str):
-        user = users_repo().get(id=id)
-        if user is None:
-            raise MountainException("User not found!")
-
-        if request.method != "GET":
-            form_data = await request.form
-            if request.headers["HX-Request"]:
-                method = request.method
-            else:
-                method = form_data["method"]
-
-            if method == "PUT":
-                new_user = copy.replace(user, **form_data)
-                logger.info("Updating user %s,  %r -> %r", user, user, new_user)
-                # TODO: actually do it
-
-            # TODO: Audit the event
-
-        return await render_template("platform/member.html.j2", user=user)
-
-    @blueprint.route("/members/<id>/edit")
-    async def edit_member(id: str):
-        user = users_repo().get(id=id)
-        if user is None:
-            raise MountainException("User not found!")
-        return await render_template("platform/member.edit.html.j2", user=user)
+    # Add the member routes
+    member_routes(blueprint)
 
     @blueprint.route("/events", methods=["GET", "POST"])
     async def events():

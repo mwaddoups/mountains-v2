@@ -6,8 +6,8 @@
   {% endif %}
   <h1>{{ user.full_name }}</h1>
   {{ profile_picture(user, "256") }}
-  <section>
+  <hgroup>
     <h2>About</h2>
     {{ user.about | markdown | safe }}
-  </section>
+  </hgroup>
 {% endblock platform %}

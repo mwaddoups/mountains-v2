@@ -43,7 +43,6 @@ def create_app():
             form = await request.form
             db = users(app.config["DB_NAME"])
             # TODO: Tokens db, add token to user, etc.
-            # TODO: Password
             user = db.get(email=form["email"])
             if user is None or not check_password_hash(
                 user.password_hash, form["password"]
