@@ -33,8 +33,13 @@ class User:
     last_login_utc: datetime.datetime | None = None
 
     @property
-    def full_name(self):
+    def full_name(self) -> str:
         return self.first_name + " " + self.last_name
+
+    @property
+    def missing_profile_color(self) -> str:
+        h = ord(self.id[0:][0]) % 360
+        return f"hsl({h}, 50%, 50%)"
 
     @classmethod
     def from_registration(
