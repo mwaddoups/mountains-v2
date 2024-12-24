@@ -6,6 +6,7 @@ import uuid
 from attrs import define
 
 from mountains.db import Repository
+from mountains.utils import now_utc, readable_id
 
 
 class EventType(enum.Enum):
@@ -65,10 +66,10 @@ class Event:
 
         # Generate a random id that's somewhat readable
         random_str = str(uuid.uuid4())[:6]
-        id = title.lower()[:15] + "-" + event_dt.strftime("%Y-%m-%d") + "-" + random_str
+        id = readable_id([title, event_dt.strftime("%Y-%m-%d"), random_str])
 
         # Timestamp as now
-        now_utc = datetime.datetime.now(tz=datetime.UTC)
+        now = now_utc()
 
         return cls(
             id=id,
@@ -78,8 +79,8 @@ class Event:
             event_end_dt=event_end_dt,
             event_type=event_type,
             max_attendees=max_attendees,
-            created_on_utc=now_utc,
-            updated_on_utc=now_utc,
+            created_on_utc=now,
+            updated_on_utc=now,
         )
 
 

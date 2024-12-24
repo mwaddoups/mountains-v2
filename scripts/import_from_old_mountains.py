@@ -1,12 +1,11 @@
 import argparse
-import asyncio
 import sqlite3
 import uuid
 from datetime import datetime
 
 from werkzeug.security import generate_password_hash
 
-from mountains.events import Event, events
+from mountains.events import Event, EventType, events
 from mountains.users import User, users
 from mountains.utils import readable_id
 
@@ -17,6 +16,19 @@ args = parser.parse_args()
 
 user_repo = users(args.output_db)
 events_repo = events(args.output_db)
+
+event_map = {
+    "SD": EventType.SUMMER_DAY_WALK,
+    "SW": EventType.SUMMER_WEEKEND,
+    "WD": EventType.WINTER_DAY_WALK,
+    "WW": EventType.WINTER_WEEKEND,
+    "CL": EventType.INDOOR_CLIMBING,
+    "OC": EventType.OUTDOOR_CLIMBING,
+    "RN": EventType.RUNNING,
+    "SO": EventType.SOCIAL,
+    "CM": EventType.COMMITTEE,
+    "XX": EventType.OTHER,
+}
 
 pw_hash = generate_password_hash("password")
 with sqlite3.connect(args.input_db) as in_conn:
@@ -67,3 +79,22 @@ with sqlite3.connect(args.input_db) as in_conn:
     # Do the events import
     events_repo.drop_table()
     events_repo.create_table()
+
+    old_events = in_conn.execute("SELECT * FROM events_event").fetchall()
+    inserted = 0
+    skipped = 0
+    for ev in old_events:
+        ev = dict(ev)
+
+        new_event = Event.from_new_event(
+            title=ev["title"],
+            description=ev["description"],
+            event_dt_str=ev["event_date"],
+            event_end_dt_str=ev["event_end_date"],
+            event_type_str=str(event_map[ev["event_type"]].value),
+            max_attendees_str=ev["max_attendees"],
+        )
+
+        events_repo.insert(new_event)
+        inserted += 1
+    print(f"Inserted {inserted} events.")

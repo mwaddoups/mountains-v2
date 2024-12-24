@@ -1,6 +1,43 @@
 {% extends "platform/base.html.j2" %}
-{% from "_forms.html.j2" import user_form %}
 {% block platform %}
   <h1>Editing {{ user.full_name }}</h1>
-  {{ user_form('put', url_for('platform.member', id=user.id) , 'Update') }}
+  <form method="post" action="{{ url_for('platform.member', id=user.id) }}">
+    <input type="hidden" name="method" value="PUT" />
+    <label>
+      Profile Picture
+      <input type="file" />
+    </label>
+    <label>
+      Email
+      <input type="email" name='email' value="{{ user.email }}" required />
+    </label>
+    <label>
+      Password
+      <input type="password" name='password' />
+    </label>
+    <label>
+      Confirm Password
+      <input type="password" name='confirm_password' />
+    </label>
+    <label>
+      First Name
+      <input type="text" name='first_name' value="{{ user.first_name }}" required />
+    </label>
+    <label>
+      Last Name
+      <input type="text" name='last_name' value="{{ user.last_name }}" required />
+    </label>
+    <label>
+      About You
+      <textarea name='about'
+                value="{{ user.about }}"
+                placeholder="Write a bit about yourself..."></textarea>
+    </label>
+    <label>
+      Mobile Number
+      <input type="text" name='mobile' value="{{ user.mobile }}" />
+    </label>
+    <input type="submit" value="Update user" />
+    <a href="{{ url_for('platform.member', id=user.id) }}">Return to profile</a>
+  </form>
 {% endblock platform %}

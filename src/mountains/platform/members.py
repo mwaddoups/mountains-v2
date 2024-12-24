@@ -4,8 +4,10 @@ import logging
 from quart import (
     Blueprint,
     current_app,
+    redirect,
     render_template,
     request,
+    url_for,
 )
 
 from mountains.errors import MountainException
@@ -20,24 +22,46 @@ def users_repo():
 
 
 def member_routes(blueprint: Blueprint):
-    @blueprint.route("/members")
+    @blueprint.route("/members", methods=["GET", "POST"])
     async def members():
-        users = sorted(users_repo().list(), key=_member_sort_key)
+        if request.method == "POST":
+            # New user registration
+            form = await request.form
+            if form["password"] != form["confirm_password"]:
+                return await render_template(
+                    "register.html.j2", error="Passwords do not match!"
+                )
+            user = User.from_registration(
+                email=form["email"],
+                password=form["password"],
+                first_name=form["first_name"],
+                last_name=form["last_name"],
+                about=form["about"],
+                mobile=form["mobile"],
+            )
 
-        if search := request.args.get("search"):
-            # Have the search match either first or last name, in lowercase
-            low_search = search.lower()
-            users = [
-                u
-                for u in users
-                if low_search in u.first_name.lower()
-                or low_search in u.last_name.lower()
-            ]
+            users_repo().insert(user)
+            return redirect(url_for("login"))
+        else:
+            users = users_repo().list()
 
-        # TODO: Infinite scroll for members, this request is slow
-        return await render_template(
-            "platform/members.html.j2", members=users, search=search
-        )
+            if search := request.args.get("search"):
+                # Have the search match either first or last name, in lowercase
+                low_search = search.lower()
+                users = [
+                    u
+                    for u in users
+                    if low_search in u.first_name.lower()
+                    or low_search in u.last_name.lower()
+                ]
+
+            #
+            users = sorted(users, key=_member_sort_key)
+
+            # TODO: Infinite scroll for members, this request is slow
+            return await render_template(
+                "platform/members.html.j2", members=users, search=search
+            )
 
     @blueprint.route("/members/<id>", methods=["GET", "POST", "PUT"])
     async def member(id: str):
@@ -46,16 +70,40 @@ def member_routes(blueprint: Blueprint):
             raise MountainException("User not found!")
 
         if request.method != "GET":
-            form_data = await request.form
-            if request.headers["HX-Request"]:
+            form = await request.form
+            if request.headers.get("HX-Request"):
                 method = request.method
             else:
-                method = form_data["method"]
+                method = form["method"]
 
             if method == "PUT":
-                new_user = copy.replace(user, **form_data)
+                # TODO: Remove password, unless it's included
+                new_user = copy.replace(
+                    user,
+                    email=form["email"],
+                    first_name=form["first_name"],
+                    last_name=form["last_name"],
+                    about=form["about"],
+                    mobile=form["mobile"],
+                )
                 logger.info("Updating user %s,  %r -> %r", user, user, new_user)
                 # TODO: actually do it
+            elif method == "POST":
+                form = await request.form
+                if form["password"] != form["confirm_password"]:
+                    return await render_template(
+                        "register.html.j2", error="Passwords do not match!"
+                    )
+                user = User.from_registration(
+                    email=form["email"],
+                    password=form["password"],
+                    first_name=form["first_name"],
+                    last_name=form["last_name"],
+                    about=form["about"],
+                    mobile=form["mobile"],
+                )
+
+                users_repo().insert(user)
 
             # TODO: Audit the event
 

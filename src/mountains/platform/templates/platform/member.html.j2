@@ -5,9 +5,23 @@
     <a href="{{ url_for('platform.edit_member', id=user.id) }}">Edit Profile</a>
   {% endif %}
   <h1>{{ user.full_name }}</h1>
+  <small>{{ user.mobile }}</small>
+  <small>Discord placeholder</small>
+  {% if user.is_committee %}<h6>Committee</h6>{% endif %}
+  {% if user.is_coordinator %}<h6>Coordinator</h6>{% endif %}
+  {% if user.is_member %}
+    <h6>Member</h6>
+    <small>Membership expires: {{ user.membership_expiry_utc.strftime("%Y-%m-%d") }}</small>
+  {% endif %}
   {{ profile_picture(user, "256") }}
   <hgroup>
     <h2>About</h2>
     {{ user.about | markdown | safe }}
+  </hgroup>
+  <hgroup>
+    <h2>Attended Events</h2>
+    <ul>
+      <li>Activity placeholder</li>
+    </ul>
   </hgroup>
 {% endblock platform %}
