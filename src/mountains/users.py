@@ -38,7 +38,8 @@ class User:
 
     @property
     def missing_profile_color(self) -> str:
-        h = ord(self.id[0:][0]) % 360
+        # map a -> z to a number between 0 and 360
+        h = (ord(self.id[0].lower()) - 96) * (360 // 26)
         return f"hsl({h}, 50%, 50%)"
 
     @classmethod
