@@ -64,7 +64,7 @@ class Repository[T]:
 
     def drop_table(self):
         with connection(self.db_name) as conn:
-            conn.execute(f"DROP TABLE {self.table_name}")
+            conn.execute(f"DROP TABLE IF EXISTS {self.table_name}")
 
     def insert(self, obj: T) -> None:
         with connection(self.db_name) as conn:

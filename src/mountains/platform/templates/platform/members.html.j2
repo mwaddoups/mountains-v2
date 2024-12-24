@@ -1,13 +1,31 @@
+{% from "platform/_profile.html.j2" import profile_picture %}
 {% extends "platform/base.html.j2" %}
 {% block platform %}
-  <h1>Members</h1>
+  <form>
+    <input type="search"
+           name="search"
+           placeholder="Enter name to search..."
+           value="{{ search if search else '' }}" />
+  </form>
   <section>
     {% for member in members %}
       <a href="{{ url_for('platform.member', id=member.id) }}">
         <article>
+          {{ profile_picture(member, "128") }}
           <h1>{{ member.full_name }}</h1>
+          {% if member.is_committee %}
+            <h6>Committee</h6>
+          {% elif member.is_coordinator %}
+            <h6>Coordinator</h6>
+          {% elif member.is_member %}
+            <h6>Member</h6>
+          {% else %}
+            <h6>Guest</h6>
+          {% endif %}
         </article>
       </a>
+    {% else %}
+      <em>No users found!</em>
     {% endfor %}
   </section>
 {% endblock platform %}

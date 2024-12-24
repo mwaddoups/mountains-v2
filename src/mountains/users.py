@@ -8,6 +8,7 @@ from attrs import Factory, define, field
 from werkzeug.security import generate_password_hash
 
 from mountains.db import Repository
+from mountains.utils import readable_id
 
 
 @define(kw_only=True)
@@ -19,10 +20,10 @@ class User:
     last_name: str
     about: str | None
     mobile: str
-    profile_picture_url: str | None = None
-    is_committee: bool = False
-    is_coordinator: bool = False
-    is_member: bool = False
+    profile_picture_url: str | None
+    is_committee: bool
+    is_coordinator: bool
+    # is_member: bool
     # is_on_discord: bool = False
     # is_winter_skills: bool
     # is_dormant: bool
@@ -34,6 +35,11 @@ class User:
     @property
     def full_name(self) -> str:
         return self.first_name + " " + self.last_name
+
+    @property
+    def is_member(self) -> bool:
+        # TODO: Implement this
+        return False
 
     @property
     def missing_profile_color(self) -> str:
@@ -54,13 +60,7 @@ class User:
     ) -> Self:
         # Generate a random id that's somewhat readable
         random_str = str(uuid.uuid4())[:6]
-        id = (
-            first_name.lower()[:15]
-            + "-"
-            + last_name.lower()[:15]
-            + "-"
-            + random_str.lower()
-        )
+        id = readable_id([first_name, last_name, random_str])
 
         # Generate password
         password_hash = generate_password_hash(password)
@@ -73,6 +73,9 @@ class User:
             last_name=last_name,
             about=about,
             mobile=mobile,
+            profile_picture_url=None,
+            is_committee=False,
+            is_coordinator=False,
         )
 
 

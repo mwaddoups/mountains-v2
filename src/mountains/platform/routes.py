@@ -51,8 +51,21 @@ def routes(blueprint: Blueprint):
 
     @blueprint.route("/members")
     async def members():
-        users = users_repo().list()
-        return await render_template("platform/members.html.j2", members=users)
+        users = sorted(
+            users_repo().list(),
+            key=lambda u: (0 if u.is_coordinator else 1, u.created_on_utc),
+        )
+        if search := request.args.get("search"):
+            low_search = search.lower()
+            users = [
+                u
+                for u in users
+                if low_search in u.first_name.lower()
+                or low_search in u.last_name.lower()
+            ]
+        return await render_template(
+            "platform/members.html.j2", members=users, search=search
+        )
 
     @blueprint.route("/members/<id>", methods=["GET", "POST", "PUT"])
     async def member(id: str):
@@ -90,6 +103,7 @@ def routes(blueprint: Blueprint):
 
             event = Event.from_new_event(
                 title=form_data["title"],
+                description=form_data["description"],
                 event_dt_str=form_data["event_dt"],
                 event_end_dt_str=form_data["event_end_dt"],
                 event_type_str=form_data["event_type"],

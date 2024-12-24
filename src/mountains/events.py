@@ -28,6 +28,7 @@ sqlite3.register_adapter(EventType, lambda x: x.value)
 class Event:
     id: str
     title: str
+    description: str
     event_dt: datetime.datetime
     event_end_dt: datetime.datetime | None
     event_type: EventType
@@ -47,6 +48,7 @@ class Event:
         cls,
         *,
         title: str,
+        description: str,
         event_dt_str: str,
         event_end_dt_str: str,
         event_type_str: str,
@@ -71,6 +73,7 @@ class Event:
         return cls(
             id=id,
             title=title,
+            description=description,
             event_dt=event_dt,
             event_end_dt=event_end_dt,
             event_type=event_type,
@@ -87,6 +90,7 @@ def events(db_name: str) -> Repository[Event]:
         schema=[
             "id TEXT PRIMARY KEY",
             "title TEXT NOT NULL",
+            "description TEXT NOT NULL",
             "event_dt DATETIME NOT NULL",
             "event_end_dt DATETIME",
             "event_type INTEGER NOT NULL",
