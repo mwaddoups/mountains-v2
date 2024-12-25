@@ -6,6 +6,8 @@
     {% for event in events %}
       <article id="{{ event.id }}">
         <h1>{{ event.title }}</h1>
+        <em>{{ event.event_dt }}</em>
+        <div>{{ event.description | markdown | safe }}</div>
       </article>
     {% endfor %}
   </section>
