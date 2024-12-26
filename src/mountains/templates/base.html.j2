@@ -1,3 +1,4 @@
+{% from "platform/_profile.html.j2" import profile_picture %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -38,7 +39,10 @@
       </nav>
       {% if 'current_user' in g %}
         <aside>
-          <a href="{{ url_for('platform.member', slug=g.current_user.slug) }}">{{ g.current_user.full_name }}</a>
+          <a href="{{ url_for('platform.member', slug=g.current_user.slug) }}">
+            {{ g.current_user.full_name }}
+            {{ profile_picture(g.current_user, '32') }}
+          </a>
           <form method="post" action="{{ url_for('logout') }}">
             <input type="submit" value="Logout" />
           </form>
