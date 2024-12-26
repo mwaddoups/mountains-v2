@@ -16,7 +16,11 @@
   {{ profile_picture(user, "256") }}
   <hgroup>
     <h2>About</h2>
-    {{ user.about | markdown | safe }}
+    {% if user.about %}
+      {{ user.about | markdown | safe }}
+    {% else %}
+      <em>No bio found!</em>
+    {% endif %}
   </hgroup>
   <hgroup>
     <h2>Attended Events</h2>

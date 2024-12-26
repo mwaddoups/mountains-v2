@@ -253,6 +253,32 @@
 }
 
 @layer components {
+  .badge {
+    border-radius: 0.5em;
+    padding: 0.25em 0.5em;
+    font-size: 0.9rem;
+  }
+
+  .badge-committee {
+    background-color: rgb(192, 132, 252);
+    color: var(--text-light);
+  }
+
+  .badge-coordinator {
+    background-color: rgb(251, 146, 60);
+    color: var(--text-light);
+  }
+
+  .badge-member {
+    background-color: rgb(59, 130, 246);
+    color: var(--text-light);
+  }
+
+  .badge-guest {
+    background-color: rgb(74, 222, 128);
+    color: var(--text-light);
+  }
+
   #members {
     width: 100%;
     padding-top: 0.25em;
@@ -272,11 +298,8 @@
       border-radius: 5px;
 
       h1,
-      h2,
-      h3,
-      h4,
-      h5,
-      h6 {
+      h2 {
+        font-size: 0.9em;
         overflow: hidden;
         text-overflow: ellipsis;
         max-width: 200px;

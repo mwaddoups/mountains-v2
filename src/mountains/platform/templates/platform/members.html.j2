@@ -1,4 +1,4 @@
-{% from "platform/_profile.html.j2" import profile_picture %}
+{% from "platform/_profile.html.j2" import profile_picture, badge %}
 {% extends "platform/base.html.j2" %}
 {% block platform %}
   <form>
@@ -9,18 +9,18 @@
   </form>
   <section id="members">
     {% for member in members[:limit] %}
-      <a href="{{ url_for('platform.member', id=member.id) }}">
+      <a href="{{ url_for('platform.member', slug=member.slug) }}">
         <article>
           {{ profile_picture(member, "128") }}
           <h2>{{ member.full_name }}</h2>
           {% if member.is_committee %}
-            <h6>Committee</h6>
+            {{ badge("committee") }}
           {% elif member.is_coordinator %}
-            <h6>Coordinator</h6>
+            {{ badge("coordinator") }}
           {% elif member.is_member %}
-            <h6>Member</h6>
+            {{ badge("member") }}
           {% else %}
-            <h6>Guest</h6>
+            {{ badge("guest") }}
           {% endif %}
         </article>
       </a>

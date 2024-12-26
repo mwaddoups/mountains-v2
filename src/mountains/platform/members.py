@@ -39,10 +39,10 @@ def member_routes(blueprint: Blueprint):
             "platform/members.html.j2", members=members, search=search, limit=limit
         )
 
-    @blueprint.route("/members/<id>", methods=["GET", "POST", "PUT"])
-    async def member(id: str):
+    @blueprint.route("/members/<slug>", methods=["GET", "POST", "PUT"])
+    async def member(slug: str):
         with connection(current_app.config["DB_NAME"]) as conn:
-            user = users(conn).get(id=id)
+            user = users(conn).get(slug=slug)
         if user is None:
             raise MountainException("User not found!")
 

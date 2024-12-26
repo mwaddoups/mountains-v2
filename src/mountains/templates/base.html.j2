@@ -38,7 +38,7 @@
       </nav>
       {% if 'current_user' in g %}
         <aside>
-          <a href="{{ url_for('platform.member', id=g.current_user.id) }}">{{ g.current_user.full_name }}</a>
+          <a href="{{ url_for('platform.member', slug=g.current_user.slug) }}">{{ g.current_user.full_name }}</a>
           <form method="post" action="{{ url_for('logout') }}">
             <input type="submit" value="Logout" />
           </form>
