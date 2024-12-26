@@ -16,3 +16,6 @@ wheels/
 
 # Environment variables for testing / prod
 .env
+
+# Images (for now)
+images/

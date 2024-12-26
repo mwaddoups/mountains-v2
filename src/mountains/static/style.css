@@ -1,6 +1,7 @@
-@layer layout, typography;
+@layer reset, layout, theme, typography;
 
 @layer reset {
+  header,
   h1,
   h2,
   h3,
@@ -11,6 +12,18 @@
   li {
     margin: 0;
     padding: 0;
+  }
+
+  a {
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    cursor: pointer;
+    color: inherit;
+
+    &:visited {
+      color: inherit;
+    }
   }
 
   input[type="text"],
@@ -27,6 +40,11 @@
   input[type="submit"],
   button {
     display: block;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
   }
 }
 
@@ -37,17 +55,39 @@
 }
 
 @layer layout {
+  body {
+    width: 80%;
+    min-width: 1024px;
+    margin: 0 auto;
+  }
+
+  input[type="submit"],
+  button {
+    padding: 0.5em;
+  }
+
+  /* Navigation */
   body > header {
     display: flex;
-    align-items: center;
+    align-items: stretch;
     gap: 1em;
+
+    > h1 {
+      margin: auto 0;
+    }
 
     > nav > ul {
       height: 100%;
       display: flex;
       align-items: center;
-      gap: 1em;
       list-style: none;
+
+      > li {
+        padding: 0 0.5em;
+        height: 100%;
+        display: flex;
+        align-items: center;
+      }
     }
 
     > aside {
@@ -55,6 +95,53 @@
       align-items: center;
       gap: 1em;
       margin-left: auto;
+    }
+  }
+}
+
+@layer theme {
+  :root {
+    --color-primary: rgb(13, 148, 136);
+    --color-secondary: blue;
+    --text-dark: hsl(0, 0%, 5%);
+    --text-light: hsl(0, 0%, 95%);
+  }
+
+  li {
+    transition: all 0.1s ease-in;
+  }
+
+  li:has(a:hover) {
+    background-color: var(--color-primary);
+    color: var(--text-light);
+  }
+
+  input[type="submit"],
+  button {
+    background-color: var(--color-primary);
+    color: var(--text-light);
+    font-weight: 400;
+    border-radius: 5px;
+  }
+
+  body > header {
+    border-bottom: 2px solid var(--color-primary);
+
+    &::before {
+      content: "";
+      width: 3em;
+      height: 3em;
+      margin: 0;
+      padding: 0;
+      background-image: url("logo_256.png");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+    }
+
+    > h1 {
+      font-size: 1.5em;
+      letter-spacing: -0.025em;
     }
   }
 }
