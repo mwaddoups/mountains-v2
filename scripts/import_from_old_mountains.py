@@ -5,7 +5,9 @@ from datetime import datetime
 
 from werkzeug.security import generate_password_hash
 
+from mountains.db import connection
 from mountains.events import Event, EventType, events
+from mountains.tokens import tokens
 from mountains.users import User, users
 from mountains.utils import readable_id
 
@@ -14,8 +16,6 @@ parser.add_argument("input_db")
 parser.add_argument("output_db")
 args = parser.parse_args()
 
-user_repo = users(args.output_db)
-events_repo = events(args.output_db)
 
 event_map = {
     "SD": EventType.SUMMER_DAY_WALK,
@@ -31,8 +31,16 @@ event_map = {
 }
 
 pw_hash = generate_password_hash("password")
-with sqlite3.connect(args.input_db) as in_conn:
+with (
+    sqlite3.connect(args.input_db) as in_conn,
+    connection(args.output_db) as out_conn,
+):
     in_conn.row_factory = sqlite3.Row
+    user_repo = users(out_conn)
+    token_repo = tokens(out_conn)
+    # recreate tokens
+    token_repo.drop_table()
+    token_repo.create_table()
 
     # Do the user import
     user_repo.drop_table()
@@ -46,12 +54,12 @@ with sqlite3.connect(args.input_db) as in_conn:
         if not u["first_name"] or not u["last_name"]:
             skipped += 1
             continue
-        random_str = str(uuid.uuid4())[:6]
-        u_id = readable_id([u["first_name"], u["last_name"], random_str])
+        u_slug = readable_id([u["first_name"], u["last_name"], str(u["id"])])
 
         # TODO: still not importing all fields
         new_user = User(
-            id=u_id,
+            id=u["id"],
+            slug=u_slug,
             email=u["email"],
             password_hash=pw_hash,
             first_name=u["first_name"],
@@ -77,24 +85,24 @@ with sqlite3.connect(args.input_db) as in_conn:
     print(f"Skipped {skipped} users (blank names)")
 
     # Do the events import
-    events_repo.drop_table()
-    events_repo.create_table()
+    # events_repo.drop_table()
+    # events_repo.create_table()
 
-    old_events = in_conn.execute("SELECT * FROM events_event").fetchall()
-    inserted = 0
-    skipped = 0
-    for ev in old_events:
-        ev = dict(ev)
+    # old_events = in_conn.execute("SELECT * FROM events_event").fetchall()
+    # inserted = 0
+    # skipped = 0
+    # for ev in old_events:
+    #     ev = dict(ev)
 
-        new_event = Event.from_new_event(
-            title=ev["title"],
-            description=ev["description"],
-            event_dt_str=ev["event_date"],
-            event_end_dt_str=ev["event_end_date"],
-            event_type_str=str(event_map[ev["event_type"]].value),
-            max_attendees_str=ev["max_attendees"],
-        )
+    #     new_event = Event.from_new_event(
+    #         title=ev["title"],
+    #         description=ev["description"],
+    #         event_dt_str=ev["event_date"],
+    #         event_end_dt_str=ev["event_end_date"],
+    #         event_type_str=str(event_map[ev["event_type"]].value),
+    #         max_attendees_str=ev["max_attendees"],
+    #     )
 
-        events_repo.insert(new_event)
-        inserted += 1
-    print(f"Inserted {inserted} events.")
+    #     events_repo.insert(new_event)
+    #     inserted += 1
+    # print(f"Inserted {inserted} events.")

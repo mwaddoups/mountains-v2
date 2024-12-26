@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import datetime
+import sqlite3
 import uuid
 from typing import Self
 
-from attrs import define, field
+from attrs import Factory, define, field
 from werkzeug.security import generate_password_hash
 
 from mountains.db import Repository
@@ -13,7 +14,8 @@ from mountains.utils import now_utc, readable_id
 
 @define(kw_only=True)
 class User:
-    id: str
+    id: int
+    slug: str
     email: str
     password_hash: str = field(repr=False)
     first_name: str
@@ -23,13 +25,15 @@ class User:
     profile_picture_url: str | None
     is_committee: bool
     is_coordinator: bool
-    # is_member: bool
     # is_on_discord: bool = False
     # is_winter_skills: bool
     membership_expiry_utc: datetime.datetime | None
     is_dormant: bool
     created_on_utc: datetime.datetime
     last_login_utc: datetime.datetime | None = None
+
+    def __str__(self):
+        return f"{self.full_name} ({self.email})"
 
     @property
     def full_name(self) -> str:
@@ -47,29 +51,26 @@ class User:
     @property
     def missing_profile_color(self) -> str:
         # map a -> z to a number between 0 and 360
-        h = (ord(self.id[0].lower()) - 96) * (360 // 26)
+        h = (ord(self.first_name[0].lower()) - 96) * (360 // 26)
         return f"hsl({h}, 50%, 50%)"
 
     @classmethod
     def from_registration(
         cls,
         *,
+        id: int,
         email: str,
-        password: str,
+        password_hash: str,
         first_name: str,
         last_name: str,
         about: str | None,
         mobile: str,
     ) -> Self:
-        # Generate a random id that's somewhat readable
-        random_str = str(uuid.uuid4())[:6]
-        id = readable_id([first_name, last_name, random_str])
-
-        # Generate password
-        password_hash = generate_password_hash(password)
+        slug = readable_id([first_name, last_name, str(id)])
 
         return cls(
             id=id,
+            slug=slug,
             email=email,
             password_hash=password_hash,
             first_name=first_name,
@@ -85,12 +86,13 @@ class User:
         )
 
 
-def users(db_name: str) -> Repository[User]:
+def users(conn: sqlite3.Connection) -> Repository[User]:
     return Repository(
-        db_name=db_name,
+        conn=conn,
         table_name="users",
         schema=[
-            "id TEXT PRIMARY KEY",
+            "id INTEGER PRIMARY KEY",
+            "slug TEXT UNIQUE NOT NULL",
             "email TEXT UNIQUE NOT NULL",
             "password_hash TEXT NOT NULL",
             "first_name TEXT NOT NULL",

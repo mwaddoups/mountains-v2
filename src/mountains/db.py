@@ -44,7 +44,7 @@ def unstructure_datetime(val: datetime.datetime) -> str:
 
 @define
 class Repository[T]:
-    db_name: str
+    conn: sqlite3.Connection
     table_name: str
     schema: list[str]
     storage_cls: type[T]
@@ -54,42 +54,54 @@ class Repository[T]:
     def _field_names(self) -> list[str]:
         return [f.name for f in attrs.fields(self.storage_cls)]
 
+    def next_id(self) -> int:
+        cur = self.conn.execute(f"SELECT MAX({self.id_col}) + 1 FROM {self.table_name}")
+        return cur.fetchone()[0]
+
     def create_table(self):
-        with connection(self.db_name) as conn:
-            conn.execute(f"""
-                CREATE TABLE IF NOT EXISTS {self.table_name} 
-                ({",".join(self.schema)})
-                WITHOUT ROWID
-            """)
+        self.conn.execute(f"""
+            CREATE TABLE IF NOT EXISTS {self.table_name} 
+            ({",".join(self.schema)})
+            WITHOUT ROWID
+        """)
 
     def drop_table(self):
-        with connection(self.db_name) as conn:
-            conn.execute(f"DROP TABLE IF EXISTS {self.table_name}")
+        self.conn.execute(f"DROP TABLE IF EXISTS {self.table_name}")
 
     def insert(self, obj: T) -> None:
-        with connection(self.db_name) as conn:
-            conn.execute(
-                f"""
-                INSERT INTO {self.table_name} (
-                    {",".join(self._field_names)}
-                ) VALUES (
-                    {",".join(":" + f for f in self._field_names)}
-                )
-            """,
-                unstructure(obj),
+        self.conn.execute(
+            f"""
+            INSERT INTO {self.table_name} (
+                {",".join(self._field_names)}
+            ) VALUES (
+                {",".join(":" + f for f in self._field_names)}
             )
+        """,
+            unstructure(obj),
+        )
+
+    def update(self, *, id: int, **kwargs) -> T | None:
+        updates = kwargs.copy()
+        updates["id"] = id
+        self.conn.execute(
+            f"""
+            UPDATE {self.table_name}
+            SET {",".join([f"{k} = :{k}" for k in kwargs])}
+            WHERE id = :id
+            """,
+            updates,
+        )
 
     def get(self, **kwargs) -> T | None:
-        with connection(self.db_name) as conn:
-            cur = conn.execute(
-                f"""
-                SELECT {",".join(self._field_names)} FROM {self.table_name}
-                WHERE {",".join([f"{k} = :{k}" for k in kwargs])}
-                LIMIT 1
-                """,
-                kwargs,
-            )
-            row = cur.fetchone()
+        cur = self.conn.execute(
+            f"""
+            SELECT {",".join(self._field_names)} FROM {self.table_name}
+            WHERE {",".join([f"{k} = :{k}" for k in kwargs])}
+            LIMIT 1
+            """,
+            kwargs,
+        )
+        row = cur.fetchone()
 
         if row is None:
             return None
@@ -97,10 +109,18 @@ class Repository[T]:
             return structure(row, self.storage_cls)
 
     def list(self) -> list[T]:
-        with connection(self.db_name) as conn:
-            cur = conn.execute(f"""
-                SELECT {",".join(self._field_names)} FROM {self.table_name}
-            """)
-            rows = cur.fetchall()
+        cur = self.conn.execute(f"""
+            SELECT {",".join(self._field_names)} FROM {self.table_name}
+        """)
+        rows = cur.fetchall()
 
         return [structure(row, self.storage_cls) for row in rows]
+
+    def delete_where(self, **kwargs):
+        self.conn.execute(
+            f"""
+            DELETE FROM {self.table_name}
+            WHERE {",".join([f"{k} = :{k}" for k in kwargs])}
+            """,
+            kwargs,
+        )
