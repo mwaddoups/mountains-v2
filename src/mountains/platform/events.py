@@ -34,7 +34,7 @@ def event_routes(blueprint: Blueprint):
             [
                 e
                 for e in events_repo().list()
-                if e.event_dt > datetime.datetime.now() - datetime.timedelta(days=4)
+                if e.event_dt > datetime.datetime.now() - datetime.timedelta(days=2)
             ],
             key=lambda e: e.event_dt,
         )
