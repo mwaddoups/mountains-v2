@@ -1,6 +1,16 @@
-@layer reset, layout, theme, typography;
+@layer reset, layout, typography, theme, components;
 
 @layer reset {
+  /* Set border-box for whole doc */
+  html {
+    box-sizing: border-box;
+  }
+  *,
+  *:before,
+  *:after {
+    box-sizing: inherit;
+  }
+
   header,
   h1,
   h2,
@@ -8,15 +18,26 @@
   h4,
   h5,
   h6,
+  nav,
   ul,
-  li {
-    margin: 0;
-    padding: 0;
-  }
-
+  li,
+  figure,
   a {
     margin: 0;
     padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+  }
+
+  nav li,
+  nav ul,
+  nav a {
+    display: block;
+  }
+
+  a {
     text-decoration: none;
     cursor: pointer;
     color: inherit;
@@ -32,19 +53,23 @@
   input[type="number"],
   input[type="file"],
   input[type="datetime-local"],
+  input[type="search"],
   select,
   textarea {
     display: block;
+    margin: 0;
+    padding: 0;
+    border: 0;
   }
 
   input[type="submit"],
   button {
     display: block;
     background: none;
-    border: none;
     cursor: pointer;
     padding: 0;
     margin: 0;
+    border: 0;
   }
 }
 
@@ -52,13 +77,46 @@
   :root {
     font-family: ui-sans-serif;
   }
+
+  h1 {
+    font-size: 1.5em;
+    font-weight: bold;
+  }
+
+  h2 {
+    font-size: 1.25em;
+    font-weight: bold;
+  }
 }
 
 @layer layout {
   body {
     width: 80%;
-    min-width: 1024px;
     margin: 0 auto;
+  }
+
+  input,
+  select,
+  textarea,
+  form {
+    width: 100%;
+  }
+
+  input[type="text"],
+  input[type="password"],
+  input[type="email"],
+  input[type="number"],
+  input[type="file"],
+  input[type="datetime-local"],
+  input[type="search"],
+  select,
+  textarea {
+    padding: 0.5em;
+    font-size: 1em;
+    border-radius: 1em;
+    background-color: white;
+    /* border: 1px solid var(--color-primary); */
+    filter: drop-shadow(1px 1px 2px gray);
   }
 
   input[type="submit"],
@@ -66,28 +124,33 @@
     padding: 0.5em;
   }
 
+  header a,
+  nav a {
+    display: flex;
+    align-items: center;
+    height: 100%;
+  }
+
   /* Navigation */
   body > header {
     display: flex;
     align-items: stretch;
     gap: 1em;
+    white-space: nowrap;
 
     > h1 {
       margin: auto 0;
     }
 
-    > nav > ul {
+    ul {
       height: 100%;
       display: flex;
-      align-items: center;
+      align-items: stretch;
       list-style: none;
+    }
 
-      > li {
-        padding: 0 0.5em;
-        height: 100%;
-        display: flex;
-        align-items: center;
-      }
+    a {
+      padding: 0 0.5em;
     }
 
     > aside {
@@ -95,6 +158,23 @@
       align-items: center;
       gap: 1em;
       margin-left: auto;
+    }
+  }
+
+  #content {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+
+    aside {
+      ul {
+        list-style: none;
+      }
+    }
+
+    main {
+      width: 100%;
+      padding: 1em;
     }
   }
 }
@@ -107,13 +187,13 @@
     --text-light: hsl(0, 0%, 95%);
   }
 
-  li {
+  a {
     transition: all 0.1s ease-in;
-  }
 
-  li:has(a:hover) {
-    background-color: var(--color-primary);
-    color: var(--text-light);
+    &:hover {
+      opacity: 75%;
+      filter: brightness(95%);
+    }
   }
 
   input[type="submit"],
@@ -122,6 +202,11 @@
     color: var(--text-light);
     font-weight: 400;
     border-radius: 5px;
+    transition: all 0.1s ease-in-out;
+
+    &:hover {
+      background-color: rgb(from var(--color-primary) r g b / 0.6);
+    }
   }
 
   body > header {
@@ -142,6 +227,60 @@
     > h1 {
       font-size: 1.5em;
       letter-spacing: -0.025em;
+    }
+
+    a:hover {
+      background-color: var(--color-primary);
+      color: var(--text-light);
+    }
+  }
+
+  #content > aside {
+    background-color: var(--color-primary);
+    color: var(--text-light);
+
+    a {
+      background-color: var(--color-primary);
+      margin: 0.25em;
+      padding: 0.5em;
+      border-radius: 5px;
+
+      &:hover {
+        filter: brightness(75%);
+      }
+    }
+  }
+}
+
+@layer components {
+  #members {
+    width: 100%;
+    padding-top: 0.25em;
+    display: grid;
+    gap: 0.25em;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+
+    article {
+      width: 100%;
+      background-color: white;
+      padding: 1em;
+      white-space: nowrap;
+      gap: 0.25em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-radius: 5px;
+
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 200px;
+      }
     }
   }
 }

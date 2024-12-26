@@ -7,12 +7,12 @@
            placeholder="Enter name to search..."
            value="{{ search if search else '' }}" />
   </form>
-  <section>
-    {% for member in members %}
+  <section id="members">
+    {% for member in members[:limit] %}
       <a href="{{ url_for('platform.member', id=member.id) }}">
         <article>
           {{ profile_picture(member, "128") }}
-          <h1>{{ member.full_name }}</h1>
+          <h2>{{ member.full_name }}</h2>
           {% if member.is_committee %}
             <h6>Committee</h6>
           {% elif member.is_coordinator %}
@@ -28,4 +28,11 @@
       <em>No users found!</em>
     {% endfor %}
   </section>
+  {% if (members | length) > limit %}
+    <form>
+      <input type="hidden" name="limit" value="{{ limit * 10 }}" />
+      <input type="submit"
+             value="Show more (showing {{ limit }} / {{ members | length }})">
+    </form>
+  {% endif %}
 {% endblock platform %}

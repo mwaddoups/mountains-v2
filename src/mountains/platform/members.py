@@ -4,10 +4,8 @@ import logging
 from quart import (
     Blueprint,
     current_app,
-    redirect,
     render_template,
     request,
-    url_for,
 )
 
 from mountains.db import connection
@@ -35,15 +33,16 @@ def member_routes(blueprint: Blueprint):
             ]
 
         members = sorted(members, key=_member_sort_key)
+        limit = int(request.args.get("limit", 25))
 
-        # TODO: Infinite scroll for members, this request is slow
         return await render_template(
-            "platform/members.html.j2", members=members, search=search
+            "platform/members.html.j2", members=members, search=search, limit=limit
         )
 
     @blueprint.route("/members/<id>", methods=["GET", "POST", "PUT"])
     async def member(id: str):
-        user = users_repo().get(id=id)
+        with connection(current_app.config["DB_NAME"]) as conn:
+            user = users(conn).get(id=id)
         if user is None:
             raise MountainException("User not found!")
 
@@ -72,7 +71,8 @@ def member_routes(blueprint: Blueprint):
 
     @blueprint.route("/members/<id>/edit")
     async def edit_member(id: str):
-        user = users_repo().get(id=id)
+        with connection(current_app.config["DB_NAME"]) as conn:
+            user = users(conn).get(id=id)
         if user is None:
             raise MountainException("User not found!")
         return await render_template("platform/member.edit.html.j2", user=user)
