@@ -1,7 +1,6 @@
 import datetime
 import enum
 import sqlite3
-import uuid
 
 from attrs import define
 
@@ -27,7 +26,8 @@ sqlite3.register_adapter(EventType, lambda x: x.value)
 
 @define(kw_only=True)
 class Event:
-    id: str
+    id: int
+    slug: str
     title: str
     description: str
     event_dt: datetime.datetime
@@ -48,6 +48,7 @@ class Event:
     def from_new_event(
         cls,
         *,
+        id: int,
         title: str,
         description: str,
         event_dt_str: str,
@@ -64,15 +65,14 @@ class Event:
         event_type = EventType(value=int(event_type_str))
         max_attendees = int(max_attendees_str)
 
-        # Generate a random id that's somewhat readable
-        random_str = str(uuid.uuid4())[:6]
-        id = readable_id([title, event_dt.strftime("%Y-%m-%d"), random_str])
+        slug = readable_id([event_dt.strftime("%Y-%m-%d"), title, str(id)])
 
         # Timestamp as now
         now = now_utc()
 
         return cls(
             id=id,
+            slug=slug,
             title=title,
             description=description,
             event_dt=event_dt,
@@ -84,12 +84,22 @@ class Event:
         )
 
 
-def events(db_name: str) -> Repository[Event]:
+@define(kw_only=True)
+class Attendee:
+    user_id: int
+    event_id: int
+    joined_at_utc: datetime.datetime
+    is_waiting_list: bool = False
+    is_trip_paid: bool = False
+
+
+def events(conn: sqlite3.Connection) -> Repository[Event]:
     return Repository(
-        db_name=db_name,
+        conn=conn,
         table_name="events",
         schema=[
-            "id TEXT PRIMARY KEY",
+            "id INTEGER PRIMARY KEY",
+            "slug TEXT UNIQUE",
             "title TEXT NOT NULL",
             "description TEXT NOT NULL",
             "event_dt DATETIME NOT NULL",
@@ -103,4 +113,22 @@ def events(db_name: str) -> Repository[Event]:
             "price_id TEXT",
         ],
         storage_cls=Event,
+    )
+
+
+def attendees(conn: sqlite3.Connection) -> Repository[Attendee]:
+    return Repository(
+        conn=conn,
+        table_name="attendees",
+        schema=[
+            "user_id INTEGER NOT NULL",
+            "event_id INTEGER NOT NULL",
+            "joined_at_utc DATETIME NOT NULL",
+            "is_waiting_list BOOLEAN NOT NULL DEFAULT false",
+            "is_trip_paid BOOLEAN NOT NULL DEFAULT false",
+            "PRIMARY KEY(user_id, event_id)",
+            "FOREIGN KEY(user_id) REFERENCES users(id)",
+            "FOREIGN KEY(event_id) REFERENCES events(id)",
+        ],
+        storage_cls=Attendee,
     )

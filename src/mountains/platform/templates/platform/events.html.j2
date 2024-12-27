@@ -1,13 +1,33 @@
 {% extends "platform/base.html.j2" %}
 {% block platform %}
-  <h1>Events</h1>
-  <a href="{{ url_for('platform.edit_event') }}">Create Event</a>
+  {% if g.current_user.is_site_admin %}
+    <a href="{{ url_for('platform.edit_event') }}" class="button">Create Event</a>
+  {% endif %}
+  <form>
+    <input type="search" name="search" placeholder="Search for an event..." />
+    <label>
+      Event Types
+      <select multiple name="types">
+        <option>TODO</option>
+      </select>
+    </label>
+  </form>
   <section>
     {% for event in events %}
-      <article id="{{ event.id }}">
+      <article id="{{ event.id }}" class="event">
         <h1>{{ event.title }}</h1>
         <em>{{ event.event_dt }}</em>
         <div>{{ event.description | markdown | safe }}</div>
+        {% if attendees[event.id] and ((attendees[event.id] | length) > 0) %}
+          <ul>
+            {% for attendee in attendees[event.id] %}
+              {% set user = members[attendee.user_id] %}
+              <li>{{ user.full_name }}</li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <em>No attendees yet!</em>
+        {% endif %}
       </article>
     {% endfor %}
   </section>

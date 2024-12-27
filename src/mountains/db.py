@@ -1,5 +1,6 @@
 import datetime
 import sqlite3
+import typing
 from contextlib import contextmanager
 from typing import Generator
 
@@ -112,6 +113,19 @@ class Repository[T]:
         cur = self.conn.execute(f"""
             SELECT {",".join(self._field_names)} FROM {self.table_name}
         """)
+        rows = cur.fetchall()
+
+        return [structure(row, self.storage_cls) for row in rows]
+
+    def list_where(self, **kwargs) -> typing.List[T]:
+        cur = self.conn.execute(
+            f"""
+            SELECT {",".join(self._field_names)} 
+            FROM {self.table_name}
+            WHERE {",".join([f"{k} = :{k}" for k in kwargs])}
+        """,
+            kwargs,
+        )
         rows = cur.fetchall()
 
         return [structure(row, self.storage_cls) for row in rows]

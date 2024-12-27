@@ -2,11 +2,9 @@ from __future__ import annotations
 
 import datetime
 import sqlite3
-import uuid
 from typing import Self
 
-from attrs import Factory, define, field
-from werkzeug.security import generate_password_hash
+from attrs import define, field
 
 from mountains.db import Repository
 from mountains.utils import now_utc, readable_id
@@ -47,6 +45,10 @@ class User:
             return self.membership_expiry_utc > datetime.datetime.now(
                 tz=datetime.UTC
             ).replace(tzinfo=None)
+
+    @property
+    def is_site_admin(self) -> bool:
+        return self.is_coordinator or self.is_committee
 
     @property
     def missing_profile_color(self) -> str:

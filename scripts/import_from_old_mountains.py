@@ -6,7 +6,7 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash
 
 from mountains.db import connection
-from mountains.events import Event, EventType, events
+from mountains.events import Attendee, Event, EventType, attendees, events
 from mountains.tokens import tokens
 from mountains.users import User, users
 from mountains.utils import readable_id
@@ -85,24 +85,48 @@ with (
     print(f"Skipped {skipped} users (blank names)")
 
     # Do the events import
-    # events_repo.drop_table()
-    # events_repo.create_table()
+    events_repo = events(out_conn)
+    events_repo.drop_table()
+    events_repo.create_table()
 
-    # old_events = in_conn.execute("SELECT * FROM events_event").fetchall()
-    # inserted = 0
-    # skipped = 0
-    # for ev in old_events:
-    #     ev = dict(ev)
+    old_events = in_conn.execute("SELECT * FROM events_event").fetchall()
+    inserted = 0
+    skipped = 0
+    for ev in old_events:
+        ev = dict(ev)
 
-    #     new_event = Event.from_new_event(
-    #         title=ev["title"],
-    #         description=ev["description"],
-    #         event_dt_str=ev["event_date"],
-    #         event_end_dt_str=ev["event_end_date"],
-    #         event_type_str=str(event_map[ev["event_type"]].value),
-    #         max_attendees_str=ev["max_attendees"],
-    #     )
+        new_event = Event.from_new_event(
+            id=ev["id"],
+            title=ev["title"],
+            description=ev["description"],
+            event_dt_str=ev["event_date"],
+            event_end_dt_str=ev["event_end_date"],
+            event_type_str=str(event_map[ev["event_type"]].value),
+            max_attendees_str=ev["max_attendees"],
+        )
 
-    #     events_repo.insert(new_event)
-    #     inserted += 1
-    # print(f"Inserted {inserted} events.")
+        events_repo.insert(new_event)
+        inserted += 1
+    print(f"Inserted {inserted} events.")
+
+    # Do the events import
+    attendees_repo = attendees(out_conn)
+    attendees_repo.drop_table()
+    attendees_repo.create_table()
+
+    old_attendees = in_conn.execute("SELECT * FROM events_attendinguser").fetchall()
+    inserted = 0
+    skipped = 0
+    for au in old_attendees:
+        au = dict(au)
+        new_au = Attendee(
+            user_id=au["user_id"],
+            event_id=au["event_id"],
+            is_waiting_list=au["is_waiting_list"],
+            is_trip_paid=au["is_trip_paid"],
+            joined_at_utc=datetime.fromisoformat(au["list_join_date"]),
+        )
+
+        attendees_repo.insert(new_au)
+        inserted += 1
+    print(f"Inserted {inserted} attendees.")
