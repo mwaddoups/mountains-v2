@@ -19,7 +19,7 @@
     <script src="https://unpkg.com/htmx-ext-preload@2.1.0/preload.js"></script>
   </head>
   <body hx-ext="preload">
-    <header>
+    <header class="cmc-logo">
       <h1>Clyde Mountaineering Club</h1>
       <nav>
         <ul preload>
@@ -39,10 +39,8 @@
       </nav>
       {% if 'current_user' in g %}
         <aside>
-          <a href="{{ url_for('platform.member', slug=g.current_user.slug) }}">
-            {{ g.current_user.full_name }}
-            {{ profile_picture(g.current_user, '32') }}
-          </a>
+          <a href="{{ url_for('platform.member', slug=g.current_user.slug) }}">{{ g.current_user.full_name }}</a>
+          {{ profile_picture(g.current_user, '32') }}
           <form method="post" action="{{ url_for('logout') }}">
             <input type="submit" value="Logout" />
           </form>

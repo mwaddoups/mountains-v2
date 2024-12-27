@@ -1,5 +1,5 @@
 {% macro profile_picture(user, size = '256') %}
-  <figure>
+  <figure class="profile-picture">
     {% if url %}
       <img src="{{ user.profile_picture_url }}"
            alt="{{ user.full_name }}"

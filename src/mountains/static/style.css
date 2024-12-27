@@ -1,5 +1,35 @@
 @layer reset, layout, typography, theme, components;
 
+:root {
+  /* Set sans-serif & mono fonts */
+  --sans-font: -apple-system, BlinkMacSystemFont, "Avenir Next", Avenir,
+    "Nimbus Sans L", Roboto, "Noto Sans", "Segoe UI", Arial, Helvetica,
+    "Helvetica Neue", sans-serif;
+  --mono-font: Consolas, Menlo, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+  --standard-border-radius: 5px;
+
+  --primary: rgb(13, 148, 136);
+  --text: #212121;
+  --text-light: #585858;
+  --accent: #3b82f6;
+  --accent-hover: rgb(from var(--accent) r g b / 0.6);
+  --accent-text: #ededed;
+  --disabled: #efefef;
+
+  --cmc-color-committee: rgb(192, 132, 252);
+  --cmc-color-coordinator: rgb(251, 146, 60);
+  --cmc-color-member: #3b82f6;
+  --cmc-color-guest: #4ade80;
+  --cmc-color-summer-day-walk: #4ade80;
+  --cmc-color-summer-weekend: #15803d;
+  --cmc-color-winter-day-walk: #3b82f6;
+  --cmc-color-winter-weekend: #1d4ed8;
+  --cmc-color-indoor-climbing: #c084fc;
+  --cmc-color-outdoor-climbing: #9333ea;
+  --cmc-color-run: #eab308;
+  --cmc-color-other: #f472b6;
+}
+
 @layer reset {
   /* Set border-box for whole doc */
   html {
@@ -11,184 +41,241 @@
     box-sizing: inherit;
   }
 
-  header,
+  textarea,
+  select,
+  input,
+  progress {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+  }
+
+  html {
+    /* Set the font globally */
+    font-family: var(--sans-font);
+    scroll-behavior: smooth;
+  }
+
+  body {
+    color: var(--text);
+    font-size: 1.15rem;
+    line-height: 1.5em;
+
+    /* Make the body centered, using 3-col grid */
+    display: grid;
+    grid-template-columns: 1fr min(80rem, 90%) 1fr;
+    margin: 0;
+
+    /* Center all content */
+    > * {
+      grid-column: 2;
+    }
+
+    /* Except the header */
+    > header {
+      border-bottom: 2px solid var(--primary);
+      grid-column: 1 / -1;
+      text-align: center;
+    }
+  }
+
+  main {
+    padding-top: 1.5rem;
+  }
+
+  body > footer {
+    margin-top: 4rem;
+    padding: 2rem 1rem 1.5rem 1rem;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    text-align: center;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Headings */
+  h1 {
+    font-size: xx-large;
+  }
+
+  h2 {
+    font-size: x-large;
+  }
+
+  h3 {
+    font-size: large;
+  }
+
+  h4 {
+    font-size: medium;
+  }
+
+  h5 {
+    font-size: small;
+  }
+
+  h6 {
+    font-size: x-small;
+  }
+
+  p {
+    margin: 1.5rem 0;
+  }
+
+  /* Prevent long strings from overflowing container */
+  p,
   h1,
   h2,
   h3,
   h4,
   h5,
-  h6,
-  nav,
-  ul,
-  li,
-  figure,
-  a {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    font-size: 100%;
-    font: inherit;
-    vertical-align: baseline;
+  h6 {
+    overflow-wrap: break-word;
   }
 
-  nav li,
-  nav ul,
-  nav a {
-    display: block;
-  }
-
+  /* Links and buttons */
   a {
     text-decoration: none;
-    cursor: pointer;
-    color: inherit;
 
+    &,
     &:visited {
-      color: inherit;
+      color: var(--accent);
+    }
+
+    &:hover {
+      transition: all 0.1s ease-in;
+      text-decoration: underline;
     }
   }
 
-  input[type="text"],
-  input[type="password"],
-  input[type="email"],
-  input[type="number"],
-  input[type="file"],
-  input[type="datetime-local"],
-  input[type="search"],
-  select,
-  textarea {
-    display: inline-block;
-    margin: 0;
-    padding: 0;
-    border: 0;
-  }
-
-  input[type="submit"],
   button,
-  a.button {
-    display: inline-block;
-    background: none;
+  .button,
+  a.button,
+  input[type="submit"],
+  input[type="reset"],
+  input[type="button"] {
+    border: 1px solid var(--accent);
+    background-color: var(--accent);
+    color: var(--accent-text);
+    padding: 0.5rem 0.9rem;
+    text-decoration: none;
+    line-height: normal;
+  }
+
+  .button[aria-disabled="true"],
+  input:disabled,
+  textarea:disabled,
+  select:disabled,
+  button[disabled] {
+    cursor: not-allowed;
+    background-color: var(--disabled);
+    border-color: var(--disabled);
+    color: var(--text-light);
+  }
+
+  button:enabled:hover,
+  .button:not([aria-disabled="true"]):hover,
+  input[type="submit"]:enabled:hover,
+  input[type="reset"]:enabled:hover,
+  input[type="button"]:enabled:hover {
+    transition: all 0.1s ease-in;
+    background-color: var(--accent-hover);
+    border-color: var(--accent-hover);
     cursor: pointer;
-    padding: 0;
-    margin: 0;
-    border: 0;
-  }
-}
-
-@layer typography {
-  :root {
-    font-family: ui-sans-serif;
   }
 
-  h1 {
-    font-size: xx-large;
-    font-weight: bold;
+  .button:focus-visible,
+  button:focus-visible:where(:enabled),
+  input:enabled:focus-visible:where(
+      [type="submit"],
+      [type="reset"],
+      [type="button"]
+    ) {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
   }
 
-  h2 {
-    font-size: x-large;
-    font-weight: bold;
+  /* Reset input styling for forms */
+
+  textarea,
+  select,
+  input,
+  button,
+  .button {
+    display: inline-block;
+    font-size: inherit;
+    font-family: inherit;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: var(--standard-border-radius);
+    box-shadow: none;
+    max-width: 100%;
   }
 
-  h3 {
-    font-size: large;
-    font-weight: bold;
+  textarea,
+  select,
+  input {
+    color: var(--text);
+    background-color: var(--bg);
+    border: 1px solid var(--border);
   }
 
-  h4 {
-    font-size: medium;
-    font-weight: bold;
+  label {
+    display: block;
+  }
+  textarea:not([cols]) {
+    width: 100%;
   }
 
-  h5 {
-    font-size: small;
-    font-weight: bold;
-  }
+  /* Navigation */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1rem;
+    white-space: nowrap;
+    gap: 0.5rem;
+    padding: 0 1rem 0 1rem;
 
-  h6 {
-    font-size: x-small;
-    font-weight: bold;
+    a,
+    a:visited {
+      color: inherit;
+    }
+
+    h1 {
+      font-size: 1.25em;
+      letter-spacing: -0.025em;
+      margin-right: 1em;
+    }
+
+    nav {
+      line-height: 2;
+
+      ul,
+      ol {
+        display: flex;
+        gap: 1em;
+        align-items: center;
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      ul li,
+      ol li,
+      a {
+        display: inline-block;
+      }
+    }
+    aside {
+      margin-left: auto;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
   }
 }
 
 @layer layout {
-  body {
-    width: 80%;
-    margin: 0 auto;
-  }
-
-  input,
-  select,
-  textarea,
-  form {
-    width: 100%;
-  }
-
-  input[type="text"],
-  input[type="password"],
-  input[type="email"],
-  input[type="number"],
-  input[type="file"],
-  input[type="datetime-local"],
-  input[type="search"],
-  select,
-  textarea {
-    padding: 0.5em;
-    margin: 0.25em 0;
-    font-size: 1em;
-    border-radius: 1em;
-    background-color: white;
-    /* border: 1px solid var(--color-primary); */
-    filter: drop-shadow(1px 1px 2px gray);
-  }
-
-  input[type="submit"],
-  button,
-  a.button {
-    padding: 0.5em;
-  }
-
-  header a,
-  nav a {
-    display: flex;
-    align-items: center;
-    height: 100%;
-  }
-
-  /* Navigation */
-  body > header {
-    display: flex;
-    align-items: stretch;
-    gap: 1em;
-    white-space: nowrap;
-
-    > h1 {
-      margin: auto 0;
-    }
-
-    ul {
-      height: 100%;
-      display: flex;
-      align-items: stretch;
-      list-style: none;
-    }
-
-    a {
-      padding: 0 0.5em;
-    }
-
-    > aside {
-      display: flex;
-      align-items: center;
-      gap: 1em;
-      margin-left: auto;
-      a {
-        display: flex;
-        align-items: center;
-        gap: 0.5em;
-      }
-    }
-  }
-
   #content {
     width: 100%;
     min-height: 100vh;
@@ -208,83 +295,32 @@
 }
 
 @layer theme {
-  :root {
-    --color-primary: rgb(13, 148, 136);
-    --color-secondary: #3b82f6;
-    --text-dark: hsl(0, 0%, 5%);
-    --text-light: hsl(0, 0%, 95%);
-    --cmc-color-committee: rgb(192, 132, 252);
-    --cmc-color-coordinator: rgb(251, 146, 60);
-    --cmc-color-member: #3b82f6;
-    --cmc-color-guest: #4ade80;
-    --cmc-color-summer-day-walk: #4ade80;
-    --cmc-color-summer-weekend: #15803d;
-    --cmc-color-winter-day-walk: #3b82f6;
-    --cmc-color-winter-weekend: #1d4ed8;
-    --cmc-color-indoor-climbing: #c084fc;
-    --cmc-color-outdoor-climbing: #9333ea;
-    --cmc-color-run: #eab308;
-    --cmc-color-other: #f472b6;
-  }
-
-  a {
-    transition: all 0.1s ease-in;
-
-    &:hover {
-      opacity: 75%;
-      filter: brightness(95%);
-    }
-  }
-
   input[type="submit"],
   button,
   a.button {
-    background-color: var(--color-primary);
-    color: var(--text-light);
+    background-color: var(--primary);
+    color: var(--accent-text);
     font-weight: 400;
     border-radius: 5px;
     transition: all 0.1s ease-in-out;
 
     &:hover {
-      background-color: rgb(from var(--color-primary) r g b / 0.6);
-    }
-  }
-
-  body > header {
-    border-bottom: 2px solid var(--color-primary);
-
-    &::before {
-      content: "";
-      width: 3em;
-      height: 3em;
-      margin: 0;
-      padding: 0;
-      background-image: url("logo_256.png");
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: contain;
-    }
-
-    > h1 {
-      font-size: 1.5em;
-      letter-spacing: -0.025em;
-    }
-
-    a:hover {
-      background-color: var(--color-primary);
-      color: var(--text-light);
+      background-color: rgb(from var(--primary) r g b / 0.6);
     }
   }
 
   #content > aside {
     background-color: var(--color-primary);
-    color: var(--text-light);
 
     a {
       background-color: var(--color-primary);
+      color: var(--text-light);
       margin: 0.25em;
       padding: 0.5em;
       border-radius: 5px;
+
+      /* TODO: Remove this once we have icons */
+      padding-left: 2em;
 
       &:hover {
         filter: brightness(75%);
@@ -294,6 +330,20 @@
 }
 
 @layer components {
+  /* CMC Logo (for nav) */
+  .cmc-logo::before {
+    content: "";
+    width: 3em;
+    height: 3em;
+    margin: 0;
+    padding: 0;
+    background-image: url("logo_256.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+  }
+
+  /* Badges */
   .badge {
     border-radius: 0.5em;
     padding: 0.25em 0.5em;
@@ -301,38 +351,30 @@
     color: var(--text-light);
     background-color: var(--cmc-color-other);
   }
-
   .badge-committee {
     background-color: var(--cmc-color-committee);
   }
-
   .badge-coordinator {
     background-color: var(--cmc-color-coordinator);
   }
-
   .badge-member {
     background-color: var(--cmc-color-member);
   }
-
   .badge-guest {
     background-color: var(--cmc-color-guest);
   }
-
   .badge-summer-day-walk {
     background-color: var(--cmc-color-summer-day-walk);
   }
-
   .badge-summer-weekend {
     background-color: var(--cmc-color-summer-weekend);
   }
-
   .badge-winter-day-walk {
     background-color: var(--cmc-color-winter-day-walk);
   }
   .badge-winter-weekend {
     background-color: var(--cmc-color-winter-weekend);
   }
-
   .badge-indoor-climbing {
     background-color: var(--cmc-color-indoor-climbing);
   }
@@ -344,6 +386,12 @@
   }
   .badge-members-only {
     background-color: var(--cmc-color-member);
+  }
+
+  /* Profile pictures maintain aspect */
+  .profile-picture {
+    margin: 0;
+    aspect-ratio: 1;
   }
 
   #members {
@@ -375,6 +423,9 @@
   }
 
   .event {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
     padding: 1em;
     border-radius: 1em;
     background-color: white;
@@ -387,15 +438,52 @@
 
       h1 {
         margin-bottom: 0.25em;
+        font-size: x-large;
+        color: var(--color-primary);
       }
       .badge {
         margin-right: 0.25em;
       }
+      em {
+        padding-top: 0.5rem;
+        display: block;
+      }
     }
 
     .event-description {
-      max-height: 20em;
+      border-top: 1px solid gray;
+      padding: 0.25em 1em;
+      max-height: 15em;
       overflow: scroll;
+    }
+
+    details {
+      summary {
+        display: flex;
+        align-items: center;
+
+        figure {
+          margin-left: 0.1em;
+
+          &:first-of-type {
+            margin-left: 1em;
+          }
+        }
+      }
+
+      ul {
+        list-style: none;
+      }
+    }
+
+    details[open] > summary > figure {
+      opacity: 0%;
+    }
+
+    .attending-user {
+      display: flex;
+      align-items: center;
+      gap: 0.25em;
     }
   }
   .event-date {
@@ -405,14 +493,14 @@
     border: 2px gray solid;
     border-top: 8px gray solid;
     border-radius: 5px;
-    padding: 0.5em;
+    padding: 0.25em 0.5em;
 
-    p {
+    > p {
       font-size: medium;
       margin: 0;
       padding: 0;
     }
-    h1 {
+    > h2 {
       font-size: xx-large;
       margin: 0;
       padding: 0;
