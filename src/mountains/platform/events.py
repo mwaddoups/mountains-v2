@@ -1,11 +1,11 @@
 import datetime
 
-from quart import Blueprint, current_app, render_template, request
+from quart import Blueprint, current_app, redirect, render_template, request, url_for
 
 from mountains.db import connection
 from mountains.errors import MountainException
 
-from ..events import Event, attendees
+from ..events import Event, EventType, attendees
 from ..events import events as events_repo
 from ..users import users
 
@@ -66,6 +66,15 @@ def event_routes(blueprint: Blueprint):
             members=event_members,
         )
 
+    @blueprint.route("/events/attend/<id>", methods=["POST"])
+    async def attend_event(id: str | None = None):
+        with connection(current_app.config["DB_NAME"]) as conn:
+            event = events_repo(conn).get(id=id)
+            if event is None:
+                raise MountainException("Event not found!")
+
+        return redirect(url_for("platform.events") + f"#{event.id}")
+
     @blueprint.route("/events/add")
     @blueprint.route("/events/edit/<id>")
     async def edit_event(id: str | None = None):
@@ -77,5 +86,5 @@ def event_routes(blueprint: Blueprint):
         else:
             event = None
         return await render_template(
-            "platform/event.edit.html.j2", event=event, event_types=Event.event_types()
+            "platform/event.edit.html.j2", event=event, event_types=EventType
         )

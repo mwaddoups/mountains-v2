@@ -2,12 +2,15 @@
   <figure>
     {% if url %}
       <img src="{{ user.profile_picture_url }}"
-           alt="profile picture"
+           alt="{{ user.full_name }}"
+           title="{{ user.full_name }}"
            width="{{ size }}"
            height="{{ size }}" />
     {% else %}
       {# BI - PersonSquare #}
       <svg xmlns="http://www.w3.org/2000/svg"
+           alt="{{ user.full_name }}"
+           title="{{ user.full_name }}"
            width="{{ size }}"
            height="{{ size }}"
            fill="{{ user.missing_profile_color }}"
