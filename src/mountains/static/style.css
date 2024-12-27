@@ -80,32 +80,32 @@
   }
 
   h1 {
-    font-size: 2em;
+    font-size: xx-large;
     font-weight: bold;
   }
 
   h2 {
-    font-size: 1.5em;
+    font-size: x-large;
     font-weight: bold;
   }
 
   h3 {
-    font-size: 1.17em;
+    font-size: large;
     font-weight: bold;
   }
 
   h4 {
-    font-size: 1em;
+    font-size: medium;
     font-weight: bold;
   }
 
   h5 {
-    font-size: 0.83em;
+    font-size: small;
     font-weight: bold;
   }
 
   h6 {
-    font-size: 0.67em;
+    font-size: x-small;
     font-weight: bold;
   }
 }
@@ -210,9 +210,21 @@
 @layer theme {
   :root {
     --color-primary: rgb(13, 148, 136);
-    --color-secondary: blue;
+    --color-secondary: #3b82f6;
     --text-dark: hsl(0, 0%, 5%);
     --text-light: hsl(0, 0%, 95%);
+    --cmc-color-committee: rgb(192, 132, 252);
+    --cmc-color-coordinator: rgb(251, 146, 60);
+    --cmc-color-member: #3b82f6;
+    --cmc-color-guest: #4ade80;
+    --cmc-color-summer-day-walk: #4ade80;
+    --cmc-color-summer-weekend: #15803d;
+    --cmc-color-winter-day-walk: #3b82f6;
+    --cmc-color-winter-weekend: #1d4ed8;
+    --cmc-color-indoor-climbing: #c084fc;
+    --cmc-color-outdoor-climbing: #9333ea;
+    --cmc-color-run: #eab308;
+    --cmc-color-other: #f472b6;
   }
 
   a {
@@ -286,26 +298,52 @@
     border-radius: 0.5em;
     padding: 0.25em 0.5em;
     font-size: 0.9rem;
+    color: var(--text-light);
+    background-color: var(--cmc-color-other);
   }
 
   .badge-committee {
-    background-color: rgb(192, 132, 252);
-    color: var(--text-light);
+    background-color: var(--cmc-color-committee);
   }
 
   .badge-coordinator {
-    background-color: rgb(251, 146, 60);
-    color: var(--text-light);
+    background-color: var(--cmc-color-coordinator);
   }
 
   .badge-member {
-    background-color: rgb(59, 130, 246);
-    color: var(--text-light);
+    background-color: var(--cmc-color-member);
   }
 
   .badge-guest {
-    background-color: rgb(74, 222, 128);
-    color: var(--text-light);
+    background-color: var(--cmc-color-guest);
+  }
+
+  .badge-summer-day-walk {
+    background-color: var(--cmc-color-summer-day-walk);
+  }
+
+  .badge-summer-weekend {
+    background-color: var(--cmc-color-summer-weekend);
+  }
+
+  .badge-winter-day-walk {
+    background-color: var(--cmc-color-winter-day-walk);
+  }
+  .badge-winter-weekend {
+    background-color: var(--cmc-color-winter-weekend);
+  }
+
+  .badge-indoor-climbing {
+    background-color: var(--cmc-color-indoor-climbing);
+  }
+  .badge-outdoor-climbing {
+    background-color: var(--cmc-color-outdoor-climbing);
+  }
+  .badge-run {
+    background-color: var(--cmc-color-run);
+  }
+  .badge-members-only {
+    background-color: var(--cmc-color-member);
   }
 
   #members {
@@ -341,8 +379,43 @@
     border-radius: 1em;
     background-color: white;
     filter: drop-shadow(1px 1px 2px gray);
-    max-height: 20em;
     margin: 1em auto;
-    overflow: scroll;
+
+    header {
+      display: flex;
+      gap: 1em;
+
+      h1 {
+        margin-bottom: 0.25em;
+      }
+      .badge {
+        margin-right: 0.25em;
+      }
+    }
+
+    .event-description {
+      max-height: 20em;
+      overflow: scroll;
+    }
+  }
+  .event-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 2px gray solid;
+    border-top: 8px gray solid;
+    border-radius: 5px;
+    padding: 0.5em;
+
+    p {
+      font-size: medium;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      font-size: xx-large;
+      margin: 0;
+      padding: 0;
+    }
   }
 }

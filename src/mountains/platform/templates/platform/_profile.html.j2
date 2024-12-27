@@ -18,6 +18,8 @@
     {% endif %}
   </figure>
 {% endmacro %}
-{% macro badge(name) %}
-  <h6 class="badge badge-{{ name }}">{{ name | capitalize }}</h6>
+{% macro badge(text) %}
+  <span class="badge badge-{{ text | lower | replace(' ', '-') | replace('_', '-') }}">
+    {{ text | replace('_', ' ') | title }}
+  </span>
 {% endmacro %}

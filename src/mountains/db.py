@@ -107,7 +107,7 @@ class Repository[T]:
         if row is None:
             return None
         else:
-            return structure(row, self.storage_cls)
+            return structure(dict(row), self.storage_cls)
 
     def list(self) -> list[T]:
         cur = self.conn.execute(f"""
@@ -115,7 +115,7 @@ class Repository[T]:
         """)
         rows = cur.fetchall()
 
-        return [structure(row, self.storage_cls) for row in rows]
+        return [structure(dict(row), self.storage_cls) for row in rows]
 
     def list_where(self, **kwargs) -> typing.List[T]:
         cur = self.conn.execute(
@@ -128,7 +128,7 @@ class Repository[T]:
         )
         rows = cur.fetchall()
 
-        return [structure(row, self.storage_cls) for row in rows]
+        return [structure(dict(row), self.storage_cls) for row in rows]
 
     def delete_where(self, **kwargs):
         self.conn.execute(

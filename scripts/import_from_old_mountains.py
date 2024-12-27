@@ -103,6 +103,7 @@ with (
             event_end_dt_str=ev["event_end_date"],
             event_type_str=str(event_map[ev["event_type"]].value),
             max_attendees_str=ev["max_attendees"],
+            is_members_only=bool(ev["members_only"]),
         )
 
         events_repo.insert(new_event)

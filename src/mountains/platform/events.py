@@ -27,6 +27,7 @@ def event_routes(blueprint: Blueprint):
                     event_end_dt_str=form_data["event_end_dt"],
                     event_type_str=form_data["event_type"],
                     max_attendees_str=form_data["max_attendees"],
+                    is_members_only=form_data["is_members_only"],
                 )
                 events_db.insert(event)
 
@@ -44,6 +45,7 @@ def event_routes(blueprint: Blueprint):
             )
 
             # Fetch the attendees and users we absolutely need
+            # TODO inner join!
             attendees_db = attendees(conn)
             users_db = users(conn)
             event_attendees = {}

@@ -36,13 +36,10 @@ class Event:
     created_on_utc: datetime.datetime
     updated_on_utc: datetime.datetime
     max_attendees: int | None
+    is_members_only: bool = False
     is_draft: bool = False
     is_deleted: bool = False
     price_id: str | None = None
-
-    @staticmethod
-    def event_types():
-        return EventType
 
     @classmethod
     def from_new_event(
@@ -55,6 +52,7 @@ class Event:
         event_end_dt_str: str,
         event_type_str: str,
         max_attendees_str: str,
+        is_members_only: bool,
     ):
         # Convert from the form data
         event_dt = datetime.datetime.fromisoformat(event_dt_str)
@@ -79,6 +77,7 @@ class Event:
             event_end_dt=event_end_dt,
             event_type=event_type,
             max_attendees=max_attendees,
+            is_members_only=is_members_only,
             created_on_utc=now,
             updated_on_utc=now,
         )
@@ -108,6 +107,7 @@ def events(conn: sqlite3.Connection) -> Repository[Event]:
             "created_on_utc DATETIME NOT NULL",
             "updated_on_utc DATETIME NOT NULL",
             "max_attendees INTEGER",
+            "is_members_only BOOLEAN NOT NULL DEFAULT false",
             "is_draft BOOLEAN NOT NULL DEFAULT false",
             "is_deleted BOOLEAN NOT NULL DEFAULT false",
             "price_id TEXT",

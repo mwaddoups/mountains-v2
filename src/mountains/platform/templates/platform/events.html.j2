@@ -1,3 +1,4 @@
+{% from "platform/_profile.html.j2" import profile_picture, badge %}
 {% extends "platform/base.html.j2" %}
 {% block platform %}
   {% if g.current_user.is_site_admin %}
@@ -15,9 +16,19 @@
   <section>
     {% for event in events %}
       <article id="{{ event.id }}" class="event">
-        <h1>{{ event.title }}</h1>
-        <em>{{ event.event_dt }}</em>
-        <div>{{ event.description | markdown | safe }}</div>
+        <header>
+          <div class="event-date">
+            <p>{{ event.event_dt.strftime("%A") }}</p>
+            <h1>{{ event.event_dt.strftime("%d") }}</h1>
+            <p>{{ event.event_dt.strftime("%b %Y") }}</p>
+          </div>
+          <div>
+            <h1>{{ event.title }}</h1>
+            {{ badge(event.event_type.name) }}
+            {% if event.is_members_only %}{{ badge("Members Only") }}{% endif %}
+          </div>
+        </header>
+        <div class="event-description">{{ event.description | markdown | safe }}</div>
         {% if attendees[event.id] and ((attendees[event.id] | length) > 0) %}
           <ul>
             {% for attendee in attendees[event.id] %}
