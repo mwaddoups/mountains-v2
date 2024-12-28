@@ -242,19 +242,40 @@
   }
   textarea:not([cols]) {
     width: 100%;
+    height: 20em;
   }
 
   input[type="search"] {
     width: 100%;
   }
 
+  fieldset {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    border: none;
+    padding: 0;
+
+    label {
+      flex-grow: 1;
+    }
+  }
+
   /* Other elements */
+  section {
+    margin-bottom: 1em;
+  }
+
   mark {
     outline: 1px solid var(--primary);
     background-color: inherit;
     font-weight: 500;
     padding: 0.15em 0.35em;
     border-radius: var(--standard-border-radius);
+  }
+
+  small {
+    color: var(--text-light);
   }
 
   /* Use articles as basic cards */
@@ -269,9 +290,9 @@
     border: 1px solid var(--border);
     background-color: var(--bg);
     filter: drop-shadow(1px 1px 2px var(--border));
+    filter: drop-shadow(-1px -1px 2px var(--border));
 
     > header {
-      border-bottom: 1px solid var(--border);
       margin: 0;
     }
   }
@@ -350,6 +371,13 @@
 }
 
 @layer components {
+  /* Utility classes */
+  .flex {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+  }
+
   .float-right {
     float: right;
   }
@@ -430,16 +458,18 @@
 
   /* Profile pictures maintain aspect */
   .profile-picture {
+    display: inline-block;
     margin: 0;
     aspect-ratio: 1;
     border-radius: var(--standard-border-radius);
   }
 
   #members {
+    --member-width: 160px;
     display: grid;
     justify-content: space-between;
     gap: 1em;
-    grid-template-columns: repeat(auto-fill, 160px);
+    grid-template-columns: repeat(auto-fill, var(--member-width));
     align-items: stretch;
 
     article :is(h1, h2, h3, h4, h5, h6) {

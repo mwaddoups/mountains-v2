@@ -1,8 +1,8 @@
 {% macro profile_picture(user, size = '256') %}
-  {% if url %}
+  {% if user.profile_picture_url %}
     <img class="profile-picture"
-         src="{{ user.profile_picture_url }}"
-         alt="{{ user.full_name }}"
+         src="{{ url_for('static', filename=user.profile_picture_url) }}"
+         alt="Profile picture for {{ user.full_name }}"
          title="{{ user.full_name }}"
          width="{{ size }}"
          height="{{ size }}" />

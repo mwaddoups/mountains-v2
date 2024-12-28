@@ -1,6 +1,5 @@
 import argparse
 import sqlite3
-import uuid
 from datetime import datetime
 
 from werkzeug.security import generate_password_hash
@@ -56,6 +55,9 @@ with (
             continue
         u_slug = readable_id([u["first_name"], u["last_name"], str(u["id"])])
 
+        # Take uploads/ off the start
+        profile_url = u["profile_picture"][8:]
+
         # TODO: still not importing all fields
         new_user = User(
             id=u["id"],
@@ -66,7 +68,9 @@ with (
             last_name=u["last_name"],
             about=u["about"],
             mobile=u["mobile_number"],
-            profile_picture_url=None,
+            profile_picture_url=u["profile_picture"][8:]
+            if u["profile_picture"]
+            else None,
             is_committee=bool(u["is_committee"]),
             is_coordinator=bool(u["is_walk_coordinator"]),
             is_dormant=bool(u["is_dormant"]),

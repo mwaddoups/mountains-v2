@@ -5,8 +5,20 @@
         action="{{ url_for('platform.member', slug=user.slug) }}">
     <input type="hidden" name="method" value="PUT" />
     <label>
+      First Name
+      <input type="text" name='first_name' value="{{ user.first_name }}" required />
+    </label>
+    <label>
+      Last Name
+      <input type="text" name='last_name' value="{{ user.last_name }}" required />
+    </label>
+    <label>
       Profile Picture
       <input type="file" />
+    </label>
+    <label>
+      Mobile Number
+      <input type="text" name='mobile' value="{{ user.mobile }}" />
     </label>
     <label>
       Email
@@ -21,22 +33,8 @@
       <input type="password" name='confirm_password' />
     </label>
     <label>
-      First Name
-      <input type="text" name='first_name' value="{{ user.first_name }}" required />
-    </label>
-    <label>
-      Last Name
-      <input type="text" name='last_name' value="{{ user.last_name }}" required />
-    </label>
-    <label>
       About You
-      <textarea name='about'
-                value="{{ user.about }}"
-                placeholder="Write a bit about yourself..."></textarea>
-    </label>
-    <label>
-      Mobile Number
-      <input type="text" name='mobile' value="{{ user.mobile }}" />
+      <textarea name='about' placeholder="Write a bit about yourself...">{{user.about}}</textarea>
     </label>
     <input type="submit" value="Update user" />
     <a href="{{ url_for('platform.member', slug=user.slug) }}">Return to profile</a>
