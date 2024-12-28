@@ -21,7 +21,7 @@
   {% endif %}
 {% endmacro %}
 {% macro badge(text) %}
-  <span class="badge badge-{{ text | lower | replace(' ', '-') | replace('_', '-') }}">
+  <span class="badge color-{{ text | lower | replace(' ', '-') | replace('_', '-') }}">
     {{ text | replace('_', ' ') | title }}
   </span>
 {% endmacro %}

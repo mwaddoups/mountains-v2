@@ -10,15 +10,17 @@
 
   --primary: rgb(13, 148, 136);
   --text: #212121;
+  --text-white: #ededed;
   --bg: #ffffff;
   --text-light: #585858;
-  --text-badge: #ededed;
+  --text-badge: var(--text-white);
   --border: #dddddd;
   --accent: #3b82f6;
   --accent-hover: rgb(from var(--accent) r g b / 0.6);
   --accent-text: #ededed;
   --disabled: #efefef;
 
+  --cmc-highlight: #f472b6;
   --cmc-color-committee: rgb(192, 132, 252);
   --cmc-color-coordinator: rgb(251, 146, 60);
   --cmc-color-member: #3b82f6;
@@ -246,6 +248,15 @@
     width: 100%;
   }
 
+  /* Other elements */
+  mark {
+    outline: 1px solid var(--primary);
+    background-color: inherit;
+    font-weight: 500;
+    padding: 0.15em 0.35em;
+    border-radius: var(--standard-border-radius);
+  }
+
   /* Use articles as basic cards */
   article {
     display: flex;
@@ -339,6 +350,9 @@
 }
 
 @layer components {
+  .float-right {
+    float: right;
+  }
   /* CMC Logo (for nav) */
   .cmc-logo::before {
     content: "";
@@ -354,47 +368,64 @@
 
   /* Badges */
   .badge {
-    background-color: var(--cmc-color-other);
+    background-color: var(--cmc-highlight);
     border-radius: var(--standard-border-radius);
     padding: 0.25em 0.5em;
     text-align: center;
     color: var(--text-badge);
   }
-  .badge-committee {
-    background-color: var(--cmc-color-committee);
+  .color-committee {
+    --cmc-highlight: var(--cmc-color-committee);
   }
-  .badge-coordinator {
-    background-color: var(--cmc-color-coordinator);
+  .color-coordinator {
+    --cmc-highlight: var(--cmc-color-coordinator);
   }
-  .badge-member {
-    background-color: var(--cmc-color-member);
+  .color-member {
+    --cmc-highlight: var(--cmc-color-member);
   }
-  .badge-guest {
-    background-color: var(--cmc-color-guest);
+  .color-guest {
+    --cmc-highlight: var(--cmc-color-guest);
   }
-  .badge-summer-day-walk {
-    background-color: var(--cmc-color-summer-day-walk);
+  .color-summer-day-walk {
+    --cmc-highlight: var(--cmc-color-summer-day-walk);
   }
-  .badge-summer-weekend {
-    background-color: var(--cmc-color-summer-weekend);
+  .color-summer-weekend {
+    --cmc-highlight: var(--cmc-color-summer-weekend);
   }
-  .badge-winter-day-walk {
-    background-color: var(--cmc-color-winter-day-walk);
+  .color-winter-day-walk {
+    --cmc-highlight: var(--cmc-color-winter-day-walk);
   }
-  .badge-winter-weekend {
-    background-color: var(--cmc-color-winter-weekend);
+  .color-winter-weekend {
+    --cmc-highlight: var(--cmc-color-winter-weekend);
   }
-  .badge-indoor-climbing {
-    background-color: var(--cmc-color-indoor-climbing);
+  .color-indoor-climbing {
+    --cmc-highlight: var(--cmc-color-indoor-climbing);
   }
-  .badge-outdoor-climbing {
-    background-color: var(--cmc-color-outdoor-climbing);
+  .color-outdoor-climbing {
+    --cmc-highlight: var(--cmc-color-outdoor-climbing);
   }
-  .badge-run {
-    background-color: var(--cmc-color-run);
+  .color-run {
+    --cmc-highlight: var(--cmc-color-run);
   }
-  .badge-members-only {
-    background-color: var(--cmc-color-member);
+  .color-members-only {
+    --cmc-highlight: var(--cmc-color-member);
+  }
+
+  .admin {
+    --accent: var(--cmc-color-committee);
+    color: var(--cmc-color-committee);
+    background-color: white;
+    opacity: 50%;
+    border-radius: var(--standard-border-radius);
+    filter: drop-shadow(1px 1px 1px var(--cmc-color-committee));
+
+    > details {
+      padding: 1em;
+    }
+
+    &:has(details[open]) {
+      opacity: 100%;
+    }
   }
 
   /* Profile pictures maintain aspect */
@@ -421,15 +452,6 @@
   }
 
   .event {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5em;
-    padding: 1em;
-    border-radius: 1em;
-    background-color: white;
-    filter: drop-shadow(1px 1px 2px gray);
-    margin: 1em auto;
-
     header {
       display: flex;
       gap: 1em;
@@ -459,14 +481,6 @@
       summary {
         display: flex;
         align-items: center;
-
-        figure {
-          margin-left: 0.1em;
-
-          &:first-of-type {
-            margin-left: 1em;
-          }
-        }
       }
 
       ul {
@@ -474,7 +488,7 @@
       }
     }
 
-    details[open] > summary > figure {
+    details[open] > summary .profile-picture {
       opacity: 0%;
     }
 

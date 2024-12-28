@@ -1,7 +1,8 @@
 {% extends "platform/base.html.j2" %}
 {% block platform %}
   <h1>Editing {{ user.full_name }}</h1>
-  <form method="post" action="{{ url_for('platform.member', id=user.id) }}">
+  <form method="post"
+        action="{{ url_for('platform.member', slug=user.slug) }}">
     <input type="hidden" name="method" value="PUT" />
     <label>
       Profile Picture
@@ -38,6 +39,6 @@
       <input type="text" name='mobile' value="{{ user.mobile }}" />
     </label>
     <input type="submit" value="Update user" />
-    <a href="{{ url_for('platform.member', id=user.id) }}">Return to profile</a>
+    <a href="{{ url_for('platform.member', slug=user.slug) }}">Return to profile</a>
   </form>
 {% endblock platform %}
