@@ -1,6 +1,6 @@
 import datetime
 
-from quart import Blueprint, current_app, redirect, render_template, request, url_for
+from flask import Blueprint, current_app, redirect, render_template, request, url_for
 
 from mountains.db import connection
 from mountains.errors import MountainException
@@ -12,9 +12,9 @@ from ..users import users
 
 def event_routes(blueprint: Blueprint):
     @blueprint.route("/events", methods=["GET", "POST"])
-    async def events():
+    def events():
         if request.method == "POST":
-            form_data = await request.form
+            form_data = request.form
 
             with connection(current_app.config["DB_NAME"], locked=True) as conn:
                 events_db = events_repo(conn)
@@ -59,7 +59,7 @@ def event_routes(blueprint: Blueprint):
                         )
                 event_attendees[event.id] = attending_users
 
-        return await render_template(
+        return render_template(
             "platform/events.html.j2",
             events=events,
             attendees=event_attendees,
@@ -67,7 +67,7 @@ def event_routes(blueprint: Blueprint):
         )
 
     @blueprint.route("/events/attend/<id>", methods=["POST"])
-    async def attend_event(id: str | None = None):
+    def attend_event(id: str | None = None):
         with connection(current_app.config["DB_NAME"]) as conn:
             event = events_repo(conn).get(id=id)
             if event is None:
@@ -77,7 +77,7 @@ def event_routes(blueprint: Blueprint):
 
     @blueprint.route("/events/add")
     @blueprint.route("/events/edit/<id>")
-    async def edit_event(id: str | None = None):
+    def edit_event(id: str | None = None):
         if id is not None:
             with connection(current_app.config["DB_NAME"]) as conn:
                 event = events_repo(conn).get(id=id)
@@ -85,6 +85,6 @@ def event_routes(blueprint: Blueprint):
                 raise MountainException("Event not found!")
         else:
             event = None
-        return await render_template(
+        return render_template(
             "platform/event.edit.html.j2", event=event, event_types=EventType
         )

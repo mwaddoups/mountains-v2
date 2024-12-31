@@ -7,9 +7,9 @@ requires-python = ">=3.12"
 dependencies = [
     "attrs>=24.3.0",
     "cattrs>=24.1.2",
+    "flask[dotenv]>=3.1.0",
     "markdown>=3.7",
     "pillow>=11.0.0",
-    "quart[dotenv]>=0.19.9",
 ]
 
 [dependency-groups]

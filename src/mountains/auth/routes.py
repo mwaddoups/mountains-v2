@@ -1,7 +1,7 @@
 import logging
 import uuid
 
-from quart import (
+from flask import (
     Blueprint,
     current_app,
     redirect,
@@ -22,9 +22,9 @@ logger = logging.getLogger(__name__)
 
 def routes(blueprint: Blueprint):
     @blueprint.route("/login", methods=["GET", "POST"])
-    async def login(error: str | None = None):
+    def login():
         if request.method == "POST":
-            form = await request.form
+            form = request.form
             with connection(current_app.config["DB_NAME"]) as conn:
                 user_db = users(conn)
                 token_db = tokens(conn)
@@ -36,7 +36,8 @@ def routes(blueprint: Blueprint):
                     # TODO: Error handling
                     return redirect(
                         url_for(
-                            "login", error="Login failed - check username and password."
+                            "auth.login",
+                            error="Login failed - check username and password.",
                         )
                     )
                 else:
@@ -51,12 +52,12 @@ def routes(blueprint: Blueprint):
                     session["token_id"] = token.id
                     return redirect(url_for("platform.home"))
 
-        return await render_template("auth/login.html.j2", error=error)
+        return render_template("auth/login.html.j2", error=request.args.get("error"))
 
     @blueprint.route("/forgotpassword", methods=["GET", "POST"])
-    async def forgot_password():
+    def forgot_password():
         if request.method == "POST":
-            form = await request.form
+            form = request.form
             email = form["email"]
             with connection(current_app.config["DB_NAME"]) as conn:
                 user_db = users(conn)
@@ -81,27 +82,25 @@ def routes(blueprint: Blueprint):
                         "Password reset for CMC",
                         f"Reset your password: {reset_url}",
                     )
-            return await render_template("auth/forgotpassword.html.j2", was_reset=True)
+            return render_template("auth/forgotpassword.html.j2", was_reset=True)
         else:
-            return await render_template("auth/forgotpassword.html.j2")
+            return render_template("auth/forgotpassword.html.j2")
 
     @blueprint.route("/resetpassword", methods=["GET", "POST"])
-    async def reset_password():
+    def reset_password():
         with connection(current_app.config["DB_NAME"]) as conn:
             token_id = request.args.get("token")
             token_db = tokens(conn)
             if token_id is None or (token := token_db.get(id=token_id)) is None:
-                return await render_template(
-                    "auth/resetpassword.html.j2", is_valid=False
-                )
+                return render_template("auth/resetpassword.html.j2", is_valid=False)
 
             if request.method == "POST":
                 user_db = users(conn)
                 user = user_db.get(id=token.user_id)
                 assert user is not None
-                form = await request.form
+                form = request.form
                 if form["password"] != form["confirm_password"]:
-                    return await render_template(
+                    return render_template(
                         "resetpassword.html.j2", error="Entered passwords do not match."
                     )
                 else:
@@ -111,21 +110,21 @@ def routes(blueprint: Blueprint):
                     return redirect(
                         url_for("auth.login", error="Password reset - please login.")
                     )
-        return await render_template("resetpassword.html.j2")
+        return render_template("resetpassword.html.j2")
 
     @blueprint.route("/register", methods=["GET", "POST"])
-    async def register():
+    def register():
         if request.method == "POST":
             # New user registration
-            form = await request.form
+            form = request.form
             if form["password"] != form["confirm_password"]:
-                return await render_template(
+                return render_template(
                     "register.html.j2", error="Passwords do not match!"
                 )
             with connection(current_app.config["DB_NAME"]) as conn:
                 user_db = users(conn)
                 if user_db.get(email=form["email"]) is not None:
-                    return await render_template(
+                    return render_template(
                         "register.html.j2", error="Email is not unique - try again!"
                     )
                 password_hash = generate_password_hash(form["password"])
@@ -142,9 +141,9 @@ def routes(blueprint: Blueprint):
                 logger.info("Registering new user %s...", user)
                 user_db.insert(user)
                 return redirect(url_for("auth.login"))
-        return await render_template("auth/register.html.j2")
+        return render_template("auth/register.html.j2")
 
     @blueprint.route("/logout", methods=["POST"])
-    async def logout():
+    def logout():
         del session["token_id"]
         return redirect(url_for("index"))

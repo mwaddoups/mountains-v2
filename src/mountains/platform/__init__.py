@@ -1,4 +1,4 @@
-from quart import Blueprint
+from flask import Blueprint
 
 from .routes import routes
 

@@ -1,7 +1,7 @@
 import copy
 import logging
 
-from quart import (
+from flask import (
     Blueprint,
     current_app,
     render_template,
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 def member_routes(blueprint: Blueprint):
     @blueprint.route("/members")
-    async def members():
+    def members():
         with connection(current_app.config["DB_NAME"]) as conn:
             members = users(conn).list()
 
@@ -35,19 +35,19 @@ def member_routes(blueprint: Blueprint):
         members = sorted(members, key=_member_sort_key)
         limit = int(request.args.get("limit", 25))
 
-        return await render_template(
+        return render_template(
             "platform/members.html.j2", members=members, search=search, limit=limit
         )
 
     @blueprint.route("/members/<slug>", methods=["GET", "POST", "PUT"])
-    async def member(slug: str):
+    def member(slug: str):
         with connection(current_app.config["DB_NAME"]) as conn:
             user = users(conn).get(slug=slug)
         if user is None:
             raise MountainException("User not found!")
 
         if request.method != "GET":
-            form = await request.form
+            form = request.form
             if request.headers.get("HX-Request"):
                 method = request.method
             else:
@@ -67,15 +67,15 @@ def member_routes(blueprint: Blueprint):
                 # TODO: actually do it
             # TODO: Audit the event
 
-        return await render_template("platform/member.html.j2", user=user)
+        return render_template("platform/member.html.j2", user=user)
 
     @blueprint.route("/members/<id>/edit")
-    async def edit_member(id: str):
+    def edit_member(id: str):
         with connection(current_app.config["DB_NAME"]) as conn:
             user = users(conn).get(id=id)
         if user is None:
             raise MountainException("User not found!")
-        return await render_template("platform/member.edit.html.j2", user=user)
+        return render_template("platform/member.edit.html.j2", user=user)
 
 
 def _member_sort_key(user: User) -> tuple:

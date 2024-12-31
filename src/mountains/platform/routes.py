@@ -1,6 +1,6 @@
 import logging
 
-from quart import (
+from flask import (
     Blueprint,
     current_app,
     g,
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 def routes(blueprint: Blueprint):
     @blueprint.before_request
-    async def current_user():
+    def current_user():
         # Ensure all requests have access to the current user
         if (token_id := session.get("token_id")) is None:
             return redirect(url_for("auth.login"))
@@ -37,8 +37,8 @@ def routes(blueprint: Blueprint):
                     g.current_user = user
 
     @blueprint.route("/home")
-    async def home():
-        return await render_template("platform/home.html.j2")
+    def home():
+        return render_template("platform/home.html.j2")
 
     member_routes(blueprint)
 

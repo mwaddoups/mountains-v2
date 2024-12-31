@@ -1,14 +1,14 @@
 import logging
 
 import markdown
-from quart import Quart, Response, render_template, request
-from quart.logging import default_handler
+from flask import Flask, Response, render_template, request
+from flask.logging import default_handler
 
 from . import auth, platform
 
 
 def create_app():
-    app = Quart(__name__)
+    app = Flask(__name__)
 
     # Set up logging for any logger on 'mountains'
     logger = logging.getLogger("mountains")
@@ -16,7 +16,7 @@ def create_app():
     logger.addHandler(default_handler)
 
     # Load from the local .env file
-    app.config.from_prefixed_env("QUART")
+    app.config.from_prefixed_env("FLASK")
     logger.info("Running on DB: %s", app.config["DB_NAME"])
     # Ensure the session cookie as secure
     app.config.update(
@@ -33,12 +33,12 @@ def create_app():
         return markdown.markdown(s)
 
     @app.route("/")
-    async def index():
+    def index():
         # TODO: Editable pages.
-        return await render_template("index.html.j2")
+        return render_template("index.html.j2")
 
     @app.after_request
-    async def ensure_preload_cached(response: Response):
+    def ensure_preload_cached(response: Response):
         # We need to ensure that any preloaded links are valid for a few seconds
         if request.headers.get("HX-Preloaded") == "true":
             response.headers["Cache-Control"] = "private, max-age=5"
