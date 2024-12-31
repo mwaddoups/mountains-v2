@@ -1,7 +1,7 @@
 {% extends "base.html.j2" %}
 {% block content %}
   <h1>Login</h1>
-  <form method="post" action="{{ url_for('login') }}">
+  <form method="post" action="{{ url_for('auth.login') }}">
     <label>
       Email
       <input type="email" name="email" />
@@ -13,6 +13,6 @@
     <input type="submit" value="Login" />
   </form>
   {% if error %}<strong>{{ error }}</strong>{% endif %}
-  <a href="{{ url_for('register') }}">Register</a>
-  <a href="{{ url_for('forgot_password') }}">Forgot Password</a>
+  <a href="{{ url_for('auth.register') }}">Register</a>
+  <a href="{{ url_for('auth.forgot_password') }}">Forgot Password</a>
 {% endblock content %}

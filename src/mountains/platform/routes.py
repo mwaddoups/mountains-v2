@@ -25,7 +25,7 @@ def routes(blueprint: Blueprint):
     async def current_user():
         # Ensure all requests have access to the current user
         if (token_id := session.get("token_id")) is None:
-            return redirect(url_for("login"))
+            return redirect(url_for("auth.login"))
         else:
             with connection(current_app.config["DB_NAME"]) as conn:
                 token = tokens(conn).get(id=token_id)

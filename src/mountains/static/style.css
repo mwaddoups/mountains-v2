@@ -472,6 +472,7 @@
     grid-template-columns: repeat(auto-fill, var(--member-width));
     align-items: stretch;
 
+    /* Make sure no member names overlap */
     article :is(h1, h2, h3, h4, h5, h6) {
       padding: 0 0.25rem;
       white-space: nowrap;
@@ -489,7 +490,7 @@
       h1 {
         margin-bottom: 0.25em;
         font-size: x-large;
-        color: var(--color-primary);
+        color: var(--primary);
       }
       .badge {
         margin-right: 0.25em;
