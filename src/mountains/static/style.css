@@ -1,4 +1,4 @@
-@layer default, theme, components;
+@layer default, navigation, components;
 
 :root {
   /* Set sans-serif & mono fonts */
@@ -20,6 +20,7 @@
   --accent-hover: rgb(from var(--accent) r g b / 0.6);
   --accent-text: #ededed;
   --disabled: #efefef;
+  --cancel: var(--disabled);
 
   --cmc-highlight: #f472b6;
   --cmc-color-committee: rgb(192, 132, 252);
@@ -314,8 +315,9 @@
       margin: 0;
     }
   }
+}
 
-  /* Navigation */
+@layer navigation {
   nav {
     ul,
     ol {
@@ -362,6 +364,10 @@
 
     aside {
       margin-left: auto;
+
+      a {
+        color: inherit;
+      }
     }
   }
   /* Sidebar */
@@ -393,6 +399,11 @@
 
   .float-right {
     float: right;
+  }
+
+  .btn-cancel {
+    background-color: var(--bg);
+    color: var(--accent);
   }
   /* CMC Logo (for nav) */
   .cmc-logo::before {
@@ -507,6 +518,10 @@
         margin: 0 0 0.25em 0;
         font-size: x-large;
         color: var(--primary);
+
+        a {
+          color: inherit;
+        }
       }
       .badge {
         margin-right: 0.25em;

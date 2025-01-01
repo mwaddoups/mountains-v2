@@ -120,7 +120,7 @@ def event_routes(blueprint: Blueprint):
                 else:
                     attendees_repo.delete_where(event_id=event.id, user_id=user_id)
 
-        return redirect(url_for("platform.events") + f"#{event.id}")
+        return redirect(url_for("platform.events") + f"#{event.slug}")
 
     @blueprint.route("/events/add")
     @blueprint.route("/events/edit/<id>")

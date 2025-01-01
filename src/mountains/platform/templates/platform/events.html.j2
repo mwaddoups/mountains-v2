@@ -15,7 +15,7 @@
   </form>
   <section>
     {% for event in events %}
-      <article id="{{ event.id }}" class="event">
+      <article id="{{ event.slug }}" class="event">
         <header class="flex">
           <div class="event-date">
             <span>{{ event.event_dt.strftime("%A") }}</span>
@@ -23,7 +23,9 @@
             <span>{{ event.event_dt.strftime("%b %Y") }}</span>
           </div>
           <div>
-            <h1>{{ event.title }}</h1>
+            <h1>
+              <a href="{{ url_for('platform.events') + '#' + event.slug }}">{{ event.title }}</a>
+            </h1>
             {{ badge(event.event_type.name) }}
             {% if event.is_members_only %}{{ badge("Members Only") }}{% endif %}
             {% if event.event_end_dt %}
@@ -83,7 +85,7 @@
               action="{{ url_for('platform.attend_event', event_id=event.id, user_id=g.current_user.id) }}">
           {% if g.current_user.id in (evt_attendees | map(attribute='user_id') | list) %}
             <input type="hidden" name="method" value="DELETE" />
-            <input type="submit" value="Leave" />
+            <input type="submit" class="btn-cancel" value="Leave" />
           {% else %}
             <input type="hidden" name="method" value="POST" />
             <input type="submit" value="Attend" />

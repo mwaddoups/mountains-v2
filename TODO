@@ -1,36 +1,14 @@
-Authentication
-
-- Last thing: session cookie
-
-Database
-
-- sqlite3 (WAL? threading?)
-
-Members
-
-- Members list content
-- Members list interactivity
-- Members list styling
-- Member profile content
-
-  User data
-  Event data
-  AttendingUser data
-  Audit logging
-  Styling
-  Preload / htmx
-  Photos
-  Email
-
-Forgot password
-IDs alongside slugs please
-
-Serve static stuff differently
-Serve htmx directly
-
-Harder stuff:
+Breadcrumbs
+Photos and images
+Audit logging
+Permissions
+Events admin tools
+Editable users
+Editable pages
 Payments
-Discord integration
+Discord
+Membership rework
+Repeating events ?
 
-New stuff:
-CI!
+- General look over for TODOs
+- Testing!
