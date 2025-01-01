@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import datetime
 import enum
 import sqlite3
 
-from attrs import define
+from attrs import Factory, define
 
 from mountains.db import Repository
 from mountains.utils import now_utc, readable_id
@@ -40,6 +42,15 @@ class Event:
     is_draft: bool = False
     is_deleted: bool = False
     price_id: str | None = None
+
+    def is_full(self, attendees: list[Attendee]) -> bool:
+        if self.max_attendees is None or self.max_attendees == 0:
+            return False
+
+        if any(a.is_waiting_list for a in attendees):
+            return True
+
+        return len(attendees) >= self.max_attendees
 
     @classmethod
     def from_new_event(
@@ -87,7 +98,7 @@ class Event:
 class Attendee:
     user_id: int
     event_id: int
-    joined_at_utc: datetime.datetime
+    joined_at_utc: datetime.datetime = Factory(now_utc)
     is_waiting_list: bool = False
     is_trip_paid: bool = False
 

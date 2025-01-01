@@ -97,7 +97,7 @@ class Repository[T]:
         cur = self.conn.execute(
             f"""
             SELECT {",".join(self._field_names)} FROM {self.table_name}
-            WHERE {",".join([f"{k} = :{k}" for k in kwargs])}
+            WHERE {" AND ".join([f"{k} = :{k}" for k in kwargs])}
             LIMIT 1
             """,
             kwargs,
@@ -122,7 +122,7 @@ class Repository[T]:
             f"""
             SELECT {",".join(self._field_names)} 
             FROM {self.table_name}
-            WHERE {",".join([f"{k} = :{k}" for k in kwargs])}
+            WHERE {" AND ".join([f"{k} = :{k}" for k in kwargs])}
         """,
             kwargs,
         )
@@ -134,7 +134,7 @@ class Repository[T]:
         self.conn.execute(
             f"""
             DELETE FROM {self.table_name}
-            WHERE {",".join([f"{k} = :{k}" for k in kwargs])}
+            WHERE {" AND ".join([f"{k} = :{k}" for k in kwargs])}
             """,
             kwargs,
         )
