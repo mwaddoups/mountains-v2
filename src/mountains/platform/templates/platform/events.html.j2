@@ -12,43 +12,45 @@
   {% endif %}
   <form>
     <input type="search" name="search" placeholder="Search for an event..." />
-    <label>
-      Event Types
-      <select multiple name="types">
-        <option>TODO</option>
-      </select>
-    </label>
   </form>
   <section>
     {% for event in events %}
       <article id="{{ event.id }}" class="event">
-        <header>
+        <header class="flex">
           <div class="event-date">
-            <p>{{ event.event_dt.strftime("%A") }}</p>
-            <h2>{{ event.event_dt.strftime("%d") }}</h2>
-            <p>{{ event.event_dt.strftime("%b %Y") }}</p>
+            <span>{{ event.event_dt.strftime("%A") }}</span>
+            <span>{{ event.event_dt.strftime("%-d") }}</span>
+            <span>{{ event.event_dt.strftime("%b %Y") }}</span>
           </div>
           <div>
             <h1>{{ event.title }}</h1>
             {{ badge(event.event_type.name) }}
             {% if event.is_members_only %}{{ badge("Members Only") }}{% endif %}
             {% if event.event_end_dt %}
-              <em>{{ event.event_dt.strftime("%A, %b %d, %Y, %H:%M") }} ⇒ {{ event.event_end_dt.strftime("%A, %b %d, %Y, %H:%M") }}</em>
+              <p>
+                {{ event.event_dt.strftime("%A, %b %d, %Y, %H:%M") }} 🡪 {{ event.event_end_dt.strftime("%A, %b %d, %Y, %H:%M") }}
+              </p>
             {% else %}
-              <em>{{ event.event_dt.strftime("%A, %b %d, %Y, %H:%M") }}</em>
+              <p>&nbsp;{{ event.event_dt.strftime("%A, %b %d, %Y, %H:%M") }}</p>
             {% endif %}
           </div>
         </header>
-        <div class="event-description">{{ event.description | markdown | safe }}</div>
+        <details class="event-description">
+          <summary>{{ event.description | markdown | safe }}</summary>
+        </details>
         {% set evt_attendees = attendees[event.id] | sort(attribute='joined_at_utc') %}
         {% set total = evt_attendees | length %}
         {% set total_wait = evt_attendees | map(attribute='is_waiting_list') | sum %}
-        <details>
+        <details class="attendees">
           <summary>
             <span>Attendees ({{ total - total_wait }} total, {{ event.max_attendees if event.max_attendees > 0 else 'no' }} max)</span>
-            {% for attendee in evt_attendees if not attendee.is_waiting_list %}
-              {{ profile_picture(members[attendee.user_id], '32') }}
-            {% endfor %}
+            <div class="attendees-summary">
+              {% for attendee in evt_attendees if not attendee.is_waiting_list %}
+                {{ profile_picture(members[attendee.user_id], '32') }}
+              {% else %}
+                <small>No attendees yet!</small>
+              {% endfor %}
+            </div>
           </summary>
           <ul>
             {% for attendee in evt_attendees if not attendee.is_waiting_list %}
@@ -58,21 +60,25 @@
             {% endfor %}
           </ul>
         </details>
-        <details>
-          <summary>
-            <span>Waiting List ({{ total_wait }} total)</span>
-            {% for attendee in evt_attendees if attendee.is_waiting_list %}
-              {{ profile_picture(members[attendee.user_id], '32') }}
-            {% endfor %}
-          </summary>
-          <ul>
-            {% for attendee in evt_attendees if attendee.is_waiting_list %}
-              {{ attending_user(attendee, members[attendee.user_id]) }}
-            {% else %}
-              <li>No waiting list yet!</li>
-            {% endfor %}
-          </ul>
-        </details>
+        {% if total_wait > 0 %}
+          <details class="attendees">
+            <summary>
+              <span>Waiting List ({{ total_wait }} total)</span>
+              <div class="attendees-summary">
+                {% for attendee in evt_attendees if attendee.is_waiting_list %}
+                  {{ profile_picture(members[attendee.user_id], '32') }}
+                {% endfor %}
+              </div>
+            </summary>
+            <ul>
+              {% for attendee in evt_attendees if attendee.is_waiting_list %}
+                {{ attending_user(attendee, members[attendee.user_id]) }}
+              {% else %}
+                <li>No waiting list yet!</li>
+              {% endfor %}
+            </ul>
+          </details>
+        {% endif %}
         <form method="post"
               action="{{ url_for('platform.attend_event', id=event.id) }}">
           {% if g.current_user.id in (evt_attendees | map(attribute='user_id') | list) %}

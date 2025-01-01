@@ -445,7 +445,7 @@
   .color-outdoor-climbing {
     --cmc-highlight: var(--cmc-color-outdoor-climbing);
   }
-  .color-run {
+  .color-running {
     --cmc-highlight: var(--cmc-color-run);
   }
   .color-members-only {
@@ -496,52 +496,75 @@
   }
 
   .event {
+    padding: 1em;
+    margin: 2em 0 2em 0;
+    border-bottom: 1px solid var(--primary);
+    filter: none;
     header {
-      display: flex;
-      gap: 1em;
-
+      padding-bottom: 0.25em;
       h1 {
-        margin-bottom: 0.25em;
+        letter-spacing: -0.04em;
+        margin: 0 0 0.25em 0;
         font-size: x-large;
         color: var(--primary);
       }
       .badge {
         margin-right: 0.25em;
       }
-      em {
+      p {
+        /* Calendar icon before (BI) */
+        &::before {
+          content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-calendar' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z'/%3E%3C/svg%3E");
+        }
+        font-weight: 500;
+        margin: 0;
         padding-top: 0.5rem;
         display: block;
       }
     }
 
     .event-description {
-      border-top: 1px solid gray;
-      padding: 0.25em 1em;
-      max-height: 15em;
-      overflow: scroll;
+      /* Make the description open on click */
+      > summary {
+        display: block;
+        max-height: 15em;
+        overflow: clip;
+        transition: max-height 0.3s ease-in-out;
+      }
+
+      &[open] > summary {
+        max-height: 500em;
+      }
+
+      margin-bottom: 1em;
     }
 
-    details {
+    details.attendees {
+      margin-bottom: 1em;
       summary {
-        display: flex;
-        align-items: center;
+        display: block;
+        font-weight: 500;
+        font-size: 1em;
       }
 
       ul {
         list-style: none;
+        margin: 0;
+        padding: 0;
       }
     }
 
-    details[open] > summary .profile-picture {
-      opacity: 0%;
+    details[open] .attendees-summary {
+      display: none;
     }
 
     .attending-user {
       display: flex;
       align-items: center;
-      gap: 0.25em;
+      gap: 0.125em;
     }
   }
+
   .event-date {
     display: flex;
     flex-direction: column;
@@ -551,13 +574,14 @@
     border-radius: 5px;
     padding: 0.25em 0.5em;
 
-    > p {
+    > span {
       font-size: medium;
       margin: 0;
       padding: 0;
     }
-    > h2 {
+    > span:nth-child(2) {
       font-size: xx-large;
+      font-weight: bold;
       margin: 0;
       padding: 0;
     }

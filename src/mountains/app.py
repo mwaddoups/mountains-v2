@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 import markdown
@@ -31,6 +32,10 @@ def create_app():
     @app.template_filter("markdown")
     def convert_markdown(s: str) -> str:
         return markdown.markdown(s)
+
+    @app.context_processor
+    def now_dt() -> dict:
+        return {"now": datetime.datetime.now()}
 
     @app.route("/")
     def index():
