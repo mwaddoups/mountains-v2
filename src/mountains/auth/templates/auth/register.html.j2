@@ -1,12 +1,23 @@
 {% extends "base.html.j2" %}
 {% block content %}
-  <section>
-    <h1>Register</h1>
+  <h1>Register</h1>
+  {% if error %}<strong class="error">{{ error }}</strong>{% endif %}
+  {% if success %}
+    <p>Your registration was successful! Redirecting to login...</p>
+    <a href="{{ url_for('auth.login') }}"
+       hx-get="{{ url_for('auth.login') }}"
+       hx-trigger="load delay:3s"
+       hx-push-url="true"
+       hx-target="body">Redirect manually...</a>
+  {% else %}
+    {% set form = form if form else {} %}
     <form method="post">
-      <input type="hidden" name="method" value="POST" />
       <label>
         Email
-        <input type="email" name='email' required />
+        <input type="email"
+               name='email'
+               required
+               value="{{ form.get('email', '') }}" />
       </label>
       <label>
         Password
@@ -14,26 +25,34 @@
       </label>
       <label>
         Confirm Password
-        <input type="password" name='confirm_password' required />
+        <input type="password"
+               name='confirm_password'
+               required
+               onchange="this.value === this.form.elements['password'].value ? this.setCustomValidity('') : this.setCustomValidity('Passwords do not match!')" />
       </label>
       <label>
         First Name
-        <input type="text" name='first_name' required />
+        <input type="text"
+               name='first_name'
+               required
+               value="{{ form.get('first_name', '') }}" />
       </label>
       <label>
         Last Name
-        <input type="text" name='last_name' required />
+        <input type="text"
+               name='last_name'
+               required
+               value="{{ form.get('last_name', '') }}" />
       </label>
       <label>
         About You
-        <textarea name='about' placeholder="Write a bit about yourself..."></textarea>
+        <textarea name='about' placeholder="Write a bit about yourself..">{{ form.get('about', '') }}</textarea>
       </label>
       <label>
         Mobile Number
-        <input type="text" name='mobile' />
+        <input type="text" name='mobile' value="{{ form.get('mobile', '') }}" />
       </label>
       <input type="submit" value="Register" />
     </form>
-    {% if error %}<strong>{{ error }}</strong>{% endif %}
-  </section>
+  {% endif %}
 {% endblock content %}

@@ -11,6 +11,7 @@
   --primary: rgb(13, 148, 136);
   --text: #212121;
   --text-white: #ededed;
+  --error: pink;
   --bg: #ffffff;
   --text-light: #585858;
   --text-badge: var(--text-white);
@@ -223,7 +224,6 @@
     font-size: inherit;
     font-family: inherit;
     padding: 0.5rem;
-    margin-bottom: 0.5rem;
     border-radius: var(--standard-border-radius);
     box-shadow: none;
     max-width: 100%;
@@ -237,9 +237,21 @@
     border: 1px solid var(--border);
   }
 
+  input:user-invalid {
+    border: 1px solid var(--error);
+  }
+
   label {
     display: block;
+    > input {
+      width: 100%;
+    }
+
+    &:has(input[required])::before {
+      content: "*";
+    }
   }
+
   textarea:not([cols]) {
     width: 100%;
     height: 20em;
@@ -278,6 +290,12 @@
     color: var(--text-light);
   }
 
+  strong.error {
+    background-color: var(--error);
+    border-radius: var(--standard-border-radius);
+    padding: 0.5em;
+  }
+
   /* Use articles as basic cards */
   article {
     display: flex;
@@ -298,7 +316,6 @@
   }
 
   /* Navigation */
-  header,
   nav {
     ul,
     ol {
@@ -345,10 +362,6 @@
 
     aside {
       margin-left: auto;
-
-      input {
-        margin: 0;
-      }
     }
   }
   /* Sidebar */

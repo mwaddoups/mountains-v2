@@ -37,15 +37,17 @@
           </li>
         </ul>
       </nav>
-      {% if 'current_user' in g %}
-        <aside>
+      <aside>
+        {% if 'current_user' in g %}
           <a href="{{ url_for('platform.member', slug=g.current_user.slug) }}">{{ g.current_user.full_name }}</a>
           {{ profile_picture(g.current_user, '32') }}
           <form method="post" action="{{ url_for('auth.logout') }}">
             <input type="submit" value="Logout" />
           </form>
-        </aside>
-      {% endif %}
+        {% else %}
+          <a class="button" href="{{ url_for('auth.login') }}">Login / Register</a>
+        {% endif %}
+      </aside>
     </header>
     {% block content %}
     {% endblock content %}

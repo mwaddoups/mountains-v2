@@ -4,9 +4,10 @@ import datetime
 import sqlite3
 from typing import Self
 
-from attrs import define, field
+from attrs import Factory, define, field
 
 from mountains.db import Repository
+from mountains.errors import ValidationError
 from mountains.utils import now_utc, readable_id
 
 
@@ -19,15 +20,15 @@ class User:
     first_name: str
     last_name: str
     about: str | None
-    mobile: str
-    profile_picture_url: str | None
-    is_committee: bool
-    is_coordinator: bool
+    mobile: str | None = None
+    profile_picture_url: str | None = None
+    is_committee: bool = False
+    is_coordinator: bool = False
     # is_on_discord: bool = False
     # is_winter_skills: bool
-    membership_expiry_utc: datetime.datetime | None
-    is_dormant: bool
-    created_on_utc: datetime.datetime
+    membership_expiry_utc: datetime.datetime | None = None
+    is_dormant: bool = False
+    created_on_utc: datetime.datetime = Factory(now_utc)
     last_login_utc: datetime.datetime | None = None
 
     def __str__(self):
@@ -66,9 +67,21 @@ class User:
         first_name: str,
         last_name: str,
         about: str | None,
-        mobile: str,
+        mobile: str | None,
     ) -> Self:
         slug = readable_id([first_name, last_name, str(id)])
+
+        if len(first_name) == 0:
+            raise ValidationError("First name cannot be blank!")
+
+        if len(last_name) == 0:
+            raise ValidationError("First name cannot be blank!")
+
+        if about is not None and len(about) == 0:
+            about = None
+
+        if mobile is not None and len(mobile) == 0:
+            mobile = None
 
         return cls(
             id=id,
@@ -79,12 +92,6 @@ class User:
             last_name=last_name,
             about=about,
             mobile=mobile,
-            profile_picture_url=None,
-            is_committee=False,
-            is_coordinator=False,
-            membership_expiry_utc=None,
-            is_dormant=False,
-            created_on_utc=now_utc(),
         )
 
 

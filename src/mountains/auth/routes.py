@@ -1,5 +1,7 @@
 import logging
 import uuid
+from inspect import currentframe
+from typing import Mapping
 
 from flask import (
     Blueprint,
@@ -14,6 +16,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from mountains.db import connection
 from mountains.email import send_mail
+from mountains.errors import MountainException
 from mountains.tokens import AuthToken, tokens
 from mountains.users import User, users
 
@@ -42,13 +45,15 @@ def routes(blueprint: Blueprint):
                     )
                 else:
                     logger.info("Logging in %s", user)
-                    token = token_db.get(user_id=user.id)
-                    if token is None:
-                        logger.info("Generating new token for %s...", user)
-                        token = AuthToken.from_id(id=user.id, valid_days=30)
-                        token_db.insert(token)
+                    logger.debug("Expiring any old tokens for %s...", user)
+                    for token in token_db.list_where(id=user.id):
+                        if not token.is_valid():
+                            logger.info("Removing old token %r", token)
+                            token_db.delete_where(id=token.id)
 
-                    # TODO: This needs to be a proper permanent token
+                    logger.debug("Generating new token for %s...", user)
+                    token = AuthToken.from_id(id=user.id, valid_days=30)
+                    token_db.insert(token)
                     session["token_id"] = token.id
                     return redirect(url_for("platform.home"))
 
@@ -57,8 +62,7 @@ def routes(blueprint: Blueprint):
     @blueprint.route("/forgotpassword", methods=["GET", "POST"])
     def forgot_password():
         if request.method == "POST":
-            form = request.form
-            email = form["email"]
+            email = request.form["email"]
             with connection(current_app.config["DB_NAME"]) as conn:
                 user_db = users(conn)
                 if (user := user_db.get(email=email)) is not None:
@@ -75,7 +79,7 @@ def routes(blueprint: Blueprint):
                     token_db.insert(token)
 
                     reset_url = url_for(
-                        "reset_password", token=token.id, _external=True
+                        "auth.reset_password", token=token.id, _external=True
                     )
                     send_mail(
                         user.email,
@@ -101,7 +105,8 @@ def routes(blueprint: Blueprint):
                 form = request.form
                 if form["password"] != form["confirm_password"]:
                     return render_template(
-                        "resetpassword.html.j2", error="Entered passwords do not match."
+                        "auth/resetpassword.html.j2",
+                        error="Entered passwords do not match.",
                     )
                 else:
                     password_hash = generate_password_hash(form["password"])
@@ -110,40 +115,48 @@ def routes(blueprint: Blueprint):
                     return redirect(
                         url_for("auth.login", error="Password reset - please login.")
                     )
-        return render_template("resetpassword.html.j2")
+        return render_template("auth/resetpassword.html.j2")
 
     @blueprint.route("/register", methods=["GET", "POST"])
     def register():
         if request.method == "POST":
-            # New user registration
-            form = request.form
-            if form["password"] != form["confirm_password"]:
+            try:
+                _register_new_user(current_app.config["DB_NAME"], request.form)
+                return render_template("auth/register.html.j2", success=True)
+            except MountainException as e:
+                print(e)
                 return render_template(
-                    "register.html.j2", error="Passwords do not match!"
+                    "auth/register.html.j2", error=str(e), form=request.form
                 )
-            with connection(current_app.config["DB_NAME"]) as conn:
-                user_db = users(conn)
-                if user_db.get(email=form["email"]) is not None:
-                    return render_template(
-                        "register.html.j2", error="Email is not unique - try again!"
-                    )
-                password_hash = generate_password_hash(form["password"])
-                user = User.from_registration(
-                    id=user_db.next_id(),
-                    email=form["email"],
-                    password_hash=password_hash,
-                    first_name=form["first_name"],
-                    last_name=form["last_name"],
-                    about=form["about"],
-                    mobile=form["mobile"],
-                )
-
-                logger.info("Registering new user %s...", user)
-                user_db.insert(user)
-                return redirect(url_for("auth.login"))
         return render_template("auth/register.html.j2")
 
     @blueprint.route("/logout", methods=["POST"])
     def logout():
         del session["token_id"]
         return redirect(url_for("index"))
+
+
+def _register_new_user(db_name: str, form: Mapping[str, str]):
+    # Check the password matches and generate a hash
+    if form["password"] != form["confirm_password"]:
+        raise MountainException("Passwords do not match!")
+    password_hash = generate_password_hash(form["password"])
+
+    # Lock the DB so we can generate a new user ID and insert
+    with connection(db_name, locked=True) as conn:
+        user_db = users(conn)
+        if user_db.get(email=form["email"]) is not None:
+            raise MountainException(
+                f"The email {form['email']} has already been registered."
+            )
+        user = User.from_registration(
+            id=user_db.next_id(),
+            email=form["email"],
+            password_hash=password_hash,
+            first_name=form["first_name"],
+            last_name=form["last_name"],
+            about=form["about"],
+            mobile=form["mobile"],
+        )
+        logger.info("Registering new user %s...", user)
+        user_db.insert(user)
