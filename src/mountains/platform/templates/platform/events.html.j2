@@ -15,7 +15,7 @@
   </form>
   <section>
     {% for event in events %}
-      <article id="{{ event.slug }}" class="event">
+      <article id="{{ event.slug }}" class="event card">
         <header class="flex">
           <div class="event-date">
             <span>{{ event.event_dt.strftime("%A") }}</span>

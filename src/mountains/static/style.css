@@ -172,16 +172,6 @@
     padding: 0.5rem 0.9rem;
     border-radius: var(--standard-border-radius);
 
-    /* Disabled */
-    &[aria-disabled="true"],
-    &:disabled,
-    &[disabled] {
-      cursor: not-allowed;
-      background-color: var(--disabled);
-      border-color: var(--disabled);
-      color: var(--text-light);
-    }
-
     /* Hover */
     &:enabled:hover,
     &:not([aria-disabled="true"]):hover {
@@ -192,6 +182,14 @@
     }
   }
 
+  /* Disabled */
+  input[aria-disabled="true"],
+  input:disabled,
+  input[disabled] {
+    cursor: not-allowed;
+    border-color: var(--disabled);
+    color: var(--text-light);
+  }
   .button:focus-visible,
   button:focus-visible:where(:enabled),
   input:enabled:focus-visible:where(
@@ -206,7 +204,12 @@
   /* Text inputs */
   textarea,
   select,
-  input:not([type="submit"], [type="reset"], [type="button"]) {
+  input:not(
+      [type="submit"],
+      [type="reset"],
+      [type="button"],
+      [type="checkbox"]
+    ) {
     display: inline-block;
     font-size: inherit;
     font-family: inherit;
@@ -235,22 +238,46 @@
     width: 100%;
   }
 
-  label {
-    display: block;
+  /* Custom Checkbox */
+  input[type="checkbox"] {
+    display: flex;
+    align-items: center;
+    appearance: none;
+    margin: 0;
 
-    > :is(
-        input[type="text"],
-        input[type="datetime-local"],
-        input[type="number"],
-        textarea
-      ) {
-      width: 100%;
+    &::after {
+      display: block;
+      content: "NO";
+      padding: 0.25rem;
+      border: 1px solid var(--border);
+      border-radius: 1px;
+      cursor: pointer;
     }
 
-    &:has(input[required])::before {
-      content: "*";
+    &:checked::after {
+      content: "YES";
+      background-color: var(--accent);
+      color: var(--accent-text);
     }
-    &:has(input[disabled]) {
+  }
+
+  label:has(input, select) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    grid-auto-flow: column;
+    place-content: center;
+
+    &:not(:has(small)) {
+      grid-row: 1 / -1;
+    }
+
+    input,
+    select {
+      grid-row: 1 / -1;
+    }
+
+    &:has(input[disabled], select[disabled]) {
       opacity: 50%;
     }
   }
