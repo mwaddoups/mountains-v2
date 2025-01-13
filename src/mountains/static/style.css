@@ -475,12 +475,27 @@
     opacity: 50%;
     border-radius: var(--standard-border-radius);
     filter: drop-shadow(1px 1px 1px var(--cmc-color-committee));
+    padding: 1em;
 
-    > details {
-      padding: 1em;
+    position: relative;
+
+    div {
+      position: absolute;
+      top: 2em;
+      left: 1em;
+      background-color: white;
+      width: max-content;
+      border-radius: var(--standard-border-radius);
+      padding: 2em;
+      display: flex;
+      flex-direction: column;
     }
 
-    &:has(details[open]) {
+    summary {
+      font-weight: bold;
+    }
+
+    &[open] {
       opacity: 100%;
     }
   }
@@ -514,7 +529,6 @@
   .event {
     padding: 1em;
     margin: 2em 0 2em 0;
-    border-bottom: 1px solid var(--primary);
     filter: none;
     header {
       padding-bottom: 0.25em;
@@ -541,6 +555,10 @@
         padding-top: 0.5rem;
         display: block;
       }
+
+      .admin {
+        margin-left: auto;
+      }
     }
 
     .event-description {
@@ -560,7 +578,11 @@
       > summary {
         color: transparent;
         background-clip: text;
-        background-image: linear-gradient(to bottom, black 0%, #cccccc 15em);
+        background-image: linear-gradient(
+          to bottom,
+          var(--text) 0%,
+          #cccccc 15em
+        );
       }
       &[open] > summary {
         background-image: none;

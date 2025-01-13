@@ -36,6 +36,17 @@
               <p>&nbsp;{{ event.event_dt.strftime("%A, %b %d, %Y, %H:%M") }}</p>
             {% endif %}
           </div>
+          {% if g.current_user.is_site_admin %}
+            <details class="admin">
+              <summary>Admin Tools</summary>
+              <div>
+                <a class="button"
+                   href="{{ url_for('platform.edit_event', id=event.id) }}">Edit event</a>
+                <a class="button" href="#">Copy event</a>
+                <a class="button" href="#">Delete event</a>
+              </div>
+            </details>
+          {% endif %}
         </header>
         <details class="event-description">
           <summary>{{ event.description | markdown | safe }}</summary>
