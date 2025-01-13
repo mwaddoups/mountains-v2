@@ -1,7 +1,7 @@
 {% extends "base.html.j2" %}
 {% block content %}
   <h1>Register</h1>
-  {% if error %}<strong class="error">{{ error }}</strong>{% endif %}
+  {% if error %}<strong role="alert">{{ error }}</strong>{% endif %}
   {% if success %}
     <p>Your registration was successful! Redirecting to login...</p>
     <a href="{{ url_for('auth.login') }}"

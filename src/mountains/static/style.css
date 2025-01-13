@@ -2,12 +2,13 @@
 
 :root {
   /* Set sans-serif & mono fonts */
-  --sans-font: -apple-system, BlinkMacSystemFont, "Avenir Next", Avenir,
-    "Nimbus Sans L", Roboto, "Noto Sans", "Segoe UI", Arial, Helvetica,
-    "Helvetica Neue", sans-serif;
+  --sans-font: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --mono-font: Consolas, Menlo, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
   --standard-border-radius: 5px;
 
+  /* Colors for theme */
   --primary: rgb(13, 148, 136);
   --text: #212121;
   --text-white: #ededed;
@@ -158,40 +159,45 @@
     }
   }
 
+  /* Buttons */
   button,
   .button,
   a.button,
   input[type="submit"],
   input[type="reset"],
   input[type="button"] {
+    /* Reset */
+    text-decoration: none;
+    box-shadow: none;
+    line-height: normal;
+    font-size: inherit;
+    font-family: inherit;
+
+    /* Basic styling */
     border: 1px solid var(--accent);
     background-color: var(--accent);
     color: var(--accent-text);
     padding: 0.5rem 0.9rem;
-    text-decoration: none;
-    line-height: normal;
-  }
+    border-radius: var(--standard-border-radius);
 
-  .button[aria-disabled="true"],
-  input:disabled,
-  textarea:disabled,
-  select:disabled,
-  button[disabled] {
-    cursor: not-allowed;
-    background-color: var(--disabled);
-    border-color: var(--disabled);
-    color: var(--text-light);
-  }
+    /* Disabled */
+    &[aria-disabled="true"],
+    &:disabled,
+    &[disabled] {
+      cursor: not-allowed;
+      background-color: var(--disabled);
+      border-color: var(--disabled);
+      color: var(--text-light);
+    }
 
-  button:enabled:hover,
-  .button:not([aria-disabled="true"]):hover,
-  input[type="submit"]:enabled:hover,
-  input[type="reset"]:enabled:hover,
-  input[type="button"]:enabled:hover {
-    transition: all 0.1s ease-in;
-    background-color: var(--accent-hover);
-    border-color: var(--accent-hover);
-    cursor: pointer;
+    /* Hover */
+    &:enabled:hover,
+    &:not([aria-disabled="true"]):hover {
+      transition: all 0.1s ease-in;
+      background-color: var(--accent-hover);
+      border-color: var(--accent-hover);
+      cursor: pointer;
+    }
   }
 
   .button:focus-visible,
@@ -205,33 +211,36 @@
     outline-offset: 1px;
   }
 
-  /* Reset input styling for forms */
-
+  /* Text inputs */
   textarea,
   select,
-  input,
-  button,
-  .button {
+  input:not([type="submit"], [type="reset"], [type="button"]) {
     display: inline-block;
     font-size: inherit;
     font-family: inherit;
+    box-shadow: none;
+
     padding: 0.5rem;
     margin: 0.25rem 0;
     border-radius: var(--standard-border-radius);
-    box-shadow: none;
     max-width: 100%;
-  }
 
-  textarea,
-  select,
-  input {
     color: var(--text);
     background-color: var(--bg);
     border: 1px solid var(--border);
+
+    &:user-invalid {
+      border: 1px solid var(--error);
+    }
   }
 
-  input:user-invalid {
-    border: 1px solid var(--error);
+  textarea:not([cols]) {
+    width: 100%;
+    height: 20em;
+  }
+
+  input[type="search"] {
+    width: 100%;
   }
 
   label {
@@ -254,30 +263,9 @@
     }
   }
 
-  textarea:not([cols]) {
-    width: 100%;
-    height: 20em;
-  }
-
-  input[type="search"] {
-    width: 100%;
-  }
-
-  fieldset {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    border: none;
-    padding: 0;
-
-    label {
-      flex-grow: 1;
-    }
-  }
-
   /* Other elements */
   section {
-    margin-bottom: 1em;
+    margin: 0 0 1rem 0;
   }
 
   mark {
@@ -292,7 +280,7 @@
     color: var(--text-light);
   }
 
-  strong.error {
+  [role="alert"] {
     background-color: var(--error);
     border-radius: var(--standard-border-radius);
     padding: 0.5em;
@@ -326,16 +314,13 @@
 }
 
 @layer navigation {
+  /* Reset for navigation */
   nav {
     ul,
     ol {
       list-style-type: none;
       margin: 0;
       padding: 0;
-    }
-
-    ul ul {
-      font-size: small;
     }
 
     ul li,
@@ -400,6 +385,7 @@
 
     ul ul,
     ol ol {
+      font-size: small;
       gap: 0.1rem;
     }
 
@@ -645,6 +631,7 @@
       font-size: medium;
       margin: 0;
       padding: 0;
+      white-space: nowrap;
     }
     > span:nth-child(2) {
       font-size: xx-large;

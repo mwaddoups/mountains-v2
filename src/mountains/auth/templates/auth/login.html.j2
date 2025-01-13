@@ -1,7 +1,7 @@
 {% extends "base.html.j2" %}
 {% block content %}
   <h1>Login</h1>
-  {% if error %}<strong class="error">{{ error }}</strong>{% endif %}
+  {% if error %}<strong role="alert">{{ error }}</strong>{% endif %}
   <form method="post" action="{{ url_for('auth.login') }}">
     <label>
       Email

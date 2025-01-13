@@ -1,3 +1,32 @@
+Big plan: STOP STYLING! Get all the functionality in and style AT THE END
+
+Events
+
+- Attending popups
+- Editing events / deleting events
+- Attendee list / editing
+- Attendee adder
+- Event filter
+- Past / future events
+- HTMX juicing
+
+Users
+
+- Profile picture upload
+- Editing in general
+
+Discord / Payments work
+
+Dormant users
+
+Pages
+
+- Editable text
+
+Caching
+
+- Etags / last modified
+
 Breadcrumbs
 Photos and images
 Audit logging
