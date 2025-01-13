@@ -1,17 +1,29 @@
 {% extends "base.html.j2" %}
+{% macro nav_link(endpoint, name) -%}
+  {% if request.endpoint.startswith(endpoint) %}
+    <li>
+      <a href="{{ url_for(endpoint) }}"
+         aria-selected="{{ 'true' if request.endpoint.endswith(endpoint) else 'false' }}">{{ name }}</a>
+      {% if caller %}{{ caller() }}{% endif %}
+    </li>
+  {% else %}
+    <li>
+      <a href="{{ url_for(endpoint) }}">{{ name }}</a>
+    </li>
+  {% endif %}
+{%- endmacro %}
 {% block content %}
   <aside>
     <nav>
       <ul preload>
-        <li>
-          <a href="{{ url_for('platform.home') }}">Home</a>
-        </li>
-        <li>
-          <a href="{{ url_for('platform.events') }}">Events</a>
-        </li>
-        <li>
-          <a href="{{ url_for('platform.members') }}">Members</a>
-        </li>
+        {{ nav_link('platform.home', 'Home') }}
+        {% call nav_link('platform.events', 'Events') %}
+          <ul>
+            {{ nav_link('platform.events', 'Upcoming') }}
+            {{ nav_link('platform.events_calendar', 'Calendar') }}
+          </ul>
+        {% endcall %}
+        {{ nav_link('platform.members', 'Members') }}
       </ul>
     </nav>
   </aside>

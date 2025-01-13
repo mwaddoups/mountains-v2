@@ -13,6 +13,7 @@ from flask import (
 
 from mountains.db import connection
 from mountains.errors import MountainException
+from mountains.utils import now_utc
 
 from ..events import Attendee, Event, EventType, attendees
 from ..events import events as events_repo
@@ -75,6 +76,59 @@ def event_routes(blueprint: Blueprint):
             events=events,
             attendees=event_attendees,
             members=event_members,
+        )
+
+    @blueprint.route("/events/calendar")
+    @blueprint.route("/events/calendar/<year>/<month>")
+    def events_calendar(year: str | int | None = None, month: str | int | None = None):
+        now = now_utc()
+        if year is None:
+            year = now.year
+        else:
+            year = int(year)
+        if month is None:
+            month = now.month
+        else:
+            month = int(month)
+
+        # Get the first monday before start of month
+        start = datetime.datetime(year, month, 1)
+        start -= datetime.timedelta(days=start.weekday())
+
+        # Get the last sunday after end of month
+        ## Get the month-end
+        if month == 12:
+            end = datetime.datetime(year + 1, 1, 1)
+        else:
+            end = datetime.datetime(year, month + 1, 1)
+        end -= datetime.timedelta(days=1)
+        ## Push forward to next sunday
+        end += datetime.timedelta(days=6 - end.weekday())
+
+        # Get all events between both days
+        with connection(current_app.config["DB_NAME"]) as conn:
+            # TODO: Use WHERE in DB
+            events = [
+                e
+                for e in events_repo(conn).list()
+                if (e.event_dt >= start and e.event_dt <= end)
+                or (
+                    e.event_end_dt is not None
+                    and e.event_end_dt >= start
+                    and e.event_end_dt <= end
+                )
+            ]
+
+        days = [
+            start.date() + datetime.timedelta(days=i) for i in range((end - start).days)
+        ]
+
+        return render_template(
+            "platform/events.calendar.html.j2",
+            year=year,
+            month=month,
+            days=days,
+            events=events,
         )
 
     @blueprint.route(

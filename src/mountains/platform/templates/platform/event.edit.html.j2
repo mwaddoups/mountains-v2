@@ -32,7 +32,7 @@
     <label>
       Members only?
       <small>(Usually no, except weekends)</small>
-      <input type="checkbox" name="members_only" value="false" />
+      <input type="checkbox" name="members_only" />
     </label>
     <label>
       Signup Open Date
@@ -42,7 +42,27 @@
     <label>
       Max Attendees
       <small>(0 = no max)</small>
-      <input type="number" name="max_attendees" value="0" />
+      <input type="number" name="max_attendees" />
+    </label>
+    <label>
+      Pre-attend - check user is on discord?
+      <small>(Always enabled)</small>
+      <input type="checkbox" name="show_discord" checked disabled />
+    </label>
+    <label>
+      Pre-attend - check user is a member, if members only?
+      <small>(Always enabled)</small>
+      <input type="checkbox" name="show_discord" checked disabled />
+    </label>
+    <label>
+      Pre-attend - check user's trial is not over?
+      <small>(Always enabled)</small>
+      <input type="checkbox" name="show_discord" checked disabled />
+    </label>
+    <label>
+      Pre-attend - show participation statement and check ICE?
+      <small>(Usually yes for outdoor events, no for socials / indoor climbing)</small>
+      <input type="checkbox" name="show_participation" />
     </label>
     <label>
       Event Description

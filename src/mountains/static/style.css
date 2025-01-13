@@ -249,6 +249,9 @@
     &:has(input[required])::before {
       content: "*";
     }
+    &:has(input[disabled]) {
+      opacity: 50%;
+    }
   }
 
   textarea:not([cols]) {
@@ -331,6 +334,10 @@
       padding: 0;
     }
 
+    ul ul {
+      font-size: small;
+    }
+
     ul li,
     ol li,
     a {
@@ -379,8 +386,7 @@
   aside > nav {
     padding: 0 1rem 0 1rem;
 
-    a,
-    a:visited {
+    :is(a, a:visited) {
       color: var(--primary);
     }
 
@@ -390,6 +396,16 @@
       flex-direction: column;
       gap: 1rem;
       align-items: right;
+    }
+
+    ul ul,
+    ol ol {
+      gap: 0.1rem;
+    }
+
+    /* Style active links for final layer only */
+    ul:not(:has(ul)) :is(a, a:visited)[aria-selected="true"] {
+      text-decoration: underline;
     }
   }
 }
@@ -636,5 +652,10 @@
       margin: 0;
       padding: 0;
     }
+  }
+
+  .events-calendar {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
   }
 }
