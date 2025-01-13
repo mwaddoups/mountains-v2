@@ -23,6 +23,7 @@
   --disabled: #efefef;
   --cancel: var(--disabled);
 
+  /* CMC-specific colors */
   --cmc-highlight: #f472b6;
   --cmc-color-committee: rgb(192, 132, 252);
   --cmc-color-coordinator: rgb(251, 146, 60);
@@ -63,7 +64,7 @@
 
     /* Make the body centered, using 3-col grid */
     display: grid;
-    grid-template-columns: 1fr min(60rem, 90%) 1fr;
+    grid-template-columns: 1fr min(55rem, 90%) 1fr;
     margin: 0;
 
     /* Center all content */
@@ -73,29 +74,20 @@
 
     /* Except the header */
     > header {
-      border-bottom: 2px solid var(--primary);
       grid-column: 1 / -1;
       text-align: center;
     }
 
     /* And any non-header nav as a sidebar */
-    > aside {
+    > aside:has(nav) {
       grid-column: 1;
       text-align: right;
     }
   }
 
-  header {
+  body > header {
+    border-bottom: 2px solid var(--primary);
     margin-bottom: 1.5rem;
-  }
-
-  body > footer {
-    margin-top: 4rem;
-    padding: 2rem 1rem 1.5rem 1rem;
-    color: var(--text-light);
-    font-size: 0.9rem;
-    text-align: center;
-    border-top: 1px solid var(--border);
   }
 
   /* Headings */
@@ -292,25 +284,6 @@
       display: block;
     }
   }
-
-  /* Use articles as basic cards */
-  article {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    line-height: normal;
-
-    /** Nice outline **/
-    border-radius: var(--standard-border-radius);
-    border: 1px solid var(--border);
-    background-color: var(--bg);
-    filter: drop-shadow(1px 1px 2px var(--border));
-    filter: drop-shadow(-1px -1px 2px var(--border));
-
-    > header {
-      margin: 0;
-    }
-  }
 }
 
 @layer navigation {
@@ -335,15 +308,13 @@
     }
   }
 
-  body > header {
+  body > header > nav {
     display: flex;
     align-items: center;
     font-size: 1rem;
     white-space: nowrap;
     gap: 0.5rem;
     padding: 0 1rem 0 1rem;
-    line-height: 1;
-    margin-bottom: 1rem;
 
     h1 {
       font-size: 1.25em;
@@ -351,15 +322,17 @@
       margin-right: 1em;
     }
 
-    nav ul,
-    nav ol,
-    aside {
+    ul,
+    ol {
       display: flex;
       gap: 1rem;
       align-items: center;
     }
 
     aside {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
       margin-left: auto;
 
       a {
@@ -367,9 +340,10 @@
       }
     }
   }
+
   /* Sidebar */
   aside > nav {
-    padding: 0 1rem 0 1rem;
+    padding: 0 1rem;
 
     :is(a, a:visited) {
       color: var(--primary);
@@ -379,20 +353,33 @@
     ol {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
       align-items: right;
+      gap: 0.5rem;
     }
 
     ul ul,
     ol ol {
       font-size: small;
-      gap: 0.1rem;
+      gap: 0.125rem;
     }
 
     /* Style active links for final layer only */
     ul:not(:has(ul)) :is(a, a:visited)[aria-selected="true"] {
       text-decoration: underline;
     }
+  }
+
+  /* CMC Logo */
+  .cmc-logo::before {
+    content: "";
+    width: 3rem;
+    height: 3rem;
+    margin: 0;
+    padding: 0;
+    background-image: url("logo_256.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
   }
 }
 
@@ -401,7 +388,7 @@
   .flex {
     display: flex;
     align-items: center;
-    gap: 1em;
+    gap: 1rem;
   }
 
   .float-right {
@@ -412,17 +399,18 @@
     background-color: var(--bg);
     color: var(--accent);
   }
-  /* CMC Logo (for nav) */
-  .cmc-logo::before {
-    content: "";
-    width: 3em;
-    height: 3em;
-    margin: 0;
-    padding: 0;
-    background-image: url("logo_256.png");
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: contain;
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    line-height: normal;
+
+    /** Nice outline **/
+    border-radius: var(--standard-border-radius);
+    border: 1px solid var(--border);
+    background-color: var(--bg);
+    filter: drop-shadow(1px 1px 2px var(--border));
   }
 
   /* Badges */
