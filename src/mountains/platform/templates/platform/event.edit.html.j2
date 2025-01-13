@@ -1,5 +1,6 @@
 {% extends "platform/base.html.j2" %}
 {% block platform %}
+  <a href="{{ url_for('platform.events') }}">< return to upcoming events</a>
   {% if event %}
     <h1>Editing {{ event.title }}</h1>
   {% else %}
@@ -11,15 +12,13 @@
       <input type="text" name="title" required />
     </label>
     <label>
-      Event Description
-      <textarea name="description" required></textarea>
-    </label>
-    <label>
       Start Date
+      <small>(24h time)</small>
       <input type="datetime-local" name="event_dt" required />
     </label>
     <label>
       End Date
+      <small>(For calendar, usually blank unless weekend)</small>
       <input type="datetime-local" name="event_end_dt" />
     </label>
     <label>
@@ -31,8 +30,29 @@
       </select>
     </label>
     <label>
+      Members only?
+      <small>(Usually no, except weekends)</small>
+      <input type="checkbox" name="members_only" value="false" />
+    </label>
+    <label>
+      Signup Open Date
+      <small>(24h time - leave blank for always open)</small>
+      <input type="datetime-local" name="event_open_dt" />
+    </label>
+    <label>
       Max Attendees
+      <small>(0 = no max)</small>
       <input type="number" name="max_attendees" value="0" />
+    </label>
+    <label>
+      Event Description
+      <small>(Uses <a href="https://www.markdownguide.org/basic-syntax/">markdown</a>)</small>
+      <textarea name="description" required></textarea>
+    </label>
+    <label>
+      Lock signup forever?
+      <small>Usually no, unless it's a draft</small>
+      <input type="checkbox" name="lock_signup" />
     </label>
     <input type="submit" value="Submit" />
   </form>

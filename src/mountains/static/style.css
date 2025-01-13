@@ -48,15 +48,6 @@
     box-sizing: inherit;
   }
 
-  textarea,
-  select,
-  input,
-  progress {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-  }
-
   html {
     /* Set the font globally */
     font-family: var(--sans-font);
@@ -245,7 +236,13 @@
 
   label {
     display: block;
-    > input {
+
+    > :is(
+        input[type="text"],
+        input[type="datetime-local"],
+        input[type="number"],
+        textarea
+      ) {
       width: 100%;
     }
 
