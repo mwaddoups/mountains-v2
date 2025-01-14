@@ -156,15 +156,15 @@ def event_routes(blueprint: Blueprint):
             with connection(current_app.config["DB_NAME"]) as conn:
                 event = events_repo(conn).get(id=id)
             if event is None:
-                raise MountainException("Event not found!")
+                abort(404)
         else:
             event = None
 
+        error: str | None = None
         if method != "GET":
             if not g.current_user.is_authorised():
                 abort(403)
 
-            error: str | None = None
             try:
                 with connection(current_app.config["DB_NAME"], locked=True) as conn:
                     events_db = events_repo(conn)
@@ -199,12 +199,30 @@ def event_routes(blueprint: Blueprint):
                 error=error,
             )
         else:
-            event_form = event.to_form() if event else None
+            # For default, use a copy if passed as ?copy_from and the ID is found...
+            event_form = None
+            if event is None and (copy_id := request.args.get("copy_from", type=int)):
+                with connection(current_app.config["DB_NAME"]) as conn:
+                    copy_event = events_repo(conn).get(id=copy_id)
+
+                if copy_event is not None:
+                    event_form = copy_event.to_form()
+                else:
+                    error = (
+                        "Event not found for attempted copy, using default values..."
+                    )
+                    logger.error("Attempt to copy with a missing event ID %s", copy_id)
+
+            # Or use the old event if editing...
+            if event is not None and event_form is None:
+                event_form = event.to_form()
+
             return render_template(
                 "platform/event.edit.html.j2",
                 editing=event,
                 form=event_form,
                 event_types=EventType,
+                error=error,
             )
 
     @blueprint.route("/events/<int:event_id>/attend/", methods=["POST"])
@@ -271,7 +289,7 @@ def event_routes(blueprint: Blueprint):
 
 
 def _single_event_url(event: Event) -> str:
-    return url_for("platform.events") + "#" + event.slug
+    return url_for("platform.events", _anchor=event.slug)
 
 
 def _events_attendees(

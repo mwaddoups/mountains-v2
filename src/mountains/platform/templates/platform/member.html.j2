@@ -13,14 +13,14 @@
     {% if g.current_user.is_site_admin %}
       <details class="admin">
         <summary>Admin</summary>
-        <div>
+        <article class="card">
           <form>
             <input type="submit" value="Toggle something" />
             <input type="submit" value="Toggle something else" />
           </form>
           <span>Email: {{ user.email }}</span>
           <span>Membership expires: {{ user.membership_expiry_utc.strftime("%Y-%m-%d") }}</span>
-        </div>
+        </article>
       </details>
     {% endif %}
   </div>

@@ -5,12 +5,15 @@ DONE
 
 - Event filter
 - Past / future events
+- Editing events / deleting events
+
+DOING
 
 - Attending popups
-- Editing events / deleting events
 - Attendee list / editing
 - Attendee adder
 - HTMX juicing
+- Event templates
 - Drafts
 
 Users
