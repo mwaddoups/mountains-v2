@@ -1,0 +1,24 @@
+{% extends "platform/base.html.j2" %}
+{% block platform %}
+  <header>
+    <a href="{{ url_for('platform.photos') }}">< Back to Photos</a>
+  </header>
+  <details>
+    <summary>Upload Photos</summary>
+    <form method="post">
+      <label>
+        <input type="file" name="photos" multiple />
+      </label>
+      <input type="submit" value="Upload" />
+    </form>
+  </details>
+  <section>
+    {% for photo in photos %}
+      <figure>
+        {# djlint:off #}
+        <img src="{{ url_for('static', filename=photo.photo_path) }}" />
+        {# djlint:on #}
+      </figure>
+    {% endfor %}
+  </section>
+{% endblock platform %}

@@ -11,6 +11,9 @@ DOING
 
 - Attending popups
 - Attendee list / editing
+
+TODO
+
 - Attendee adder
 - HTMX juicing
 - Event templates
@@ -43,6 +46,7 @@ Editable pages
 Payments
 Discord
 Membership rework
+Admin block for managing admin
 Repeating events ?
 
 - General look over for TODOs

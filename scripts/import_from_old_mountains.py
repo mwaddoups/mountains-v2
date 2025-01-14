@@ -6,6 +6,7 @@ from werkzeug.security import generate_password_hash
 
 from mountains.db import connection
 from mountains.events import Attendee, Event, EventType, attendees, events
+from mountains.photos import Album, Photo, albums, photos
 from mountains.tokens import tokens
 from mountains.users import User, users
 from mountains.utils import readable_id
@@ -126,13 +127,15 @@ with (
             is_members_only=bool(ev["members_only"]),
             is_locked=bool(ev["signup_open"]),
             price_id=ev["price_id"],
+            is_draft=False,
+            is_deleted=False,
         )
 
         events_repo.insert(new_event)
         inserted += 1
     print(f"Inserted {inserted} events.")
 
-    # Do the events import
+    # Do the attendees import
     attendees_repo = attendees(out_conn)
     attendees_repo.drop_table()
     attendees_repo.create_table()
@@ -153,3 +156,54 @@ with (
         attendees_repo.insert(new_au)
         inserted += 1
     print(f"Inserted {inserted} attendees.")
+
+    # Do the albums import
+    albums_repo = albums(out_conn)
+    albums_repo.drop_table()
+    albums_repo.create_table()
+
+    old_albums = in_conn.execute("SELECT * FROM photos_album").fetchall()
+    inserted = 0
+    skipped = 0
+    for al in old_albums:
+        al = dict(al)
+        new_al = Album(
+            id=al["id"],
+            name=al["name"],
+            event_date=datetime.fromisoformat(al["event_date"])
+            if al["event_date"]
+            else None,
+            created_at_utc=datetime.fromisoformat(al["created"]),
+        )
+
+        albums_repo.insert(new_al)
+        inserted += 1
+    print(f"Inserted {inserted} albums.")
+
+    # Do the photos import
+    photos_repo = photos(out_conn)
+    photos_repo.drop_table()
+    photos_repo.create_table()
+
+    old_photos = in_conn.execute("SELECT * FROM photos_photo").fetchall()
+    inserted = 0
+    skipped = 0
+    for p in old_photos:
+        p = dict(p)
+        if p["album_id"] and p["uploader_id"]:
+            new_p = Photo(
+                id=p["id"],
+                starred=p["starred"],
+                uploader_id=p["uploader_id"],
+                photo_path=p["photo"],
+                album_id=p["album_id"],
+                created_at_utc=datetime.fromisoformat(p["uploaded"]),
+            )
+
+            photos_repo.insert(new_p)
+            inserted += 1
+        else:
+            skipped += 1
+    print(
+        f"Inserted {inserted} photos (skipped {skipped} for missing album or uploader id)."
+    )

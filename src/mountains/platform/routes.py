@@ -2,6 +2,7 @@ import logging
 
 from flask import (
     Blueprint,
+    abort,
     current_app,
     g,
     redirect,
@@ -11,6 +12,8 @@ from flask import (
 )
 
 from mountains.db import connection
+from mountains.photos import albums as albums_repo
+from mountains.photos import photos as photos_repo
 from mountains.tokens import tokens
 from mountains.users import users
 
@@ -39,6 +42,24 @@ def routes(blueprint: Blueprint):
     @blueprint.route("/home")
     def home():
         return render_template("platform/home.html.j2")
+
+    @blueprint.route("/photos")
+    def photos():
+        with connection(current_app.config["DB_NAME"]) as conn:
+            albums = sorted(
+                albums_repo(conn).list(), key=lambda a: a.created_at_utc, reverse=True
+            )
+        return render_template("platform/photos.html.j2", albums=albums)
+
+    @blueprint.route("/photos/<int:id>")
+    def album(id: int):
+        with connection(current_app.config["DB_NAME"]) as conn:
+            album = albums_repo(conn).get(id=id)
+            if album is None:
+                abort(404)
+
+            photos = photos_repo(conn).list_where(album_id=album.id)
+        return render_template("platform/album.html.j2", album=album, photos=photos)
 
     member_routes(blueprint)
 
