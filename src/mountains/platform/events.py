@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 def event_routes(blueprint: Blueprint):
-    @blueprint.route("/events", methods=["GET", "POST"])
+    @blueprint.route("/events")
     def events(id: int | None = None):
         search = request.args.get("search")
         if start_dt_str := request.args.get("start_dt"):
@@ -147,81 +147,6 @@ def event_routes(blueprint: Blueprint):
             events=events,
         )
 
-    @blueprint.route("/events/<int:event_id>/attend/")
-    def attend_event(event_id: int):
-        with connection(current_app.config["DB_NAME"]) as conn:
-            event = events_repo(conn).get(id=event_id)
-            if event is None:
-                abort(404, f"Event {event_id} not found!")
-
-        user: User = g.current_user
-        popups = []
-        # TODO: TRIAL EVENTS!
-
-        if user.discord_id is None:
-            popups.append("Discord")
-        if event.show_participation_ice or len(user.in_case_emergency) == 0:
-            popups.append("Contact Details")
-        if event.show_participation_ice:
-            popups.append("Participation Statement")
-
-        if len(popups) == 0:
-            return redirect(url_for("platform.events") + "#" + event.slug)
-
-        # TODO: Editable popup text
-        return render_template(
-            "platform/event.attend.html.j2", event=event, popups=popups, user=user
-        )
-
-    @blueprint.route(
-        "/events/<int:event_id>/attendees/<int:user_id>",
-        methods=["POST", "PUT", "DELETE"],
-    )
-    def attendee(event_id: int, user_id: int):
-        with connection(current_app.config["DB_NAME"]) as conn:
-            event = events_repo(conn).get(id=event_id)
-            if event is None:
-                abort(404, f"Event {event_id} not found!")
-            user = users_repo(conn).get(id=user_id)
-            if user is None:
-                abort(404, f"User {user_id} not found!")
-
-        if request.method == "POST":
-            method = request.form["method"]
-        else:
-            method = request.method
-
-        # TODO: Permissions for user_id
-        if method == "POST":
-            # Lock here as we need to check the waiting list
-            with connection(current_app.config["DB_NAME"], locked=True) as conn:
-                attendees_repo = attendees(conn)
-                event_attendees = attendees_repo.list_where(event_id=event.id)
-                if user_id in [a.user_id for a in event_attendees]:
-                    logger.warning(
-                        "Attempt to add already existing user %s to event %s, ignoring...",
-                        user_id,
-                        event,
-                    )
-                else:
-                    attendee = Attendee(
-                        user_id=user_id,
-                        event_id=event.id,
-                        is_waiting_list=event.is_full(event_attendees),
-                    )
-
-                    attendees_repo.insert(attendee)
-        elif method == "DELETE":
-            with connection(current_app.config["DB_NAME"]) as conn:
-                attendees_repo = attendees(conn)
-                target_attendee = attendees_repo.get(event_id=event.id, user_id=user_id)
-                if target_attendee is None:
-                    abort(404, "Attendee not found!")
-                else:
-                    attendees_repo.delete_where(event_id=event.id, user_id=user_id)
-
-        return redirect(url_for("platform.events") + f"#{event.slug}")
-
     @blueprint.route("/events/add", methods=["GET", "POST"])
     @blueprint.route("/events/<int:id>/edit", methods=["GET", "POST", "PUT"])
     def edit_event(id: int | None = None):
@@ -262,7 +187,7 @@ def event_routes(blueprint: Blueprint):
                         abort(405)
 
                 # TODO: Audit the event
-                return redirect(url_for("platform.events") + "#" + event.slug)
+                return redirect(_single_event_url(event))
             except MountainException as e:
                 error = str(e)
 
@@ -281,6 +206,72 @@ def event_routes(blueprint: Blueprint):
                 form=event_form,
                 event_types=EventType,
             )
+
+    @blueprint.route("/events/<int:event_id>/attend/", methods=["POST"])
+    def attend_event(event_id: int):
+        with connection(current_app.config["DB_NAME"]) as conn:
+            event = events_repo(conn).get(id=event_id)
+            if event is None:
+                abort(404, f"Event {event_id} not found!")
+
+        user: User = g.current_user
+        popups = []
+        # TODO: TRIAL EVENTS!
+
+        if user.discord_id is None:
+            popups.append("Discord")
+        if event.show_participation_ice or len(user.in_case_emergency) == 0:
+            popups.append("Contact Details")
+        if event.show_participation_ice:
+            popups.append("Participation Statement")
+
+        if len(popups) == 0:
+            _add_user_to_event(event, user.id, db_name=current_app.config["DB_NAME"])
+            return redirect(_single_event_url(event))
+
+        # TODO: Editable popup text
+        return render_template(
+            "platform/event.attend.html.j2", event=event, popups=popups, user=user
+        )
+
+    @blueprint.route(
+        "/events/<int:event_id>/attendees/<int:user_id>",
+        methods=["POST", "PUT", "DELETE"],
+    )
+    def attendee(event_id: int, user_id: int):
+        if not g.current_user.is_authorised(user_id):
+            abort(403)
+
+        with connection(current_app.config["DB_NAME"]) as conn:
+            event = events_repo(conn).get(id=event_id)
+            if event is None:
+                abort(404, f"Event {event_id} not found!")
+            user = users_repo(conn).get(id=user_id)
+            if user is None:
+                abort(404, f"User {user_id} not found!")
+
+        if request.method == "POST":
+            method = request.form["method"]
+        else:
+            method = request.method
+
+        if method == "POST":
+            _add_user_to_event(event, user_id, db_name=current_app.config["DB_NAME"])
+        elif method == "DELETE":
+            with connection(current_app.config["DB_NAME"]) as conn:
+                attendees_repo = attendees(conn)
+                target_attendee = attendees_repo.get(event_id=event.id, user_id=user_id)
+                if target_attendee is None:
+                    abort(404, "Attendee not found!")
+                else:
+                    attendees_repo.delete_where(event_id=event.id, user_id=user_id)
+                # TODO: Audit!
+
+        return redirect(_single_event_url(event))
+
+
+def _single_event_url(event: Event) -> str:
+    return url_for("platform.events") + "#" + event.slug
 
 
 def _events_attendees(
@@ -306,3 +297,26 @@ def _events_attendees(
         event_attendees[event.id] = evt_attendees
 
     return event_attendees, event_members
+
+
+def _add_user_to_event(event: Event, user_id: int, *, db_name: str):
+    # Lock here as we need to check the waiting list
+    with connection(db_name, locked=True) as conn:
+        attendees_repo = attendees(conn)
+        event_attendees = attendees_repo.list_where(event_id=event.id)
+        if user_id in [a.user_id for a in event_attendees]:
+            logger.warning(
+                "Attempt to add already existing user %s to event %s, ignoring...",
+                user_id,
+                event,
+            )
+        else:
+            attendee = Attendee(
+                user_id=user_id,
+                event_id=event.id,
+                is_waiting_list=event.is_full(event_attendees),
+            )
+
+            attendees_repo.insert(attendee)
+
+        # TODO: AUDIT!

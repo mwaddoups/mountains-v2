@@ -88,8 +88,11 @@
         <input type="submit" class="btn-cancel" value="Leave" />
       </form>
     {% else %}
-      <a class="button"
-         href="{{ url_for('platform.attend_event', event_id=event.id) }}">Attend</a>
+      <form method="post"
+            action="{{ url_for('platform.attend_event', event_id=event.id) }}">
+        <input type="hidden" name="method" value="POST" />
+        <input type="submit" value="Attend" />
+      </form>
     {% endif %}
   {% endif %}
 </article>
