@@ -17,7 +17,7 @@ from flask import (
 
 from mountains.db import connection
 from mountains.errors import MountainException
-from mountains.utils import now_utc
+from mountains.utils import now_utc, req_method
 
 from ..events import Attendee, Event, EventType, attendees
 from ..events import events as events_repo
@@ -30,67 +30,45 @@ logger = logging.getLogger(__name__)
 def event_routes(blueprint: Blueprint):
     @blueprint.route("/events", methods=["GET", "POST"])
     def events(id: int | None = None):
-        if request.method == "POST":
-            # TODO: Permissions
-            form_data = request.form
-
-            with connection(current_app.config["DB_NAME"], locked=True) as conn:
-                events_db = events_repo(conn)
-
-                event = Event.from_new_event(
-                    id=events_db.next_id(),
-                    title=form_data["title"],
-                    description=form_data["description"],
-                    event_dt_str=form_data["event_dt"],
-                    event_end_dt_str=form_data["event_end_dt"],
-                    event_type_str=form_data["event_type"],
-                    max_attendees_str=form_data["max_attendees"],
-                    is_members_only=bool(form_data["is_members_only"]),
-                )
-                events_db.insert(event)
-
-            # TODO: Audit the event
-            return redirect(url_for("events", id=event.id))
+        search = request.args.get("search")
+        if start_dt_str := request.args.get("start_dt"):
+            start_dt = datetime.date.fromisoformat(start_dt_str)
+        elif "start_dt" in request.args:
+            # Intentionally empty
+            start_dt = None
         else:
-            search = request.args.get("search")
-            if start_dt_str := request.args.get("start_dt"):
-                start_dt = datetime.date.fromisoformat(start_dt_str)
-            elif "start_dt" in request.args:
-                # Intentionally empty
-                start_dt = None
-            else:
-                start_dt = now_utc().date()
+            start_dt = now_utc().date()
 
-            if "event_type" in request.args:
-                event_types = request.args.getlist("event_type", type=int)
-            else:
-                event_types = [t.value for t in EventType]
+        if "event_type" in request.args:
+            event_types = request.args.getlist("event_type", type=int)
+        else:
+            event_types = [t.value for t in EventType]
 
-            with connection(current_app.config["DB_NAME"]) as conn:
-                events = [
-                    e
-                    for e in events_repo(conn).list()
-                    if e.event_type.value in event_types
-                ]
+        with connection(current_app.config["DB_NAME"]) as conn:
+            events = [
+                e
+                for e in events_repo(conn).list_where(is_deleted=False)
+                if e.event_type.value in event_types
+            ]
 
-                if search:
-                    events = [e for e in events if search.lower() in e.title.lower()]
+            if search:
+                events = [e for e in events if search.lower() in e.title.lower()]
 
-                if start_dt is not None:
-                    events = [e for e in events if e.is_upcoming_on(start_dt)]
+            if start_dt is not None:
+                events = [e for e in events if e.is_upcoming_on(start_dt)]
 
-                # Sort all future events in ascending, then all past in descending
-                today = now_utc().date()
-                events = sorted(
-                    [e for e in events if e.is_upcoming_on(today)],
-                    key=lambda e: e.event_dt,
-                ) + sorted(
-                    [e for e in events if not e.is_upcoming_on(today)],
-                    reverse=True,
-                    key=lambda e: e.event_dt,
-                )
+            # Sort all future events in ascending, then all past in descending
+            today = now_utc().date()
+            events = sorted(
+                [e for e in events if e.is_upcoming_on(today)],
+                key=lambda e: e.event_dt,
+            ) + sorted(
+                [e for e in events if not e.is_upcoming_on(today)],
+                reverse=True,
+                key=lambda e: e.event_dt,
+            )
 
-                event_attendees, event_members = _events_attendees(conn, events)
+            event_attendees, event_members = _events_attendees(conn, events)
 
             return render_template(
                 "platform/events.html.j2",
@@ -103,14 +81,22 @@ def event_routes(blueprint: Blueprint):
                 event_types=event_types,
             )
 
-    @blueprint.route("/events/<id>", methods=["GET", "PUT", "DELETE"])
+    @blueprint.route("/events/<id>", methods=["POST", "DELETE"])
     def event(id: int):
-        return render_template(
-            "platform/events.html.j2",
-            events=events,
-            attendees=event_attendees,
-            members=event_members,
-        )
+        if not g.current_user.is_authorised():
+            abort(403)
+
+        with connection(current_app.config["DB_NAME"]) as conn:
+            event = events_repo(conn).get(id=id)
+            if event is None:
+                abort(404, f"Event {id} not found!")
+
+            if req_method(request) == "DELETE":
+                logger.info("Soft deleting event %s", event)
+                events_repo(conn).update(id=id, is_deleted=True)
+                return redirect(url_for("platform.events"))
+            else:
+                return redirect(url_for("platform.events") + "#" + event.slug)
 
     @blueprint.route("/events/calendar")
     @blueprint.route("/events/calendar/<int:year>/<int:month>")
@@ -180,7 +166,7 @@ def event_routes(blueprint: Blueprint):
             popups.append("Participation Statement")
 
         if len(popups) == 0:
-            return redirect(url_for("attendee", event_id=event_id, user_id=user.id))
+            return redirect(url_for("platform.events") + "#" + event.slug)
 
         # TODO: Editable popup text
         return render_template(
@@ -236,9 +222,11 @@ def event_routes(blueprint: Blueprint):
 
         return redirect(url_for("platform.events") + f"#{event.slug}")
 
-    @blueprint.route("/events/add")
-    @blueprint.route("/events/<int:id>/edit")
+    @blueprint.route("/events/add", methods=["GET", "POST"])
+    @blueprint.route("/events/<int:id>/edit", methods=["GET", "POST", "PUT"])
     def edit_event(id: int | None = None):
+        method = req_method(request)
+
         if id is not None:
             with connection(current_app.config["DB_NAME"]) as conn:
                 event = events_repo(conn).get(id=id)
@@ -246,9 +234,53 @@ def event_routes(blueprint: Blueprint):
                 raise MountainException("Event not found!")
         else:
             event = None
-        return render_template(
-            "platform/event.edit.html.j2", event=event, event_types=EventType
-        )
+
+        if method != "GET":
+            if not g.current_user.is_authorised():
+                abort(403)
+
+            error: str | None = None
+            try:
+                with connection(current_app.config["DB_NAME"], locked=True) as conn:
+                    events_db = events_repo(conn)
+                    if method == "POST" and event is None:
+                        event = Event.from_form(
+                            id=events_db.next_id(), form=request.form
+                        )
+                        events_db.insert(event)
+                    elif method == "PUT" and event is not None:
+                        assert event is not None
+                        event = Event.from_form(
+                            id=event.id,
+                            form=request.form,
+                            created_on_utc=event.created_on_utc,
+                            is_deleted=event.is_deleted,
+                        )
+                        events_db.delete_where(id=event.id)
+                        events_db.insert(event)
+                    else:
+                        abort(405)
+
+                # TODO: Audit the event
+                return redirect(url_for("platform.events") + "#" + event.slug)
+            except MountainException as e:
+                error = str(e)
+
+            return render_template(
+                "platform/event.edit.html.j2",
+                editing=event,
+                form=request.form,
+                event_types=EventType,
+                error=error,
+            )
+        else:
+            event_form = event.to_form() if event else None
+            return render_template(
+                "platform/event.edit.html.j2",
+                editing=event,
+                form=event_form,
+                event_types=EventType,
+            )
 
 
 def _events_attendees(

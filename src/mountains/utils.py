@@ -1,6 +1,12 @@
+from __future__ import annotations
+
 import datetime
 import re
 import unicodedata
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from werkzeug import Request
 
 
 def now_utc() -> datetime.datetime:
@@ -22,3 +28,15 @@ def slugify(value: str) -> str:
     )
     value = re.sub(r"[^\w\s-]", "", value).strip().lower()
     return re.sub(r"[-\s]+", "-", value)
+
+
+def req_method(request: Request) -> str:
+    if (
+        "method" in request.form
+        and request.method == "POST"
+        and not request.headers.get("HX-Request")
+    ):
+        # Use the hidden METHOD form field to set the request
+        return request.form["method"]
+    else:
+        return request.method

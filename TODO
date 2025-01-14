@@ -1,14 +1,17 @@
 Big plan: STOP STYLING! Get all the functionality in and style AT THE END
 
 Events
+DONE
+
+- Event filter
+- Past / future events
 
 - Attending popups
 - Editing events / deleting events
 - Attendee list / editing
 - Attendee adder
-- Event filter
-- Past / future events
 - HTMX juicing
+- Drafts
 
 Users
 

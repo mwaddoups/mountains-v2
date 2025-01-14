@@ -1,36 +1,50 @@
 {% extends "platform/base.html.j2" %}
 {% block platform %}
-  <a href="{{ url_for('platform.events') }}">< return to upcoming events</a>
-  {% if event %}
-    <h1>Editing {{ event.title }}</h1>
+  <a href="{{ url_for('platform.events') }}">< return to Events</a>
+  {% if editing %}
+    <h1>Editing {{ editing.title }}</h1>
   {% else %}
     <h1>New Event</h1>
   {% endif %}
-  <form method="post" action="{{ url_for('platform.events') }}">
+  {% if error %}<p role="alert">{{ error }}</p>{% endif %}
+  <form method="post">
+    {% if editing %}
+      <input type="hidden" name="method" value="PUT" />
+    {% else %}
+      <input type="hidden" name="method" value="POST" />
+    {% endif %}
     <label>
       Event Title
-      <input type="text" name="title" value="{{ event.title if event }}" required />
+      <input type="text" name="title" value="{{ form.title }}" required />
     </label>
     <label>
       Start Date
       <small>(24h time)</small>
       <input type="datetime-local"
              name="event_dt"
-             value="{{ event.event_dt if event }}"
+             value="{{ form.event_dt }}"
              required />
     </label>
     <label>
       End Date
-      <small>(For calendar, usually blank unless weekend)</small>
+      <small>(Optional, usually blank unless multi-day trip)</small>
+      {# Tiny bit of JS to allow revealing end date only if needed #}
+      <input type="button"
+             id="event_end_dt_hider"
+             value="Add end date"
+             onclick="document.getElementById('event_end_dt').style.removeProperty('display') && this.remove()" />
       <input type="datetime-local"
+             style="display: none"
+             id="event_end_dt"
              name="event_end_dt"
-             value="{{ event.event_end_dt if event and event.event_end_dt }}" />
+             value="{{ form.event_end_dt }}" />
+      <script>document.getElementById('event_end_dt').value && document.getElementById('event_end_dt_hider').click()</script>
     </label>
     <label>
       Event Type
       <select name="event_type" required>
         {% for event_type in event_types %}
-          {% if event and event.event_type == event_type %}
+          {% if form and form.event_type == event_type %}
             <option value="{{ event_type.value }}" selected>{{ event_type.name | replace('_', ' ') | lower | title }}</option>
           {% else %}
             <option value="{{ event_type.value }}">{{ event_type.name | replace('_', ' ') | lower | title }}</option>
@@ -41,10 +55,10 @@
     <label>
       Members only?
       <small>(Usually no, except weekends)</small>
-      {% if event and event.is_members_only %}
-        <input type="checkbox" name="members_only" checked />
+      {% if form.is_members_only %}
+        <input type="checkbox" name="is_members_only" checked />
       {% else %}
-        <input type="checkbox" name="members_only" />
+        <input type="checkbox" name="is_members_only" />
       {% endif %}
     </label>
     <label>
@@ -52,14 +66,15 @@
       <small>(24h time - leave blank for always open)</small>
       <input type="datetime-local"
              name="signup_open_dt"
-             value="{{ event.signup_open_dt if event and event.signup_open_dt }}" />
+             value="{{ form.signup_open_dt }}" />
     </label>
     <label>
       Max Attendees
       <small>(0 = no max)</small>
       <input type="number"
              name="max_attendees"
-             value="{{ event.max_attendees if event }}" />
+             min="0"
+             value="{{ form.max_attendees }}" />
     </label>
     <label>
       Pre-attend - check user is on discord?
@@ -79,7 +94,7 @@
     <label>
       Pre-attend - show participation statement and check ICE?
       <small>(Usually yes for outdoor events, no for socials / indoor climbing)</small>
-      {% if event and event.show_participation_ice %}
+      {% if form.show_participation_ice %}
         <input type="checkbox" name="show_participation_ice" checked />
       {% else %}
         <input type="checkbox" name="show_participation_ice" />
@@ -88,12 +103,12 @@
     <label>
       Event Description
       <small>(Uses <a href="https://www.markdownguide.org/basic-syntax/">markdown</a>)</small>
-      <textarea name="description" required>{{ event.description if event }}</textarea>
+      <textarea name="description" required>{{ form.description }}</textarea>
     </label>
     <label>
       Lock signup forever?
       <small>Usually no, unless it's a draft</small>
-      {% if event and event.is_locked %}
+      {% if form.is_locked %}
         <input type="checkbox" name="is_locked" checked />
       {% else %}
         <input type="checkbox" name="is_locked" />
@@ -102,10 +117,7 @@
     <label>
       Price ID
       <small>(Needed for payment, get from treasurer)</small>
-      <input type="text"
-             name="title"
-             value="{{ event.price_id if event and event.price_id else '' }}"
-             required />
+      <input type="text" name="price_id" value="{{ form.price_id }}" />
     </label>
     <input type="submit" value="Submit" />
   </form>

@@ -28,7 +28,10 @@
           <a class="button"
              href="{{ url_for('platform.edit_event', id=event.id) }}">Edit event</a>
           <a class="button" href="#">Copy event</a>
-          <a class="button" href="#">Delete event</a>
+          <form method="post" action="{{ url_for('platform.event', id=event.id) }}">
+            <input type="hidden" name="method" value="DELETE" />
+            <input type="submit" value="Delete event" />
+          </form>
         </div>
       </details>
     {% endif %}

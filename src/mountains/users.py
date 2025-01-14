@@ -59,6 +59,9 @@ class User:
         h = (ord(self.first_name[0].lower()) - 96) * (360 // 26)
         return f"hsl({h}, 50%, 50%)"
 
+    def is_authorised(self, user_id: int | None = None) -> bool:
+        return self.is_site_admin or self.id == user_id
+
     @classmethod
     def from_registration(
         cls,

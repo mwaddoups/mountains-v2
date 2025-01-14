@@ -3,11 +3,18 @@ from __future__ import annotations
 import datetime
 import enum
 import sqlite3
+from typing import TYPE_CHECKING
 
 from attrs import Factory, define
 
 from mountains.db import Repository
+from mountains.errors import MountainException
 from mountains.utils import now_utc, readable_id
+
+if TYPE_CHECKING:
+    from typing import Self
+
+    from werkzeug.datastructures import ImmutableMultiDict
 
 
 class EventType(enum.Enum):
@@ -38,13 +45,13 @@ class Event:
     created_on_utc: datetime.datetime
     updated_on_utc: datetime.datetime
     max_attendees: int | None
-    show_participation_ice: bool = False
-    signup_open_dt: datetime.datetime | None = None
-    is_members_only: bool = False
-    is_draft: bool = False
-    is_deleted: bool = False
-    is_locked: bool = False
-    price_id: str | None = None
+    show_participation_ice: bool
+    signup_open_dt: datetime.datetime | None
+    is_members_only: bool
+    is_draft: bool
+    is_deleted: bool
+    is_locked: bool
+    price_id: str | None
 
     def is_full(self, attendees: list[Attendee]) -> bool:
         if self.max_attendees is None or self.max_attendees == 0:
@@ -64,45 +71,84 @@ class Event:
         return self.is_upcoming_on(now_utc().date())
 
     @classmethod
-    def from_new_event(
+    def from_form(
         cls,
         *,
         id: int,
-        title: str,
-        description: str,
-        event_dt_str: str,
-        event_end_dt_str: str,
-        event_type_str: str,
-        max_attendees_str: str,
-        is_members_only: bool,
-    ):
+        form: ImmutableMultiDict[str, str],
+        created_on_utc: datetime.datetime | None = None,
+        updated_on_utc: datetime.datetime | None = None,
+        is_deleted: bool = False,
+    ) -> Self:
+        if len(title := form["title"]) == 0:
+            raise MountainException("Title must not be blank!")
+
         # Convert from the form data
-        event_dt = datetime.datetime.fromisoformat(event_dt_str)
-        if event_end_dt_str:
-            event_end_dt = datetime.datetime.fromisoformat(event_end_dt_str)
-        else:
-            event_end_dt = None
-        event_type = EventType(value=int(event_type_str))
-        max_attendees = int(max_attendees_str)
+        event_dt = datetime.datetime.fromisoformat(form["event_dt"])
+        event_end_dt = form.get(
+            "event_end_dt", type=datetime.datetime.fromisoformat, default=None
+        )
+        if event_end_dt is not None and event_end_dt < event_dt:
+            raise MountainException(
+                "Provided end date must be later than the start date!"
+            )
+        event_type = EventType(value=form.get("event_type", type=int))
+        signup_open_dt = form.get(
+            "signup_open_dt", type=datetime.datetime.fromisoformat, default=None
+        )
 
         slug = readable_id([event_dt.strftime("%Y-%m-%d"), title, str(id)])
 
         # Timestamp as now
         now = now_utc()
+        if created_on_utc is None:
+            created_on_utc = now
+        if updated_on_utc is None:
+            updated_on_utc = now
 
         return cls(
             id=id,
             slug=slug,
             title=title,
-            description=description,
+            description=form["description"],
             event_dt=event_dt,
             event_end_dt=event_end_dt,
             event_type=event_type,
-            max_attendees=max_attendees,
-            is_members_only=is_members_only,
+            max_attendees=form.get("max_attendees", type=int),
+            show_participation_ice="show_participation_ice" in form,
+            is_members_only="is_members_only" in form,
+            signup_open_dt=signup_open_dt,
+            is_locked="is_locked" in form,
+            price_id=form.get("price_id"),
+            is_draft="is_draft" in form,
+            is_deleted=False,
             created_on_utc=now,
             updated_on_utc=now,
         )
+
+    def to_form(self) -> dict[str, str]:
+        as_form = {
+            "title": self.title,
+            "description": self.description,
+            "event_dt": self.event_dt.isoformat(),
+            "event_end_dt": self.event_end_dt.isoformat() if self.event_end_dt else "",
+            "event_type": str(self.event_type.value),
+            "max_attendees": str(self.max_attendees),
+            "signup_open_dt": self.signup_open_dt.isoformat()
+            if self.signup_open_dt
+            else "",
+            "price_id": self.price_id if self.price_id else "",
+        }
+        # Booleans are only there if true
+        if self.is_members_only:
+            as_form["is_members_only"] = "1"
+        if self.show_participation_ice:
+            as_form["show_participation_ice"] = "1"
+        if self.is_locked:
+            as_form["is_locked"] = "1"
+        if self.is_draft:
+            as_form["is_draft"] = "1"
+        return as_form
 
 
 @define(kw_only=True)
