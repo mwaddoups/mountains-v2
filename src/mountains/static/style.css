@@ -159,6 +159,7 @@
   input[type="reset"],
   input[type="button"] {
     /* Reset */
+    display: inline-block;
     text-decoration: none;
     box-shadow: none;
     line-height: normal;
@@ -558,6 +559,11 @@
     padding: 1em;
     margin: 2em 0 2em 0;
     filter: none;
+
+    &.event-past {
+      opacity: 50%;
+    }
+
     header {
       padding-bottom: 0.25em;
       h1 {

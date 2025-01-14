@@ -1,5 +1,6 @@
 {% from "platform/macros/theme.html.j2" import badge %}
-<article id="{{ event.slug }}" class="event card">
+<article id="{{ event.slug }}"
+         class="event card{{ ' event-past' if not event.is_upcoming() }}">
   <header class="flex">
     <div class="event-date">
       <span>{{ event.event_dt.strftime("%A") }}</span>
@@ -76,14 +77,16 @@
       </ul>
     </details>
   {% endif %}
-  <form method="post"
-        action="{{ url_for('platform.attend_event', event_id=event.id, user_id=g.current_user.id) }}">
-    {% if g.current_user.id in (evt_attendees | map(attribute='user_id') | list) %}
-      <input type="hidden" name="method" value="DELETE" />
-      <input type="submit" class="btn-cancel" value="Leave" />
-    {% else %}
-      <input type="hidden" name="method" value="POST" />
-      <input type="submit" value="Attend" />
-    {% endif %}
-  </form>
+  {% if event.is_upcoming() %}
+    <form method="post"
+          action="{{ url_for('platform.attend_event', event_id=event.id, user_id=g.current_user.id) }}">
+      {% if g.current_user.id in (evt_attendees | map(attribute='user_id') | list) %}
+        <input type="hidden" name="method" value="DELETE" />
+        <input type="submit" class="btn-cancel" value="Leave" />
+      {% else %}
+        <input type="hidden" name="method" value="POST" />
+        <input type="submit" value="Attend" />
+      {% endif %}
+    </form>
+  {% endif %}
 </article>

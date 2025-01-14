@@ -15,6 +15,7 @@
       <summary>Event Filters</summary>
       <label>
         Start Date
+        <small>(clear to show all events)</small>
         <input type="date"
                name="start_dt"
                value="{{ start_dt.isoformat() if start_dt else '' }}" />
@@ -25,10 +26,20 @@
           {% for event_type in event_type_set %}
             <label class="event-filter color-{{ color_class(event_type.name) }}">
               {{ event_type.name | replace('_', ' ') | lower | title }}
-              <input type="checkbox" name="event_type" value="{{ event_type.value }}" {{ 'checked' if event_type.value in event_types }} />
+              {% if event_type.value in event_types %}
+                <input type="checkbox"
+                       name="event_type"
+                       value="{{ event_type.value }}"
+                       checked />
+              {% else %}
+                <input type="checkbox" name="event_type" value="{{ event_type.value }}" />
+              {% endif %}
             </label>
           {% endfor %}
         </fieldset>
+      </label>
+      <label>
+        <a class="button" href="{{ url_for('platform.events') }}">Clear All Filters</a>
       </label>
     </details>
     <input type="search"
@@ -37,7 +48,9 @@
            value="{{ search if search else '' }}" />
   </form>
   <section>
+    {# These are in ascending order for future, followed by descending for past #}
     {% for event in events %}
+      {% if not event.is_upcoming() and loop.changed(event.is_upcoming()) %}<h1>Past Events</h1>{% endif %}
       {% include "platform/_event.html.j2" %}
     {% endfor %}
   </section>

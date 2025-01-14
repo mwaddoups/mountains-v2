@@ -29,6 +29,7 @@ def event_routes(blueprint: Blueprint):
     @blueprint.route("/events", methods=["GET", "POST"])
     def events(id: int | None = None):
         if request.method == "POST":
+            # TODO: Permissions
             form_data = request.form
 
             with connection(current_app.config["DB_NAME"], locked=True) as conn:
@@ -59,7 +60,7 @@ def event_routes(blueprint: Blueprint):
             event_types = request.args.getlist("event_type", type=int)
             # Defaults for a starting page
             if len(request.args) == 0:
-                start_dt = datetime.date.today()
+                start_dt = now_utc().date()
                 event_types = [t.value for t in EventType]
 
             with connection(current_app.config["DB_NAME"]) as conn:
@@ -73,17 +74,18 @@ def event_routes(blueprint: Blueprint):
                     events = [e for e in events if search.lower() in e.title.lower()]
 
                 if start_dt is not None:
-                    events = [
-                        e
-                        for e in events
-                        if e.event_dt.date() >= start_dt
-                        or (
-                            e.event_end_dt is not None
-                            and e.event_end_dt.date() >= start_dt
-                        )
-                    ]
+                    events = [e for e in events if e.is_upcoming_on(start_dt)]
 
-                events = sorted(events, key=lambda e: e.event_dt)
+                # Sort all future events in ascending, then all past in descending
+                today = now_utc().date()
+                events = sorted(
+                    [e for e in events if e.is_upcoming_on(today)],
+                    key=lambda e: e.event_dt,
+                ) + sorted(
+                    [e for e in events if not e.is_upcoming_on(today)],
+                    reverse=True,
+                    key=lambda e: e.event_dt,
+                )
 
                 event_attendees, event_members = _events_attendees(conn, events)
 

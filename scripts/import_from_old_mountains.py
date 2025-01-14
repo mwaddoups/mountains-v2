@@ -98,16 +98,32 @@ with (
     skipped = 0
     for ev in old_events:
         ev = dict(ev)
+        ev_slug = readable_id([
+            datetime.fromisoformat(ev["event_date"]).strftime("%Y-%m-%d"),
+            ev["title"],
+            str(ev["id"]),
+        ])
 
-        new_event = Event.from_new_event(
+        new_event = Event(
             id=ev["id"],
+            slug=ev_slug,
             title=ev["title"],
             description=ev["description"],
-            event_dt_str=ev["event_date"],
-            event_end_dt_str=ev["event_end_date"],
-            event_type_str=str(event_map[ev["event_type"]].value),
-            max_attendees_str=ev["max_attendees"],
+            event_dt=datetime.fromisoformat(ev["event_date"]),
+            event_end_dt=datetime.fromisoformat(ev["event_end_date"])
+            if ev["event_end_date"]
+            else None,
+            created_on_utc=datetime.fromisoformat(ev["created_date"]),
+            updated_on_utc=datetime.fromisoformat(ev["created_date"]),
+            event_type=event_map[ev["event_type"]],
+            max_attendees=int(ev["max_attendees"]),
+            signup_open_dt=datetime.fromisoformat(ev["signup_open_date"])
+            if ev["signup_open_date"]
+            else None,
+            show_participation_ice=bool(ev["show_popup"]),
             is_members_only=bool(ev["members_only"]),
+            is_locked=bool(ev["signup_open"]),
+            price_id=ev["price_id"],
         )
 
         events_repo.insert(new_event)

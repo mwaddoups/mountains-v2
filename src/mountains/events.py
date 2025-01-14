@@ -38,9 +38,12 @@ class Event:
     created_on_utc: datetime.datetime
     updated_on_utc: datetime.datetime
     max_attendees: int | None
+    show_participation_ice: bool = False
+    signup_open_dt: datetime.datetime | None = None
     is_members_only: bool = False
     is_draft: bool = False
     is_deleted: bool = False
+    is_locked: bool = False
     price_id: str | None = None
 
     def is_full(self, attendees: list[Attendee]) -> bool:
@@ -51,6 +54,14 @@ class Event:
             return True
 
         return len(attendees) >= self.max_attendees
+
+    def is_upcoming_on(self, dt: datetime.date) -> bool:
+        return self.event_dt.date() >= dt or (
+            self.event_end_dt is not None and self.event_end_dt.date() >= dt
+        )
+
+    def is_upcoming(self) -> bool:
+        return self.is_upcoming_on(now_utc().date())
 
     @classmethod
     def from_new_event(
@@ -117,10 +128,13 @@ def events(conn: sqlite3.Connection) -> Repository[Event]:
             "event_type INTEGER NOT NULL",
             "created_on_utc DATETIME NOT NULL",
             "updated_on_utc DATETIME NOT NULL",
+            "signup_open_dt DATETIME",
             "max_attendees INTEGER",
+            "show_participation_ice BOOLEAN NOT NULL",
             "is_members_only BOOLEAN NOT NULL DEFAULT false",
             "is_draft BOOLEAN NOT NULL DEFAULT false",
             "is_deleted BOOLEAN NOT NULL DEFAULT false",
+            "is_locked BOOLEAN NOT NULL DEFAULT false",
             "price_id TEXT",
         ],
         storage_cls=Event,
