@@ -648,6 +648,10 @@
       align-items: center;
       gap: 0.125em;
     }
+
+    a {
+      align-self: flex-start;
+    }
   }
 
   .event-date {

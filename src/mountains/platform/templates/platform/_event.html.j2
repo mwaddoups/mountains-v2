@@ -78,15 +78,15 @@
     </details>
   {% endif %}
   {% if event.is_upcoming() %}
-    <form method="post"
-          action="{{ url_for('platform.attend_event', event_id=event.id, user_id=g.current_user.id) }}">
-      {% if g.current_user.id in (evt_attendees | map(attribute='user_id') | list) %}
+    {% if g.current_user.id in (evt_attendees | map(attribute='user_id') | list) %}
+      <form method="post"
+            action="{{ url_for('platform.attendee', event_id=event.id, user_id=g.current_user.id) }}">
         <input type="hidden" name="method" value="DELETE" />
         <input type="submit" class="btn-cancel" value="Leave" />
-      {% else %}
-        <input type="hidden" name="method" value="POST" />
-        <input type="submit" value="Attend" />
-      {% endif %}
-    </form>
+      </form>
+    {% else %}
+      <a class="button"
+         href="{{ url_for('platform.attend_event', event_id=event.id) }}">Attend</a>
+    {% endif %}
   {% endif %}
 </article>

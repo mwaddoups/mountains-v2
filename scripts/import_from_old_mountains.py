@@ -68,6 +68,8 @@ with (
             last_name=u["last_name"],
             about=u["about"],
             mobile=u["mobile_number"],
+            in_case_emergency=u["in_case_emergency"],
+            discord_id=u["discord_id"],
             profile_picture_url=u["profile_picture"][8:]
             if u["profile_picture"]
             else None,

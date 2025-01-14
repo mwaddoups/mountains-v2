@@ -8,6 +8,7 @@ from flask import (
     Blueprint,
     abort,
     current_app,
+    g,
     redirect,
     render_template,
     request,
@@ -20,7 +21,8 @@ from mountains.utils import now_utc
 
 from ..events import Attendee, Event, EventType, attendees
 from ..events import events as events_repo
-from ..users import User, users
+from ..users import User
+from ..users import users as users_repo
 
 logger = logging.getLogger(__name__)
 
@@ -53,14 +55,15 @@ def event_routes(blueprint: Blueprint):
             search = request.args.get("search")
             if start_dt_str := request.args.get("start_dt"):
                 start_dt = datetime.date.fromisoformat(start_dt_str)
-            else:
+            elif "start_dt" in request.args:
                 # Intentionally empty
                 start_dt = None
-
-            event_types = request.args.getlist("event_type", type=int)
-            # Defaults for a starting page
-            if len(request.args) == 0:
+            else:
                 start_dt = now_utc().date()
+
+            if "event_type" in request.args:
+                event_types = request.args.getlist("event_type", type=int)
+            else:
                 event_types = [t.value for t in EventType]
 
             with connection(current_app.config["DB_NAME"]) as conn:
@@ -110,17 +113,13 @@ def event_routes(blueprint: Blueprint):
         )
 
     @blueprint.route("/events/calendar")
-    @blueprint.route("/events/calendar/<year>/<month>")
-    def events_calendar(year: str | int | None = None, month: str | int | None = None):
+    @blueprint.route("/events/calendar/<int:year>/<int:month>")
+    def events_calendar(year: int | None = None, month: int | None = None):
         now = now_utc()
         if year is None:
             year = now.year
-        else:
-            year = int(year)
         if month is None:
             month = now.month
-        else:
-            month = int(month)
 
         # Get the first monday before start of month
         start = datetime.datetime(year, month, 1)
@@ -162,14 +161,44 @@ def event_routes(blueprint: Blueprint):
             events=events,
         )
 
-    @blueprint.route(
-        "/events/<event_id>/attendees/<user_id>", methods=["POST", "PUT", "DELETE"]
-    )
-    def attend_event(event_id: int, user_id: int):
+    @blueprint.route("/events/<int:event_id>/attend/")
+    def attend_event(event_id: int):
         with connection(current_app.config["DB_NAME"]) as conn:
             event = events_repo(conn).get(id=event_id)
             if event is None:
                 abort(404, f"Event {event_id} not found!")
+
+        user: User = g.current_user
+        popups = []
+        # TODO: TRIAL EVENTS!
+
+        if user.discord_id is None:
+            popups.append("Discord")
+        if event.show_participation_ice or len(user.in_case_emergency) == 0:
+            popups.append("Contact Details")
+        if event.show_participation_ice:
+            popups.append("Participation Statement")
+
+        if len(popups) == 0:
+            return redirect(url_for("attendee", event_id=event_id, user_id=user.id))
+
+        # TODO: Editable popup text
+        return render_template(
+            "platform/event.attend.html.j2", event=event, popups=popups, user=user
+        )
+
+    @blueprint.route(
+        "/events/<int:event_id>/attendees/<int:user_id>",
+        methods=["POST", "PUT", "DELETE"],
+    )
+    def attendee(event_id: int, user_id: int):
+        with connection(current_app.config["DB_NAME"]) as conn:
+            event = events_repo(conn).get(id=event_id)
+            if event is None:
+                abort(404, f"Event {event_id} not found!")
+            user = users_repo(conn).get(id=user_id)
+            if user is None:
+                abort(404, f"User {user_id} not found!")
 
         if request.method == "POST":
             method = request.form["method"]
@@ -208,8 +237,8 @@ def event_routes(blueprint: Blueprint):
         return redirect(url_for("platform.events") + f"#{event.slug}")
 
     @blueprint.route("/events/add")
-    @blueprint.route("/events/<id>/edit")
-    def edit_event(id: str | None = None):
+    @blueprint.route("/events/<int:id>/edit")
+    def edit_event(id: int | None = None):
         if id is not None:
             with connection(current_app.config["DB_NAME"]) as conn:
                 event = events_repo(conn).get(id=id)
@@ -227,7 +256,7 @@ def _events_attendees(
 ) -> tuple[dict[int, list[Attendee]], dict[int, User]]:
     # TODO inner join!
     attendees_db = attendees(conn)
-    users_db = users(conn)
+    users_db = users_repo(conn)
     event_attendees: dict[int, list[Attendee]] = {}
     event_members: dict[int, User] = {}
     for event in events:

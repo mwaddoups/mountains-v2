@@ -20,12 +20,14 @@ class User:
     first_name: str
     last_name: str
     about: str | None
-    mobile: str | None = None
+    mobile: str = ""
+    in_case_emergency: str = ""
     profile_picture_url: str | None = None
     is_committee: bool = False
     is_coordinator: bool = False
     # is_on_discord: bool = False
     # is_winter_skills: bool
+    discord_id: str | None = None
     membership_expiry_utc: datetime.datetime | None = None
     is_dormant: bool = False
     created_on_utc: datetime.datetime = Factory(now_utc)
@@ -67,7 +69,7 @@ class User:
         first_name: str,
         last_name: str,
         about: str | None,
-        mobile: str | None,
+        mobile: str,
     ) -> Self:
         slug = readable_id([first_name, last_name, str(id)])
 
@@ -79,9 +81,6 @@ class User:
 
         if about is not None and len(about) == 0:
             about = None
-
-        if mobile is not None and len(mobile) == 0:
-            mobile = None
 
         return cls(
             id=id,
@@ -107,10 +106,12 @@ def users(conn: sqlite3.Connection) -> Repository[User]:
             "first_name TEXT NOT NULL",
             "last_name TEXT NOT NULL",
             "about TEXT",
-            "mobile TEXT",
+            "mobile TEXT NOT NULL",
+            "in_case_emergency TEXT NOT NULL",
             "profile_picture_url TEXT",
             "is_committee BOOLEAN NOT NULL",
             "is_coordinator BOOLEAN NOT NULL",
+            "discord_id TEXT",
             "membership_expiry_utc DATETIME",
             "is_dormant BOOLEAN NOT NULL",
             "created_on_utc DATETIME NOT NULL",
