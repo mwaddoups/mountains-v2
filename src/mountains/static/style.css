@@ -240,28 +240,39 @@
 
   /* Custom Checkbox */
   input[type="checkbox"] {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     appearance: none;
-    margin: 0;
 
     &::after {
-      display: block;
-      content: "NO";
-      padding: 0.25rem;
-      border: 1px solid var(--border);
-      border-radius: 1px;
+      display: inline-block;
+      content: "";
+      width: 1.5em;
+      height: 1.5em;
+      /* BI - toggle-off */
+      background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmkgYmktdG9nZ2xlLW9mZiIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBkPSJNMTEgNGE0IDQgMCAwIDEgMCA4SDhhNSA1IDAgMCAwIDItNCA1IDUgMCAwIDAtMi00em0tNiA4YTQgNCAwIDEgMSAwLTggNCA0IDAgMCAxIDAgOE0wIDhhNSA1IDAgMCAwIDUgNWg2YTUgNSAwIDAgMCAwLTEwSDVhNSA1IDAgMCAwLTUgNSIvPgo8L3N2Zz4=");
+      background-size: cover;
       cursor: pointer;
     }
 
     &:checked::after {
-      content: "YES";
-      background-color: var(--accent);
-      color: var(--accent-text);
+      /* BI - toggle-on */
+      background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmkgYmktdG9nZ2xlLW9uIiB2aWV3Qm94PSIwIDAgMTYgMTYiPgogIDxwYXRoIGQ9Ik01IDNhNSA1IDAgMCAwIDAgMTBoNmE1IDUgMCAwIDAgMC0xMHptNiA5YTQgNCAwIDEgMSAwLTggNCA0IDAgMCAxIDAgOCIvPgo8L3N2Zz4=");
     }
   }
 
-  label:has(input, select) {
+  fieldset {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin: 0;
+    border: 0;
+    padding: 0;
+  }
+
+  /* Style naked labels in a grid setting */
+  /* This styles label -> text, (small), input */
+  label:has(> input, > select) {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
@@ -272,8 +283,8 @@
       grid-row: 1 / -1;
     }
 
-    input,
-    select {
+    > input,
+    > select {
       grid-row: 1 / -1;
     }
 
@@ -659,5 +670,23 @@
   .events-calendar {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  }
+
+  label.event-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    cursor: pointer;
+    background-color: var(--cmc-highlight);
+    border-radius: var(--standard-border-radius);
+    padding: 0.25em 0.5em;
+    text-align: center;
+    color: var(--text-badge);
+
+    opacity: 75%;
+    &:has(input:checked) {
+      opacity: 100%;
+    }
   }
 }

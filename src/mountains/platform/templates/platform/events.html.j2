@@ -1,4 +1,4 @@
-{% from "platform/_profile.html.j2" import profile_picture, badge %}
+{% from "platform/macros/theme.html.j2" import color_class %}
 {% extends "platform/base.html.j2" %}
 {% macro attending_user(att_user, user) %}
   <li class="attending-user">
@@ -11,98 +11,34 @@
     <a href="{{ url_for('platform.edit_event') }}" class="button">Create Event</a>
   {% endif %}
   <form>
-    <input type="search" name="search" placeholder="Search for an event..." />
+    <details open>
+      <summary>Event Filters</summary>
+      <label>
+        Start Date
+        <input type="date"
+               name="start_dt"
+               value="{{ start_dt.isoformat() if start_dt else '' }}" />
+      </label>
+      <label>
+        Event Types
+        <fieldset>
+          {% for event_type in event_type_set %}
+            <label class="event-filter color-{{ color_class(event_type.name) }}">
+              {{ event_type.name | replace('_', ' ') | lower | title }}
+              <input type="checkbox" name="event_type" value="{{ event_type.value }}" {{ 'checked' if event_type.value in event_types }} />
+            </label>
+          {% endfor %}
+        </fieldset>
+      </label>
+    </details>
+    <input type="search"
+           name="search"
+           placeholder="Search for an event..."
+           value="{{ search if search else '' }}" />
   </form>
   <section>
     {% for event in events %}
-      <article id="{{ event.slug }}" class="event card">
-        <header class="flex">
-          <div class="event-date">
-            <span>{{ event.event_dt.strftime("%A") }}</span>
-            <span>{{ event.event_dt.strftime("%-d") }}</span>
-            <span>{{ event.event_dt.strftime("%b %Y") }}</span>
-          </div>
-          <div>
-            <h1>
-              <a href="{{ url_for('platform.events') + '#' + event.slug }}">{{ event.title }}</a>
-            </h1>
-            {{ badge(event.event_type.name) }}
-            {% if event.is_members_only %}{{ badge("Members Only") }}{% endif %}
-            {% if event.event_end_dt %}
-              <p>
-                {{ event.event_dt.strftime("%A, %b %d, %Y, %H:%M") }} 🡪 {{ event.event_end_dt.strftime("%A, %b %d, %Y, %H:%M") }}
-              </p>
-            {% else %}
-              <p>&nbsp;{{ event.event_dt.strftime("%A, %b %d, %Y, %H:%M") }}</p>
-            {% endif %}
-          </div>
-          {% if g.current_user.is_site_admin %}
-            <details class="admin">
-              <summary>Admin</summary>
-              <div>
-                <a class="button"
-                   href="{{ url_for('platform.edit_event', id=event.id) }}">Edit event</a>
-                <a class="button" href="#">Copy event</a>
-                <a class="button" href="#">Delete event</a>
-              </div>
-            </details>
-          {% endif %}
-        </header>
-        <details class="event-description">
-          <summary>{{ event.description | markdown | safe }}</summary>
-        </details>
-        {% set evt_attendees = attendees[event.id] | sort(attribute='joined_at_utc') %}
-        {% set total = evt_attendees | length %}
-        {% set total_wait = evt_attendees | map(attribute='is_waiting_list') | sum %}
-        <details class="attendees">
-          <summary>
-            <span>Attendees ({{ total - total_wait }} total, {{ event.max_attendees if event.max_attendees > 0 else 'no' }} max)</span>
-            <div class="attendees-summary">
-              {% for attendee in evt_attendees if not attendee.is_waiting_list %}
-                {{ profile_picture(members[attendee.user_id], '32') }}
-              {% else %}
-                <small>No attendees yet!</small>
-              {% endfor %}
-            </div>
-          </summary>
-          <ul>
-            {% for attendee in evt_attendees if not attendee.is_waiting_list %}
-              {{ attending_user(attendee, members[attendee.user_id]) }}
-            {% else %}
-              <li>No attendees yet!</li>
-            {% endfor %}
-          </ul>
-        </details>
-        {% if total_wait > 0 %}
-          <details class="attendees">
-            <summary>
-              <span>Waiting List ({{ total_wait }} total)</span>
-              <div class="attendees-summary">
-                {% for attendee in evt_attendees if attendee.is_waiting_list %}
-                  {{ profile_picture(members[attendee.user_id], '32') }}
-                {% endfor %}
-              </div>
-            </summary>
-            <ul>
-              {% for attendee in evt_attendees if attendee.is_waiting_list %}
-                {{ attending_user(attendee, members[attendee.user_id]) }}
-              {% else %}
-                <li>No waiting list yet!</li>
-              {% endfor %}
-            </ul>
-          </details>
-        {% endif %}
-        <form method="post"
-              action="{{ url_for('platform.attend_event', event_id=event.id, user_id=g.current_user.id) }}">
-          {% if g.current_user.id in (evt_attendees | map(attribute='user_id') | list) %}
-            <input type="hidden" name="method" value="DELETE" />
-            <input type="submit" class="btn-cancel" value="Leave" />
-          {% else %}
-            <input type="hidden" name="method" value="POST" />
-            <input type="submit" value="Attend" />
-          {% endif %}
-        </form>
-      </article>
+      {% include "platform/_event.html.j2" %}
     {% endfor %}
   </section>
 {% endblock platform %}

@@ -1,0 +1,6 @@
+{% macro color_class(text) %}
+  color-{{ text | lower | replace(' ', '-') | replace('_', '-') }}
+{% endmacro %}
+{% macro badge(text) %}
+  <span class="badge {{ color_class(text) }}">{{ text | replace('_', ' ') | title }}</span>
+{% endmacro %}

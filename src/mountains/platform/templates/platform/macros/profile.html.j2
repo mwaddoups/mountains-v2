@@ -20,8 +20,3 @@
     </svg>
   {% endif %}
 {% endmacro %}
-{% macro badge(text) %}
-  <span class="badge color-{{ text | lower | replace(' ', '-') | replace('_', '-') }}">
-    {{ text | replace('_', ' ') | title }}
-  </span>
-{% endmacro %}
