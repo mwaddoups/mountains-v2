@@ -20,3 +20,4 @@ wheels/
 # Images (for now)
 images/
 src/mountains/static/profile
+src/mountains/static/uploads

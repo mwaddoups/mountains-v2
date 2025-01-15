@@ -1,17 +1,32 @@
+{% from "platform/macros/profile.html.j2" import profile_picture %}
 {% extends "platform/base.html.j2" %}
 {% block platform %}
   <section>
     {% for album in albums %}
       <a href="{{ url_for('platform.album', id=album.id) }}">
-        <article class="card">
+        <article class="album drop-shadow">
           <hgroup>
             <h3>{{ album.name }}</h3>
             {% if album.event_date %}
               <small>{{ album.event_date.strftime("%A, %B %-d %Y") }}</small>
             {% endif %}
+            <div>
+              {% for user in album_users[album.id] %}{{ profile_picture(user, '32') }}{% endfor %}
+            </div>
           </hgroup>
+          <div>
+            {% for photo in album_photos[album.id][:5] %}
+              {# djlint:off #}
+            <img src="{{ url_for('static', filename=photo.photo_path) }}" />
+              {# djlint:on #}
+            {% endfor %}
+          </div>
         </article>
       </a>
     {% endfor %}
   </section>
+  <form>
+    <input type="hidden" name="num_shown" value="{{ num_shown * 5 }}" />
+    <input type="submit" value="Show more ({{ num_shown }} shown)" />
+  </form>
 {% endblock platform %}

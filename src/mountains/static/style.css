@@ -322,6 +322,12 @@
       cursor: pointer;
     }
   }
+
+  img {
+    display: block;
+    max-width: 100%;
+    object-fit: contain;
+  }
 }
 
 @layer navigation {
@@ -429,12 +435,6 @@
     gap: 1rem;
   }
 
-  .flex-col {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
   .float-right {
     float: right;
   }
@@ -442,6 +442,13 @@
   .btn-cancel {
     background-color: var(--bg);
     color: var(--accent);
+  }
+
+  .drop-shadow {
+    border-radius: var(--standard-border-radius);
+    border: 1px solid var(--border);
+    background-color: var(--bg);
+    filter: drop-shadow(1px 1px 2px var(--border));
   }
 
   .card {
@@ -705,6 +712,42 @@
     opacity: 75%;
     &:has(input:checked) {
       opacity: 100%;
+    }
+  }
+
+  .album {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    margin: 0 0 1rem 0;
+    padding: 0.5rem;
+    overflow: hidden;
+
+    > hgroup {
+      > h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        margin: 0.125rem 0;
+      }
+      min-width: max-content;
+    }
+
+    > div {
+      display: flex;
+      align-items: center;
+      gap: 0.125rem;
+      flex: none;
+      overflow: hidden;
+      img {
+        flex: none;
+        width: 5rem;
+        border-radius: var(--standard-border-radius);
+      }
     }
   }
 }
