@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 from flask import (
@@ -50,7 +51,7 @@ def routes(blueprint: Blueprint):
         return render_template("platform/home.html.j2")
 
     @blueprint.route("/photos")
-    def photos():
+    def albums():
         num_shown = request.args.get("num_shown", type=int, default=10)
         with connection(current_app.config["DB_NAME"]) as conn:
             # TODO: Page / show all
@@ -74,12 +75,32 @@ def routes(blueprint: Blueprint):
                 album_users[album.id] = [user_map[u_id] for u_id in contributors]
 
         return render_template(
-            "platform/photos.html.j2",
+            "platform/albums.html.j2",
             albums=albums,
             album_photos=album_photos,
             album_users=album_users,
             num_shown=num_shown,
         )
+
+    @blueprint.route("/photos/add", methods=["GET", "POST"])
+    def add_album():
+        if request.method == "POST":
+            if event_date_str := request.form["event_date"]:
+                event_date = datetime.date.fromisoformat(event_date_str)
+            else:
+                event_date = None
+
+            with connection(current_app.config["DB_NAME"], locked=True) as conn:
+                albums_db = albums_repo(conn)
+                album = Album(
+                    id=albums_db.next_id(),
+                    name=request.form["name"],
+                    event_date=event_date,
+                )
+                albums_db.insert(album)
+            return redirect(url_for("platform.albums"))
+        else:
+            return render_template("platform/album.add.html.j2")
 
     @blueprint.route("/photos/<int:id>")
     def album(id: int):

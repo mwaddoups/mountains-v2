@@ -12,7 +12,7 @@ from mountains.utils import now_utc
 class Album:
     id: int
     name: str
-    event_date: datetime.datetime | None
+    event_date: datetime.date | None
     created_at_utc: datetime.datetime = Factory(now_utc)
 
 

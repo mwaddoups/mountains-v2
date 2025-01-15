@@ -43,6 +43,16 @@ def unstructure_datetime(val: datetime.datetime) -> str:
     return val.isoformat()
 
 
+@register_structure_hook
+def structure_date(val, _) -> datetime.date:
+    return datetime.date.fromisoformat(val)
+
+
+@register_unstructure_hook
+def unstructure_date(val: datetime.date) -> str:
+    return val.isoformat()
+
+
 @define
 class Repository[T]:
     conn: sqlite3.Connection

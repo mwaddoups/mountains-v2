@@ -170,7 +170,7 @@ with (
         new_al = Album(
             id=al["id"],
             name=al["name"],
-            event_date=datetime.fromisoformat(al["event_date"])
+            event_date=datetime.fromisoformat(al["event_date"]).date()
             if al["event_date"]
             else None,
             created_at_utc=datetime.fromisoformat(al["created"]),

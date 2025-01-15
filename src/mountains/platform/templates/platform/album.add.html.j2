@@ -1,0 +1,17 @@
+{% extends "platform/base.html.j2" %}
+{% block platform %}
+  <a href="{{ url_for('platform.albums') }}">< return to Albums</a>
+  <h1>New Album</h1>
+  <form method="post">
+    <label>
+      Album Name
+      <input type="text" name="name" required />
+    </label>
+    <label>
+      Event Date
+      <small>(Optional, but helpful for reference)</small>
+      <input type="date" name="event_date" />
+    </label>
+    <input type="submit" value="Submit" />
+  </form>
+{% endblock platform %}

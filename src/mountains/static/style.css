@@ -748,9 +748,11 @@
       h6 {
         margin: 0.125rem 0;
       }
+
       min-width: max-content;
     }
 
+    /* Sample images */
     > div {
       display: flex;
       align-items: center;
