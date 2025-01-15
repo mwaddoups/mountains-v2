@@ -275,13 +275,13 @@
   /* This styles label -> text, (small), input */
   label:has(> input, > select) {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
     grid-auto-flow: column;
+    align-items: center;
     place-content: center;
+    grid-template-columns: 1fr 1fr;
 
-    &:not(:has(small)) {
-      grid-row: 1 / -1;
+    &:has(small) {
+      grid-template-rows: 1fr 1fr;
     }
 
     > input,

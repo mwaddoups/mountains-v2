@@ -1,0 +1,48 @@
+{% extends "platform/base.html.j2" %}
+{% block platform %}
+  <section>
+    {{ join_page | markdown | safe }}
+  </section>
+  <section>
+    <h2>Become a Member</h2>
+    <form method="post">
+      <label>
+        Date of Birth
+        <input type="date" name="dob" required />
+      </label>
+      <label>
+        Address
+        <small>(Mountaineering Scotland need this)</small>
+        <input type="text" name="address" required />
+      </label>
+      <label>
+        Postcode
+        <input type="text" name="postcode" required />
+      </label>
+      <label>
+        Mobile Number
+        <input type="text" name="mobile_number" required />
+      </label>
+      <label>
+        Membership Type
+        <select required name="membership_type">
+          <option>TODO SELECT</option>
+        </select>
+      </label>
+      <label>
+        If you are already a MS member, what is your membership number?
+        <small>(Not needed for renewals!)</small>
+        <input type="text" name="ms_number" />
+      </label>
+      <label>
+        I agree to pay all membership dues to Clyde Mountaineering Club
+        <input type="checkbox" required />
+      </label>
+      <label>
+        I consent to my personal information being passed to Mountaineering Scotland in order to set up my membership
+        <input type="checkbox" required />
+      </label>
+      <input type="submit" value="Submit">
+    </form>
+  </section>
+{% endblock platform %}

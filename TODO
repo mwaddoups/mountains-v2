@@ -17,19 +17,21 @@ TODO
 - Attendee adder
 - HTMX juicing
 - Event templates
+- Event description previews
 - Drafts
+- Close filter
 
 Users
 
 - Profile picture upload
 - Editing in general
 
-Photos
+Photos and images
 DONE
 
 - Gallery
 - Album page
-- Dialog (JS)
+- Dialog
 - Basic upload
 - Album creation form
 
@@ -38,21 +40,25 @@ TODO
 - Photo processing in upload
 - Starring (server-side)
 - Front page photos
+- HTMX
 
 Discord / Payments work
 
 Dormant users
 
 Pages
+DONE
 
 - Editable text
+- Committee editor
+- Previews
 
 Caching
 
 - Etags / last modified
 
 Breadcrumbs
-Photos and images
+Details/summary styling
 Audit logging
 Permissions
 Events admin tools
@@ -64,6 +70,8 @@ Membership rework
 Admin block for managing admin
 Admin class for generally denoting admin stuff
 Repeating events ?
+Privacy policy / Footer
+Backups
 
 - General look over for TODOs
 - Testing!

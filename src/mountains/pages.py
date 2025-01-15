@@ -15,6 +15,12 @@ class Page:
     name: str
     description: str
     markdown: str
+    version: int
+
+
+def latest_page(name: str, repo: Repository[Page]) -> Page:
+    pages = repo.list_where(name=name)
+    return max(pages, key=lambda p: p.version)
 
 
 def pages_repo(conn: Connection) -> Repository[Page]:
@@ -22,9 +28,11 @@ def pages_repo(conn: Connection) -> Repository[Page]:
         conn=conn,
         table_name="pages",
         schema=[
-            "name TEXT PRIMARY KEY",
+            "name TEXT NOT NULL",
             "description TEXT NOT NULL",
             "markdown TEXT NOT NULL",
+            "version INTEGER NOT NULL",
+            "PRIMARY KEY(name, version)",
         ],
         storage_cls=Page,
     )

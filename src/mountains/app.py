@@ -6,7 +6,7 @@ from flask import Flask, Response, g, render_template, request, session
 from flask.logging import default_handler
 
 from mountains.db import connection
-from mountains.pages import pages_repo
+from mountains.pages import latest_page, pages_repo
 from mountains.tokens import tokens as tokens_repo
 from mountains.users import users as users_repo
 
@@ -36,7 +36,7 @@ def create_app():
 
     @app.template_filter("markdown")
     def convert_markdown(s: str) -> str:
-        return markdown.markdown(s)
+        return markdown.markdown(s, extensions=["tables"])
 
     @app.context_processor
     def now_dt() -> dict:
@@ -45,13 +45,13 @@ def create_app():
     @app.route("/")
     def index():
         with connection(app.config["DB_NAME"]) as conn:
-            page = pages_repo(conn).get(name="front-page")
+            page = latest_page(name="front-page", repo=pages_repo(conn))
         return render_template("page.html.j2", page=page)
 
     @app.route("/faqs")
     def faqs():
         with connection(app.config["DB_NAME"]) as conn:
-            page = pages_repo(conn).get(name="faqs")
+            page = latest_page(name="faqs", repo=pages_repo(conn))
         return render_template("page.html.j2", page=page)
 
     @app.after_request

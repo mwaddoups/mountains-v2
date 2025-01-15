@@ -14,7 +14,8 @@ from flask import (
 )
 
 from mountains.db import connection
-from mountains.pages import Page, pages_repo
+from mountains.errors import MountainException
+from mountains.pages import Page, latest_page, pages_repo
 from mountains.tokens import tokens as tokens_repo
 from mountains.users import users as users_repo
 
@@ -41,6 +42,12 @@ def routes(blueprint: Blueprint):
     @blueprint.route("/home")
     def home():
         return render_template("platform/home.html.j2")
+
+    @blueprint.route("/join")
+    def join():
+        with connection(current_app.config["DB_NAME"]) as conn:
+            page = latest_page(name="join-club", repo=pages_repo(conn))
+        return render_template("platform/joinclub.html.j2", join_page=page.markdown)
 
     @blueprint.route("/committee")
     def committee():
@@ -77,31 +84,34 @@ def routes(blueprint: Blueprint):
             else:
                 with connection(current_app.config["DB_NAME"]) as conn:
                     pages_db = pages_repo(conn)
-                    page = Page(
-                        name=request.form["name"],
-                        description=request.form["description"],
-                        markdown=request.form["markdown"],
-                    )
-                    exists = pages_db.get(name=page.name) is not None
                     if "new" in request.form:
-                        if exists:
+                        page = Page(
+                            name=request.form["name"],
+                            description=request.form["description"],
+                            markdown=request.form["markdown"],
+                            version=1,
+                        )
+                        if pages_db.get(name=page.name) is None:
                             pages_db.insert(page)
                             message = f"Created new page {page.name}"
                         else:
                             message = f"Could not create page - name {page.name} already exists!"
 
                     if "edit" in request.form:
-                        if exists:
-                            pages_db.delete_where(name=page.name)
-                            pages_db.insert(page)
-                            message = f"Page {page.name} was updated successfully!"
-                        else:
-                            message = (
-                                f"Could not find page to edit with name: {page.name}!"
-                            )
+                        latest = latest_page(request.form["name"], repo=pages_db)
+                        page = Page(
+                            name=request.form["name"],
+                            description=request.form["description"],
+                            markdown=request.form["markdown"],
+                            version=latest.version + 1,
+                        )
+                        pages_db.insert(page)
+                        message = f"Page {page.name} was updated successfully!"
 
         with connection(current_app.config["DB_NAME"]) as conn:
-            pages = pages_repo(conn).list()
+            all_pages = pages_repo(conn).list()
+            page_names = set(p.name for p in all_pages)
+            pages = [latest_page(name, pages_repo(conn)) for name in page_names]
         return render_template(
             "platform/pages.edit.html.j2", pages=pages, preview=preview, message=message
         )

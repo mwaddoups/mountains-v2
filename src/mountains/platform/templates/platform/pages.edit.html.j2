@@ -5,13 +5,13 @@
   <p>You can edit any of the text on club pages below.</p>
   {% for page in pages %}
     <details {{ 'open' if preview and preview.name == page.name }}>
-      <summary>{{ page.description }} ({{ page.name }})</summary>
+      <summary>{{ page.description }} ({{ page.name }}, v{{ page.version }})</summary>
       <form method="post" id="{{ page.id }}">
         <input type="hidden" name="name" value="{{ page.name }}" />
         <input type="hidden" name="description" value="{{ page.description }}" />
         <label>
           <small>(Uses <a href="https://www.markdownguide.org/basic-syntax/">markdown</a>)</small>
-          <textarea name="markdown">{{ page.markdown }}</textarea>
+          <textarea name="markdown">{{ preview.markdown if preview and preview.name == page.name else page.markdown }}</textarea>
         </label>
         {% if preview and preview.name == page.name %}
           <label>Preview</label>
@@ -24,8 +24,9 @@
       </form>
     </details>
   {% endfor %}
+  <p>The below is mainly for the use of the website admin only.</p>
   <details>
-    <summary>Create a new page (for website admin)</summary>
+    <summary>Create a new page</summary>
     <p>This can be used to create a new page - but the website admin still needs to link up the content.</p>
     <form method="post">
       <label>
