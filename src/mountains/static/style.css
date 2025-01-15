@@ -328,6 +328,15 @@
     max-width: 100%;
     object-fit: contain;
   }
+
+  /* Basic styling for dialogs */
+  dialog {
+    height: 90vh;
+    border: 0;
+    outline: 0;
+    padding: 1rem;
+    border-radius: var(--standard-border-radius);
+  }
 }
 
 @layer navigation {
@@ -507,6 +516,11 @@
   }
   .color-members-only {
     --cmc-highlight: var(--cmc-color-member);
+  }
+
+  .color-admin {
+    --accent: var(--cmc-color-committee);
+    --accent-hover: rgb(from var(--accent) r g b / 0.6);
   }
 
   .admin {
@@ -747,6 +761,52 @@
         flex: none;
         width: 5rem;
         border-radius: var(--standard-border-radius);
+      }
+    }
+  }
+
+  #gallery {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+    justify-content: stretch;
+    flex-wrap: wrap;
+    margin: 1rem auto;
+
+    > img {
+      flex: 1 1 auto;
+      height: 160px;
+      object-fit: cover;
+
+      &:hover {
+        cursor: pointer;
+        opacity: 70%;
+      }
+    }
+
+    #highlightedPhoto {
+      width: 90vw;
+    }
+
+    #highlightedPhoto > div {
+      height: 100%;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+
+      > #controls {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      img {
+        height: 75vh;
+        max-width: 100%;
+        object-fit: contain;
+        flex: none;
       }
     }
   }

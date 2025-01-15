@@ -89,7 +89,16 @@ def routes(blueprint: Blueprint):
                 abort(404)
 
             photos = photos_repo(conn).list_where(album_id=album.id)
-        return render_template("platform/album.html.j2", album=album, photos=photos)
+            user_map: dict[int, User] = {}
+            for photo in photos:
+                if photo.uploader_id not in user_map:
+                    user = users_repo(conn).get(id=photo.uploader_id)
+                    if user is not None:
+                        user_map[photo.uploader_id] = user
+
+        return render_template(
+            "platform/album.html.j2", album=album, photos=photos, user_map=user_map
+        )
 
     member_routes(blueprint)
 
