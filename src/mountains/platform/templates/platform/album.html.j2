@@ -13,11 +13,12 @@
     </form>
   </details>
   <section id="gallery">
-    {% if highlighted_ix is defined %}
+    {% if highlighted_ix != None %}
       {% set h_photo = photos[highlighted_ix] %}
       <dialog id="highlighted">
         {# Extra <div> to ensure clicks in dialog dont close it #}
         <div>
+          <a href="{{ url_for('platform.album', id=album.id) }}">< exit fullscreen</a>
           {# djlint:off #}
           <img src="{{ url_for('static', filename=h_photo.photo_path) }}" />
           {# djlint:on #}
