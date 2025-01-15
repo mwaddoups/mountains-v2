@@ -1,0 +1,14 @@
+{% extends "platform/base.html.j2" %}
+{% block platform %}
+  <h1>Committee</h1>
+  <section>
+    <h3>Member Statistics</h3>
+    {% for row in member_stats %}
+      {% if row.membership_expiry_utc %}
+        <p>{{ row.num_members }} paid members (ending {{ row.membership_expiry_utc.strftime("%Y-%m-%d") }})</p>
+      {% else %}
+        <p>{{ row.num_members }} unpaid users</p>
+      {% endif %}
+    {% endfor %}
+  </section>
+{% endblock platform %}

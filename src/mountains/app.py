@@ -6,6 +6,7 @@ from flask import Flask, Response, g, render_template, request, session
 from flask.logging import default_handler
 
 from mountains.db import connection
+from mountains.pages import pages_repo
 from mountains.tokens import tokens as tokens_repo
 from mountains.users import users as users_repo
 
@@ -43,8 +44,15 @@ def create_app():
 
     @app.route("/")
     def index():
-        # TODO: Editable pages.
-        return render_template("index.html.j2")
+        with connection(app.config["DB_NAME"]) as conn:
+            page = pages_repo(conn).get(name="front-page")
+        return render_template("page.html.j2", page=page)
+
+    @app.route("/faqs")
+    def faqs():
+        with connection(app.config["DB_NAME"]) as conn:
+            page = pages_repo(conn).get(name="faqs")
+        return render_template("page.html.j2", page=page)
 
     @app.after_request
     def ensure_preload_cached(response: Response):

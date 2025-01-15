@@ -451,6 +451,10 @@
     float: right;
   }
 
+  .btn-secondary {
+    background-color: var(--primary);
+  }
+
   .btn-cancel {
     background-color: var(--bg);
     color: var(--accent);
@@ -524,6 +528,15 @@
   .color-admin {
     --accent: var(--cmc-color-committee);
     --accent-hover: rgb(from var(--accent) r g b / 0.6);
+  }
+
+  .markdown-preview {
+    width: 100%;
+    margin: 0.5rem 0;
+    padding: 0.25rem;
+    max-height: 30rem;
+    border-left: 1px solid var(--primary);
+    overflow: auto;
   }
 
   .admin {

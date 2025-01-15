@@ -1,0 +1,48 @@
+{% extends "platform/base.html.j2" %}
+{% block platform %}
+  <h1>Page Editor</h1>
+  {% if message %}<p role="alert">{{ message }}</p>{% endif %}
+  <p>You can edit any of the text on club pages below.</p>
+  {% for page in pages %}
+    <details {{ 'open' if preview and preview.name == page.name }}>
+      <summary>{{ page.description }} ({{ page.name }})</summary>
+      <form method="post" id="{{ page.id }}">
+        <input type="hidden" name="name" value="{{ page.name }}" />
+        <input type="hidden" name="description" value="{{ page.description }}" />
+        <label>
+          <small>(Uses <a href="https://www.markdownguide.org/basic-syntax/">markdown</a>)</small>
+          <textarea name="markdown">{{ page.markdown }}</textarea>
+        </label>
+        {% if preview and preview.name == page.name %}
+          <label>Preview</label>
+          <input type="submit" class="btn-secondary" value="Update" name="preview">
+          <div class="markdown-preview">{{ preview.markdown | markdown | safe }}</div>
+        {% else %}
+          <input type="submit" class="btn-secondary" value="Preview" name="preview">
+        {% endif %}
+        <input type="submit" value="Update Page" name="edit">
+      </form>
+    </details>
+  {% endfor %}
+  <details>
+    <summary>Create a new page (for website admin)</summary>
+    <p>This can be used to create a new page - but the website admin still needs to link up the content.</p>
+    <form method="post">
+      <label>
+        Page Name
+        <small>(This id will be used for linking later, and needs to be unique)</small>
+        <input type="text" name="name" />
+      </label>
+      <label>
+        Short Description
+        <small>(This can be helpful for context)</small>
+        <input type="text" name="description" />
+      </label>
+      <label>
+        Page Text
+        <textarea name="markdown"></textarea>
+      </label>
+      <input type="submit" value="Create New Page" name="new">
+    </form>
+  </details>
+{% endblock platform %}

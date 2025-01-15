@@ -25,6 +25,14 @@
         {% endcall %}
         {{ nav_link('platform.members', 'Members') }}
         {{ nav_link('platform.albums', 'Photos') }}
+        {% if g.current_user.is_site_admin %}
+          {% call nav_link('platform.committee', 'Committee') %}
+            <ul>
+              {{ nav_link('platform.committee', 'Overview') }}
+              {{ nav_link('platform.committee_pages', 'Pages') }}
+            </ul>
+          {% endcall %}
+        {% endif %}
       </ul>
     </nav>
   </aside>

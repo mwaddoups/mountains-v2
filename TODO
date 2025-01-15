@@ -62,6 +62,7 @@ Payments
 Discord
 Membership rework
 Admin block for managing admin
+Admin class for generally denoting admin stuff
 Repeating events ?
 
 - General look over for TODOs
