@@ -77,8 +77,9 @@ def photo_routes(blueprint: Blueprint):
             return render_template("platform/album.add.html.j2")
 
     @blueprint.route("/photos/<int:id>", methods=["GET", "POST"])
-    def album(id: int):
-        if request.method == "POST":
+    @blueprint.route("/photos/<int:id>/<int:highlighted_id>", methods=["GET", "PUT"])
+    def album(id: int, highlighted_id: int | None = None):
+        if request.method == "POST" and highlighted_id is None:
             for file in request.files.getlist("photos"):
                 if file.filename:
                     photo_path = upload_photo(
@@ -105,6 +106,12 @@ def photo_routes(blueprint: Blueprint):
                 photos_repo(conn).list_where(album_id=album.id),
                 key=lambda p: p.created_at_utc,
             )
+
+            if highlighted_id:
+                highlighted_ix = [p.id for p in photos].index(highlighted_id)
+            else:
+                highlighted_ix = None
+
             user_map: dict[int, User] = {}
             for photo in photos:
                 if photo.uploader_id not in user_map:
@@ -113,5 +120,9 @@ def photo_routes(blueprint: Blueprint):
                         user_map[photo.uploader_id] = user
 
         return render_template(
-            "platform/album.html.j2", album=album, photos=photos, user_map=user_map
+            "platform/album.html.j2",
+            album=album,
+            photos=photos,
+            user_map=user_map,
+            highlighted_ix=highlighted_ix,
         )

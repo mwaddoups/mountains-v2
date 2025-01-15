@@ -13,98 +13,69 @@
     </form>
   </details>
   <section id="gallery">
-    {# Little JS for the gallery functionality #}
-    <script>
-    let setHighlightedImage = (imgId) => {
-      let dialog = document.getElementById('highlightedPhoto');
-
-      let targetImage = document.getElementById(imgId);
-
-      // Point the main image to the image
-      dialog.getElementsByTagName('img')[0].src = targetImage.src;
-      console.log(targetImage.dataset.uploader)
-
-      // Set the uploader name
-      if (targetImage.dataset.uploader) {
-        dialog.getElementsByTagName('small')[0].innerText = `Taken by: ${targetImage.dataset.uploader}`;
-      } else {
-        dialog.getElementsByTagName('small')[0].innerText = ''
-      }
-
-      // Set up the starring button text
-      if (targetImage.dataset.starred === 'true') {
-        document.getElementById('star-photo-btn').innerText = 'Unstar Photo'
-      } else {
-        document.getElementById('star-photo-btn').innerText = 'Star Photo'
-      }
-      
-      // Set up star form with the right ID
-      document.getElementById('star-photo-id').value = targetImage.dataset.id
-
-      // Set up next and previous
-      if (targetImage.previousElementSibling?.id.startsWith('photo')) {
-        document.getElementById('prev').dataset.image = targetImage.previousElementSibling.id
-      } else {
-        document.getElementById('prev').dataset.image = targetImage.src
-      }
-      if (targetImage.nextElementSibling?.id.startsWith('photo')) {
-        document.getElementById('next').dataset.image = targetImage.nextElementSibling.id
-      } else {
-        document.getElementById('next').dataset.image = targetImage.src
-      }
-    }
-    
-    let openDialog = (img) => {
-      let dialog = document.getElementById('highlightedPhoto');
-
-      // Point the main image to the image
-      setHighlightedImage(img.id)
-
-      dialog.showModal();
-      
-      // Close on a click outside
-      dialog.addEventListener('click', (e) => {
-        if (e.target.id === dialog.id) {
-          dialog.close()
-        }
-      })
-    }
-    </script>
-    <dialog id="highlightedPhoto">
-      {# Extra <div> to ensure clicks in dialog dont close it #}
-      <div>
-        {# djlint:off #}
-        <img id="highlightedPhoto" />
-        {# djlint:on #}
-        {# Overwritten by JS #}
-        <small>Taken by:</small>
-        <div id="controls">
-          <button id="prev"
-                  data-image=""
-                  onclick="setHighlightedImage(this.dataset.image)">Previous</button>
-          {% if g.current_user.is_site_admin %}
-            <form class="color-admin">
-              {# Controlled by JS #}
-              <input type="hidden" id="star-photo-id" />
-              <button id="star-photo-btn" type="submit">Star Photo</button>
-            </form>
-          {% endif %}
-          <button id="next"
-                  data-image=""
-                  onclick="setHighlightedImage(this.dataset.image)">Next</button>
+    {% if highlighted_ix is defined %}
+      {% set h_photo = photos[highlighted_ix] %}
+      <dialog id="highlighted">
+        {# Extra <div> to ensure clicks in dialog dont close it #}
+        <div>
+          {# djlint:off #}
+          <img src="{{ url_for('static', filename=h_photo.photo_path) }}" />
+          {# djlint:on #}
+          {% if h_photo.uploaded_id %}<small>Taken by: {{ user_map[h_photo.uploaded_id].full_name }}</small>{% endif %}
+          <div id="controls">
+            {% if highlighted_ix != 0 %}
+              {% set prev_photo_id = photos[highlighted_ix - 1].id %}
+              {# djlint:off #}
+              <a class="button"
+                 href="{{ url_for('platform.album', id=album.id, highlighted_id=prev_photo_id) }}">Previous</a>
+              {# djlint:on #}
+            {% else %}
+              <a class="button" aria-disabled="true">Previous</a>
+            {% endif %}
+            {% if g.current_user.is_site_admin %}
+              <form class="color-admin" method="post">
+                {% if h_photo.starred %}
+                  <input type="hidden" name="starred" value="false">
+                  <button type="submit">Unstar Photo</button>
+                {% else %}
+                  <input type="hidden" name="starred" value="true">
+                  <button type="submit" name="star">Star Photo</button>
+                {% endif %}
+              </form>
+            {% endif %}
+            {% if highlighted_ix - 1 != (photos | length) %}
+              {% set next_photo_id = photos[highlighted_ix + 1].id %}
+              {# djlint:off #}
+              <a class="button"
+                 href="{{ url_for('platform.album', id=album.id, highlighted_id=next_photo_id) }}">Next</a>
+              {# djlint:on #}
+            {% else %}
+              <a class="button" aria-disabled="true">Next</a>
+            {% endif %}
+          </div>
         </div>
-      </div>
-    </dialog>
+      </dialog>
+      {# Tiny bit of JS to open the dialog via JS (as modal) and close when clicking outside #}
+      <script>
+        const dialog = document.getElementById('highlighted');
+        dialog.showModal();
+        document.addEventListener('click', (e) => {
+          if (e.target.id === dialog.id) {
+            dialog.close()
+          }
+        })
+      </script>
+    {% endif %}
     {% for photo in photos %}
       {# djlint:off #}
-      <img id="photo-{{ photo.id }}"
-           height="160"
-           src="{{ url_for('static', filename=photo.photo_path) }}"
-           loading="lazy"
-           data-id="{{ photo.id }}"
-           data-starred="{{ 'true' if photo.starred else 'false' }}"
-           data-uploader="{{ user_map[photo.uploader_id].full_name }}"
-           onclick="openDialog(this)" />
+      <a href="{{ url_for('platform.album', id=album.id, highlighted_id=photo.id) }}">
+        <img id="photo-{{ photo.id }}"
+            height="160"
+            src="{{ url_for('static', filename=photo.photo_path) }}"
+            loading="lazy"
+            data-starred="{{ 'true' if photo.starred else 'false' }}"
+            />
+      </a>
       {# djlint:on #}
     {% endfor %}
   </section>

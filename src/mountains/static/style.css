@@ -336,6 +336,9 @@
     outline: 0;
     padding: 1rem;
     border-radius: var(--standard-border-radius);
+    border: 1px solid var(--border);
+    background-color: var(--bg);
+    filter: drop-shadow(1px 1px 2px var(--border));
   }
 }
 
@@ -786,11 +789,11 @@
       }
     }
 
-    #highlightedPhoto {
+    #highlighted {
       width: 90vw;
     }
 
-    #highlightedPhoto > div {
+    #highlighted > div {
       height: 100%;
       width: 100%;
       display: flex;
