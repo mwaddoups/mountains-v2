@@ -30,12 +30,13 @@ DONE
 - Gallery
 - Album page
 - Dialog (JS)
+- Basic upload
+- Album creation form
 
 TODO
 
-- Uploader
+- Photo processing in upload
 - Starring (server-side)
-- Album creation form
 - Front page photos
 
 Discord / Payments work

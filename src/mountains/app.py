@@ -1,10 +1,13 @@
 import datetime
 import logging
-from pathlib import Path
 
 import markdown
-from flask import Flask, Response, render_template, request
+from flask import Flask, Response, g, render_template, request, session
 from flask.logging import default_handler
+
+from mountains.db import connection
+from mountains.tokens import tokens as tokens_repo
+from mountains.users import users as users_repo
 
 from . import auth, platform
 
@@ -49,5 +52,17 @@ def create_app():
         if request.headers.get("HX-Preloaded") == "true":
             response.headers["Cache-Control"] = "private, max-age=5"
         return response
+
+    @app.before_request
+    def current_user():
+        # Ensure all requests have access to the current user, if logged in
+        if (token_id := session.get("token_id")) is not None:
+            with connection(app.config["DB_NAME"]) as conn:
+                token = tokens_repo(conn).get(id=token_id)
+                if (
+                    token is not None
+                    and (user := users_repo(conn).get(id=token.user_id)) is not None
+                ):
+                    g.current_user = user
 
     return app
