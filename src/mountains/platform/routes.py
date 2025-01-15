@@ -1,5 +1,6 @@
 import datetime
 import logging
+from pathlib import Path
 
 from flask import (
     Blueprint,
@@ -14,7 +15,7 @@ from flask import (
 )
 
 from mountains.db import connection
-from mountains.photos import Album, Photo
+from mountains.photos import Album, Photo, upload_photo
 from mountains.photos import albums as albums_repo
 from mountains.photos import photos as photos_repo
 from mountains.tokens import tokens as tokens_repo
@@ -102,8 +103,26 @@ def routes(blueprint: Blueprint):
         else:
             return render_template("platform/album.add.html.j2")
 
-    @blueprint.route("/photos/<int:id>")
+    @blueprint.route("/photos/<int:id>", methods=["GET", "POST"])
     def album(id: int):
+        if request.method == "POST":
+            for file in request.files.getlist("photos"):
+                if file.filename:
+                    photo_path = upload_photo(
+                        file, Path(current_app.config["UPLOAD_FOLDER"])
+                    )
+
+                    with connection(current_app.config["DB_NAME"], locked=True) as conn:
+                        photos_db = photos_repo(conn)
+                        photo = Photo(
+                            id=photos_db.next_id(),
+                            uploader_id=g.current_user.id,
+                            album_id=id,
+                            starred=False,
+                            photo_path=photo_path,
+                        )
+                        photos_db.insert(photo)
+
         with connection(current_app.config["DB_NAME"]) as conn:
             album = albums_repo(conn).get(id=id)
             if album is None:

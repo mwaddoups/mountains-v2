@@ -1,11 +1,18 @@
+from __future__ import annotations
+
 import datetime
 import sqlite3
+import uuid
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from attrs import Factory, define
 
 from mountains.db import Repository
 from mountains.utils import now_utc
+
+if TYPE_CHECKING:
+    from werkzeug.datastructures import FileStorage
 
 
 @define
@@ -22,8 +29,20 @@ class Photo:
     uploader_id: int
     album_id: int
     starred: bool
+    # Relative to static (e.g. uploads/photos/...)
     photo_path: Path
     created_at_utc: datetime.datetime = Factory(now_utc)
+
+
+def upload_photo(file: FileStorage, upload_dir: Path) -> Path:
+    assert file.filename is not None, (
+        "upload_photo should always have a file.filename attribute"
+    )
+    filename = Path(str(uuid.uuid4())).with_suffix(Path(file.filename).suffix)
+    upload_path = upload_dir / "photos" / filename
+    file.save(upload_path)
+    # This relies on the uploads dir being at static/uploads
+    return Path("uploads") / "photos" / filename
 
 
 def albums(conn: sqlite3.Connection) -> Repository[Album]:

@@ -5,7 +5,7 @@
   </header>
   <details>
     <summary>Upload Photos</summary>
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
       <label>
         <input type="file" name="photos" multiple />
       </label>
@@ -33,9 +33,9 @@
 
       // Set up the starring button text
       if (targetImage.dataset.starred === 'true') {
-        document.getElementById('star-photo-btn').innerText = 'Star Photo'
-      } else {
         document.getElementById('star-photo-btn').innerText = 'Unstar Photo'
+      } else {
+        document.getElementById('star-photo-btn').innerText = 'Star Photo'
       }
       
       // Set up star form with the right ID
