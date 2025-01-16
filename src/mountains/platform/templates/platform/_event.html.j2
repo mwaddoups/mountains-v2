@@ -48,7 +48,7 @@
   {% set total_wait = evt_attendees | map(attribute='is_waiting_list') | sum %}
   <details class="attendees">
     <summary>
-      <span>Attendees ({{ total - total_wait }} total, {{ event.max_attendees if event.max_attendees > 0 else 'no' }} max)</span>
+      <span>Attendees ({{ total - total_wait }} total, {{ event.max_attendees if event.max_attendees and event.max_attendees > 0 else 'no' }} max)</span>
       <div class="attendees-summary">
         {% for attendee in evt_attendees if not attendee.is_waiting_list %}
           {{ profile_picture(members[attendee.user_id], '32') }}
@@ -101,12 +101,17 @@
       <form method="post"
             action="{{ url_for('platform.attend_event', event_id=event.id) }}">
         <input type="hidden" name="method" value="POST" />
-        {% if total_wait > 0 or (total > 0 and total >= event.max_attendees) %}
+        {% if total_wait > 0 or (total > 0 and event.max_attendees and total >= event.max_attendees) %}
           <input type="submit" value="Join Waiting List" />
         {% else %}
-          <input type="submit" value="Attend" />
-        {% endif %}
-      </form>
+          {% if event.is_open() %}
+            <input type="submit" value="Attend" />
+          {% else %}
+            {% set open_str = event.signup_open_dt.strftime('%b %-d, %Y %H:%M') %}
+            <input type="button" disabled value="Signup opens at {{ open_str }}" />
+          {% endif %}
+        </form>
+      {% endif %}
     {% endif %}
   {% endif %}
 </article>

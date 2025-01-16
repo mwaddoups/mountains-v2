@@ -8,6 +8,8 @@ DONE
 - Editing events / deleting events
 - Attendee adder
 - Attendee list / editing
+- Signup open date
+- Close filter
 
 DOING
 
@@ -15,12 +17,12 @@ DOING
 
 TODO
 
-- Signup open date / paid buttons
-- HTMX juicing
+- Paid buttons
+- HTMX juicing - refresh button
 - Event templates
 - Event description previews
 - Drafts
-- Close filter
+- Calendar
 
 Users
 

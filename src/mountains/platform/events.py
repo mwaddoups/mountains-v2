@@ -247,9 +247,15 @@ def event_routes(blueprint: Blueprint):
             else:
                 if not g.current_user.is_authorised(user.id):
                     abort(403)
-                _add_user_to_event(
-                    event, user.id, db_name=current_app.config["DB_NAME"]
-                )
+
+                if event.is_open() or g.current_user.is_site_admin:
+                    _add_user_to_event(
+                        event, user.id, db_name=current_app.config["DB_NAME"]
+                    )
+                else:
+                    logger.error(
+                        "User %s tried to add self to closed event!", g.current_user
+                    )
                 return redirect(_single_event_url(event))
         else:
             with connection(current_app.config["DB_NAME"]) as conn:

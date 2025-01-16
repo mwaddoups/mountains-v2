@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime
 import enum
 import sqlite3
+import zoneinfo
 from typing import TYPE_CHECKING
 
 from attrs import Factory, define
@@ -69,6 +70,15 @@ class Event:
 
     def is_upcoming(self) -> bool:
         return self.is_upcoming_on(now_utc().date())
+
+    def is_open(self) -> bool:
+        if self.signup_open_dt is None:
+            return True
+        else:
+            # This is in GMT time
+            return self.signup_open_dt < datetime.datetime.now(
+                tz=zoneinfo.ZoneInfo("Europe/London")
+            ).replace(tzinfo=None)
 
     @classmethod
     def from_form(
