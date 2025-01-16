@@ -1,5 +1,5 @@
-import copy
 import logging
+from pathlib import Path
 
 from flask import (
     Blueprint,
@@ -11,6 +11,7 @@ from flask import (
     request,
     url_for,
 )
+from werkzeug.security import generate_password_hash
 
 from mountains.db import connection
 from mountains.discord import DiscordAPI
@@ -19,7 +20,7 @@ from mountains.utils import req_method
 
 from ..events import attendees as attendees_repo
 from ..events import events as events_repo
-from ..users import User
+from ..users import User, upload_profile
 from ..users import users as users_repo
 
 logger = logging.getLogger(__name__)
@@ -48,27 +49,12 @@ def member_routes(blueprint: Blueprint):
             "platform/members.html.j2", members=members, search=search, limit=limit
         )
 
-    @blueprint.route("/members/<slug>", methods=["GET", "POST", "PUT"])
+    @blueprint.route("/members/<slug>")
     def member(slug: str):
         with connection(current_app.config["DB_NAME"]) as conn:
             user = users_repo(conn).get(slug=slug)
         if user is None:
             raise MountainException("User not found!")
-
-        if (method := req_method(request)) != "GET":
-            if method == "PUT":
-                # TODO: Remove password, unless it's included
-                new_user = copy.replace(
-                    user,
-                    email=request.form["email"],
-                    first_name=request.form["first_name"],
-                    last_name=request.form["last_name"],
-                    about=request.form["about"],
-                    mobile=request.form["mobile"],
-                )
-                logger.info("Updating user %s,  %r -> %r", user, user, new_user)
-                # TODO: actually do it
-            # TODO: Audit the event
 
         # Get member activity
         with connection(current_app.config["DB_NAME"]) as conn:
@@ -145,13 +131,64 @@ def member_routes(blueprint: Blueprint):
             discord_members=discord_members,
         )
 
-    @blueprint.route("/members/<id>/edit")
-    def edit_member(id: str):
+    @blueprint.route("/members/<int:id>/edit", methods=["GET", "POST", "PUT"])
+    def edit_member(id: int):
         with connection(current_app.config["DB_NAME"]) as conn:
             user = users_repo(conn).get(id=id)
-        if user is None:
-            raise MountainException("User not found!")
-        return render_template("platform/member.edit.html.j2", user=user)
+            if user is None:
+                abort(403)
+
+        message = None
+        if req_method(request) == "PUT":
+            updates = {}
+
+            if "profile_picture" in request.files:
+                pic = request.files["profile_picture"]
+                if pic.filename:
+                    updates["profile_picture_url"] = upload_profile(
+                        file=request.files["profile_picture"],
+                        static_dir=Path(current_app.config["STATIC_FOLDER"]),
+                        user=user,
+                    )
+                else:
+                    message = "No photo found to upload!"
+            elif "password" in request.form:
+                if request.form["password"] == request.form["confirm_password"]:
+                    updates["password_hash"] = generate_password_hash(
+                        request.form["password"]
+                    )
+                else:
+                    message = "Passwords do not match!"
+            else:
+                for field in [
+                    "first_name",
+                    "last_name",
+                    "mobile",
+                    "in_case_emergency",
+                    "about",
+                ]:
+                    if field in request.form:
+                        # TODO: Find a better way to share the user form data if validation fails
+                        setattr(user, field, request.form[field])
+                        if (
+                            field in ["first_name", "last_name"]
+                            and len(request.form[field]) == 0
+                        ):
+                            message = "Email, first name and last name cannot be blank!"
+                        else:
+                            updates[field] = request.form[field]
+
+            if updates:
+                with connection(current_app.config["DB_NAME"]) as conn:
+                    users_repo(conn).update(id=user.id, **updates)
+
+                # TODO: Flash message
+
+                return redirect(url_for(".member", slug=user.slug))
+
+        return render_template(
+            "platform/member.edit.html.j2", user=user, message=message
+        )
 
 
 def _member_sort_key(user: User) -> tuple:

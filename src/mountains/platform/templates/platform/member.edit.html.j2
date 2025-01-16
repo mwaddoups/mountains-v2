@@ -1,42 +1,64 @@
 {% extends "platform/base.html.j2" %}
 {% block platform %}
+  <a href="{{ url_for('platform.member', slug=user.slug) }}">< Return to profile</a>
   <h1>Editing {{ user.full_name }}</h1>
-  <form method="post"
-        action="{{ url_for('platform.member', slug=user.slug) }}">
+  {% if message %}<strong role="alert">{{ message }}</strong>{% endif %}
+  <h2>Profile Picture</h2>
+  {{ profile_picture(user, '128') }}
+  <form method="post" enctype="multipart/form-data">
     <input type="hidden" name="method" value="PUT" />
     <label>
+      Profile Picture
+      <input type="file" name="profile_picture" accept="image/*" required />
+    </label>
+    <input type="submit" value="Upload Profile Picture" />
+  </form>
+  <h2>User Details</h2>
+  <form method="post">
+    <input type="hidden" name="method" value="PUT" />
+    <label>
+      Email
+      <small>(contact admin@clydemc.org to change this)</small>
+      <input type="email" name="email" value="{{ user.email }}" disabled />
+    </label>
+    <label>
       First Name
-      <input type="text" name='first_name' value="{{ user.first_name }}" required />
+      <input type="text" name="first_name" value="{{ user.first_name }}" required />
     </label>
     <label>
       Last Name
-      <input type="text" name='last_name' value="{{ user.last_name }}" required />
-    </label>
-    <label>
-      Profile Picture
-      <input type="file" />
+      <input type="text" name="last_name" value="{{ user.last_name }}" required />
     </label>
     <label>
       Mobile Number
-      <input type="text" name='mobile' value="{{ user.mobile }}" />
+      <small>(Shared with event organisers)</small>
+      <input type="text" name="mobile" value="{{ user.mobile }}" />
     </label>
     <label>
-      Email
-      <input type="email" name='email' value="{{ user.email }}" required />
-    </label>
-    <label>
-      Password
-      <input type="password" name='password' />
-    </label>
-    <label>
-      Confirm Password
-      <input type="password" name='confirm_password' />
+      Emergency Contact
+      <small>(Shared with event organisers)</small>
+      <input type="text"
+             name="in_case_emergency"
+             value="{{ user.in_case_emergency }}" />
     </label>
     <label>
       About You
-      <textarea name='about' placeholder="Write a bit about yourself...">{{user.about}}</textarea>
+      <textarea name="about"
+                placeholder="Write a bit about yourself and your experience...">{{user.about}}</textarea>
     </label>
-    <input type="submit" value="Update user" />
-    <a href="{{ url_for('platform.member', slug=user.slug) }}">Return to profile</a>
+    <input type="submit" value="Update Profile" />
+  </form>
+  <h2>Change Password</h2>
+  <form method="post">
+    <input type="hidden" name="method" value="PUT" />
+    <label>
+      Password
+      <input type="password" name="password" />
+    </label>
+    <label>
+      Confirm Password
+      <input type="password" name="confirm_password" />
+    </label>
+    <input type="submit" value="Change Password" />
   </form>
 {% endblock platform %}

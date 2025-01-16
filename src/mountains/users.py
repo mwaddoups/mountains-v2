@@ -2,13 +2,20 @@ from __future__ import annotations
 
 import datetime
 import sqlite3
-from typing import Self
+from pathlib import Path
+from typing import TYPE_CHECKING
 
 from attrs import Factory, define, field
+from PIL import Image
 
 from mountains.db import Repository
 from mountains.errors import ValidationError
 from mountains.utils import now_utc, readable_id
+
+if TYPE_CHECKING:
+    from typing import Self
+
+    from werkzeug.datastructures import FileStorage
 
 
 @define(kw_only=True)
@@ -25,8 +32,6 @@ class User:
     profile_picture_url: str | None = None
     is_committee: bool = False
     is_coordinator: bool = False
-    # is_on_discord: bool = False
-    # is_winter_skills: bool
     discord_id: str | None = None
     membership_expiry_utc: datetime.datetime | None = None
     is_dormant: bool = False
@@ -39,6 +44,12 @@ class User:
     @property
     def full_name(self) -> str:
         return self.first_name + " " + self.last_name
+
+    @property
+    def profile_picture_thumb(self) -> Path | None:
+        if self.profile_picture_url is None:
+            return None
+        return _thumb_path(Path(self.profile_picture_url))
 
     @property
     def is_member(self) -> bool:
@@ -122,3 +133,40 @@ def users(conn: sqlite3.Connection) -> Repository[User]:
         ],
         storage_cls=User,
     )
+
+
+def upload_profile(
+    file: FileStorage,
+    static_dir: Path,
+    user: User,
+    size: int = 256,
+    th_size: int = 32,
+) -> str:
+    assert file.filename is not None, (
+        "upload_profile should always have a file.filename attribute"
+    )
+    filename = Path(user.slug).with_suffix(Path(file.filename).suffix)
+    upload_path = static_dir / "profile" / filename
+    file.save(upload_path)
+
+    # Now resize the image using PIL
+    with Image.open(upload_path) as im:
+        # Crop to square
+        square_size = min(im.width, im.height)
+        left = im.width // 2 - (square_size // 2)
+        right = left + square_size
+        top = im.height // 2 - (square_size // 2)
+        bottom = square_size
+
+        cropped = im.crop((left, top, right, bottom))
+        resized = cropped.resize((size, size))
+        thumb = cropped.resize((th_size, th_size))
+
+        resized.save(upload_path)
+        thumb.save(_thumb_path(upload_path))
+
+    return str(Path("profile") / filename)
+
+
+def _thumb_path(profile_path: Path) -> Path:
+    return profile_path.with_stem(profile_path.stem + ".th")

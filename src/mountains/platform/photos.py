@@ -92,7 +92,7 @@ def photo_routes(blueprint: Blueprint):
             for file in request.files.getlist("photos"):
                 if file.filename:
                     photo_path = upload_photo(
-                        file, Path(current_app.config["UPLOAD_FOLDER"])
+                        file, Path(current_app.config["STATIC_FOLDER"])
                     )
 
                     with connection(current_app.config["DB_NAME"], locked=True) as conn:
