@@ -41,13 +41,10 @@
 
 @layer default {
   /* Set border-box for whole doc */
-  html {
-    box-sizing: border-box;
-  }
   *,
   *:before,
   *:after {
-    box-sizing: inherit;
+    box-sizing: border-box;
   }
 
   html {
@@ -325,6 +322,7 @@
   }
 
   details {
+    display: block;
     > summary {
       cursor: pointer;
     }
@@ -718,12 +716,6 @@
 
     details[open] .attendees-summary {
       display: none;
-    }
-
-    .attending-user {
-      display: flex;
-      align-items: center;
-      gap: 0.125em;
     }
 
     a {

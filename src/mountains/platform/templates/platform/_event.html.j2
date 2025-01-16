@@ -63,6 +63,12 @@
       {% else %}
         <li>No attendees yet!</li>
       {% endfor %}
+      {% if g.current_user.is_site_admin %}
+        <form class="admin"
+              action="{{ url_for('platform.event_attendee_add', event_id=event.id) }}">
+          <input type="search" name="search" placeholder="Add a new attendee..." />
+        </form>
+      {% endif %}
     </ul>
   </details>
   {% if total_wait > 0 %}
@@ -95,7 +101,7 @@
       <form method="post"
             action="{{ url_for('platform.attend_event', event_id=event.id) }}">
         <input type="hidden" name="method" value="POST" />
-        {% if total_wait > 0 or (total > 0 and total == event.max_attendees) %}
+        {% if total_wait > 0 or (total > 0 and total >= event.max_attendees) %}
           <input type="submit" value="Join Waiting List" />
         {% else %}
           <input type="submit" value="Attend" />

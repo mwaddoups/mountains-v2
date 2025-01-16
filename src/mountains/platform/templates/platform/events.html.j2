@@ -1,9 +1,12 @@
 {% from "platform/macros/theme.html.j2" import color_class %}
 {% extends "platform/base.html.j2" %}
 {% macro attending_user(att_user, user) %}
-  <li class="attending-user">
-    {{ profile_picture(user, '32') }}
-    <span>{{ user.full_name }}</span>
+  <li class="flex flex-gap-small">
+    <a href="{{ url_for('platform.member', slug=user.slug) }}"
+       class="flex flex-gap-small">
+      {{ profile_picture(user, '32') }}
+      <span>{{ user.full_name }}</span>
+    </a>
     {% if att_user.is_trip_paid %}
       <span>
         {# BI - Cash Coin #}
@@ -23,8 +26,9 @@
       <span class="admin flex flex-gap-small">
         <small>({{ user.mobile }})</small>
         <small>ICE: {{ user.in_case_emergency }}</small>
-        <form>
-          <input type="hidden" method="PUT" />
+        <form method="post"
+              action="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
+          <input type="hidden" name="method" value="PUT" />
           <input type="hidden"
                  name="is_waiting_list"
                  value="{{ not att_user.is_waiting_list }}" />
@@ -52,8 +56,9 @@
             {% endif %}
           </button>
         </form>
-        <form>
-          <input type="hidden" method="PUT" />
+        <form method="post"
+              action="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
+          <input type="hidden" name="method" value="PUT" />
           <input type="hidden"
                  name="is_trip_paid"
                  value="{{ not att_user.is_trip_paid }}" />
@@ -71,8 +76,9 @@
             </svg>
           </button>
         </form>
-        <form>
-          <input type="hidden" method="DELETE" />
+        <form method="post"
+              action="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
+          <input type="hidden" name="method" value="DELETE" />
           <button type="submit" data-tooltip="Remove User">
             {# BI - X Square Fill #}
             <svg xmlns="http://www.w3.org/2000/svg"

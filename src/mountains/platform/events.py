@@ -83,14 +83,18 @@ def event_routes(blueprint: Blueprint):
 
     @blueprint.route("/events/<id>", methods=["POST", "DELETE"])
     def event(id: int):
-        if not g.current_user.is_authorised():
-            abort(403)
-
         with connection(current_app.config["DB_NAME"]) as conn:
             event = events_repo(conn).get(id=id)
             if event is None:
                 abort(404, f"Event {id} not found!")
 
+        if request.method == "GET":
+            return redirect(_single_event_url(event))
+
+        if not g.current_user.is_authorised():
+            abort(403)
+
+        with connection(current_app.config["DB_NAME"]) as conn:
             if req_method(request) == "DELETE":
                 logger.info("Soft deleting event %s", event)
                 events_repo(conn).update(id=id, is_deleted=True)
@@ -225,6 +229,44 @@ def event_routes(blueprint: Blueprint):
                 error=error,
             )
 
+    @blueprint.route("/events/<int:event_id>/addattendee", methods=["GET", "POST"])
+    def event_attendee_add(event_id: int):
+        with connection(current_app.config["DB_NAME"]) as conn:
+            event = events_repo(conn).get(id=event_id)
+            if event is None:
+                abort(404, f"Event {event_id} not found!")
+
+        if request.method == "POST":
+            with connection(current_app.config["DB_NAME"]) as conn:
+                user = users_repo(conn).get(id=request.form.get("user_id", type=int))
+
+            if user is None:
+                raise MountainException(
+                    "Could not find the user that you wanted to add!"
+                )
+            else:
+                if not g.current_user.is_authorised(user.id):
+                    abort(403)
+                _add_user_to_event(
+                    event, user.id, db_name=current_app.config["DB_NAME"]
+                )
+                return redirect(_single_event_url(event))
+        else:
+            with connection(current_app.config["DB_NAME"]) as conn:
+                users = users_repo(conn).list()
+
+            search = request.args.get("search", None)
+            if search:
+                users = [u for u in users if search.lower() in u.full_name.lower()]
+            else:
+                users = []
+
+            return render_template(
+                "platform/event.admin.addattend.html.j2",
+                event=event,
+                users=users,
+            )
+
     @blueprint.route("/events/<int:event_id>/attend/", methods=["POST"])
     def attend_event(event_id: int):
         with connection(current_app.config["DB_NAME"]) as conn:
@@ -275,14 +317,31 @@ def event_routes(blueprint: Blueprint):
 
         if method == "POST":
             _add_user_to_event(event, user_id, db_name=current_app.config["DB_NAME"])
-        elif method == "DELETE":
+        elif method in ("PUT", "DELETE"):
             with connection(current_app.config["DB_NAME"]) as conn:
                 attendees_repo = attendees(conn)
                 target_attendee = attendees_repo.get(event_id=event.id, user_id=user_id)
                 if target_attendee is None:
                     abort(404, "Attendee not found!")
                 else:
-                    attendees_repo.delete_where(event_id=event.id, user_id=user_id)
+                    if method == "PUT":
+                        updates = {}
+                        for allowed in ("is_waiting_list", "is_trip_paid"):
+                            if allowed in request.form:
+                                if request.form[allowed] == "True":
+                                    updates[allowed] = True
+                                elif request.form[allowed] == "False":
+                                    updates[allowed] = False
+                                else:
+                                    raise MountainException(
+                                        f"Unrecognized boolean {request.form[allowed]} for {allowed}!"
+                                    )
+                        attendees_repo.update(
+                            _where=dict(event_id=event.id, user_id=user_id),
+                            **updates,
+                        )
+                    else:
+                        attendees_repo.delete_where(event_id=event.id, user_id=user_id)
                 # TODO: Audit!
 
         return redirect(_single_event_url(event))

@@ -6,16 +6,16 @@ DONE
 - Event filter
 - Past / future events
 - Editing events / deleting events
+- Attendee adder
+- Attendee list / editing
 
 DOING
 
 - Attending popups
-- Attendee list / editing
 
 TODO
 
 - Signup open date / paid buttons
-- Attendee adder
 - HTMX juicing
 - Event templates
 - Event description previews
@@ -80,7 +80,14 @@ Repeating events ?
 Privacy policy / Footer
 FAQS / Committee bios
 Mobile layout
+Parse lists correctly (-) in markdown
 Backups
+
+Mid-roles (coordinator, not committee, + site admin)
 
 - General look over for TODOs
 - Testing!
+
+Other Issues
+
+- Add is_deleted for attending users, so if someone is removed from a trip they've paid for that info is preserved

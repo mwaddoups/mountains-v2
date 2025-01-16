@@ -91,16 +91,22 @@ class Repository[T]:
             unstructure(obj),
         )
 
-    def update(self, *, id: int, **kwargs) -> T | None:
+    def update(
+        self, *, id: int | None = None, _where: dict | None = None, **kwargs
+    ) -> T | None:
         updates = kwargs.copy()
-        updates["id"] = id
+        if _where is None:
+            # Allow simpler call for standard id
+            assert id is not None
+            _where = {"id": id}
+
         self.conn.execute(
             f"""
             UPDATE {self.table_name}
             SET {",".join([f"{k} = :{k}" for k in kwargs])}
-            WHERE id = :id
+            WHERE {" AND ".join([f"{k} = :__{k}" for k in _where])}
             """,
-            updates,
+            {**updates, **{f"__{k}": v for k, v in _where.items()}},
         )
 
     def get(self, **kwargs) -> T | None:
