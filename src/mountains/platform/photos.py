@@ -136,10 +136,22 @@ def photo_routes(blueprint: Blueprint):
                     if user is not None:
                         user_map[photo.uploader_id] = user
 
-        return render_template(
-            "platform/album.html.j2",
-            album=album,
-            photos=photos,
-            user_map=user_map,
-            highlighted_ix=highlighted_ix,
-        )
+        if request.headers.get("HX-Target") == "highlighted":
+            if highlighted_id is not None:
+                return render_template(
+                    "platform/album._highlighted.html.j2",
+                    album=album,
+                    photos=photos,
+                    user_map=user_map,
+                    highlighted_ix=highlighted_ix,
+                )
+            else:
+                return ""
+        else:
+            return render_template(
+                "platform/album.html.j2",
+                album=album,
+                photos=photos,
+                user_map=user_map,
+                highlighted_ix=highlighted_ix,
+            )

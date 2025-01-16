@@ -21,21 +21,36 @@
         });
     </script>
   </details>
-  <section id="gallery">
-    {% if highlighted_ix != None %}
-      {% include "platform/album._highlighted.html.j2" %}
-    {% endif %}
+  <section id="gallery" hx-target="#highlighted">
+    <dialog id="highlighted">
+      {% if highlighted_ix != None %}
+        {% include "platform/album._highlighted.html.j2" %}
+      {% endif %}
+    </dialog>
+    <script>
+      const openDialog = () => {
+        const dialog = document.getElementById('highlighted');
+        if (dialog.hasChildNodes() && (!dialog.open)) {
+          dialog.showModal();
+        } else {
+          dialog.close()
+        }
+      }
+      htmx.on('#gallery', 'htmx:afterSettle', function(evt) {
+        openDialog();
+      });
+    </script>
+    {# hide duplicate attribute and image width/height/alt warnings #}
+    {# djlint:off H006,H037,H013 #}
     {% for photo in photos %}
-      {# djlint:off #}
-      <a href="{{ url_for('.album', id=album.id, highlighted_id=photo.id) }}">
-        <img id="photo-{{ photo.id }}"
-            height="160"
-            src="{{ url_for('static', filename=photo.photo_path) }}"
-            loading="lazy"
-            data-starred="{{ 'true' if photo.starred else 'false' }}"
-            />
+      <a hx-boost="true"
+         hx-on::afterRequest="openDialog()"
+         href="{{ url_for('.album', id=album.id, highlighted_id=photo.id) }}">
+        <img height="160"
+             src="{{ url_for('static', filename=photo.photo_path) }}"
+             loading="lazy"
+             data-starred="{{ 'true' if photo.starred else 'false' }}" />
       </a>
-      {# djlint:on #}
     {% endfor %}
   </section>
 {% endblock platform %}
