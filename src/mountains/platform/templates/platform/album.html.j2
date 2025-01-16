@@ -5,7 +5,16 @@
   </header>
   <details>
     <summary>Upload Photos</summary>
-    {% include "platform/album._upload.html.j2" %}
+    <form id="upload"
+          method="post"
+          enctype="multipart/form-data"
+          action="{{ url_for('.album', id=album.id) }}"
+          hx-post="{{ url_for('.album', id=album.id) }}"
+          hx-select="#upload">
+      <input type="file" name="photos" accept='image/*' multiple />
+      <input type="submit" value="Upload" />
+      <progress id="progress" value="0" max="100"></progress>
+    </form>
     <script>
         htmx.on('#upload', 'htmx:xhr:progress', function(evt) {
           htmx.find('#progress').setAttribute('value', evt.detail.loaded/evt.detail.total * 100)
@@ -14,58 +23,7 @@
   </details>
   <section id="gallery">
     {% if highlighted_ix != None %}
-      {% set h_photo = photos[highlighted_ix] %}
-      <dialog id="highlighted">
-        {# Extra <div> to ensure clicks in dialog dont close it #}
-        <div>
-          <a href="{{ url_for('.album', id=album.id) }}">< exit fullscreen</a>
-          {# djlint:off #}
-          <img src="{{ url_for('static', filename=h_photo.photo_path) }}" />
-          {# djlint:on #}
-          {% if h_photo.uploaded_id %}<small>Taken by: {{ user_map[h_photo.uploaded_id].full_name }}</small>{% endif %}
-          <div id="controls">
-            {% if highlighted_ix != 0 %}
-              {% set prev_photo_id = photos[highlighted_ix - 1].id %}
-              {# djlint:off #}
-              <a class="button"
-                 href="{{ url_for('.album', id=album.id, highlighted_id=prev_photo_id) }}">Previous</a>
-              {# djlint:on #}
-            {% else %}
-              <a class="button" aria-disabled="true">Previous</a>
-            {% endif %}
-            {% if g.current_user.is_site_admin %}
-              <form class="admin" method="post">
-                {% if h_photo.starred %}
-                  <input type="hidden" name="starred" value="false">
-                  <button type="submit">Unstar Photo</button>
-                {% else %}
-                  <input type="hidden" name="starred" value="true">
-                  <button type="submit" name="star">Star Photo</button>
-                {% endif %}
-              </form>
-            {% endif %}
-            {% if (highlighted_ix + 1) < (photos | length) %}
-              {% set next_photo_id = photos[highlighted_ix + 1].id %}
-              {# djlint:off #}
-              <a class="button"
-                 href="{{ url_for('.album', id=album.id, highlighted_id=next_photo_id) }}">Next</a>
-              {# djlint:on #}
-            {% else %}
-              <a class="button" aria-disabled="true">Next</a>
-            {% endif %}
-          </div>
-        </div>
-      </dialog>
-      {# Tiny bit of JS to open the dialog via JS (as modal) and close when clicking outside #}
-      <script>
-        const dialog = document.getElementById('highlighted');
-        dialog.showModal();
-        document.addEventListener('click', (e) => {
-          if (e.target.id === dialog.id) {
-            dialog.close()
-          }
-        })
-      </script>
+      {% include "platform/album._highlighted.html.j2" %}
     {% endif %}
     {% for photo in photos %}
       {# djlint:off #}

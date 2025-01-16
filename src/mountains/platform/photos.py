@@ -20,6 +20,7 @@ from mountains.photos import albums as albums_repo
 from mountains.photos import photos as photos_repo
 from mountains.users import User
 from mountains.users import users as users_repo
+from mountains.utils import req_method, str_to_bool
 
 logger = logging.getLogger(__name__)
 
@@ -80,14 +81,14 @@ def photo_routes(blueprint: Blueprint):
     @blueprint.route(
         "/photos/<int:id>/<int:highlighted_id>", methods=["GET", "POST", "PUT"]
     )
-    @blueprint.route("/photos/<int:id>", methods=["GET", "POST"])
+    @blueprint.route("/photos/<int:id>", methods=["GET", "POST", "PUT"])
     def album(id: int, highlighted_id: int | None = None):
         with connection(current_app.config["DB_NAME"]) as conn:
             album = albums_repo(conn).get(id=id)
             if album is None:
                 abort(404)
 
-        if request.method == "POST" and highlighted_id is None:
+        if req_method(request) == "POST" and highlighted_id is None:
             for file in request.files.getlist("photos"):
                 if file.filename:
                     photo_path = upload_photo(
@@ -111,6 +112,11 @@ def photo_routes(blueprint: Blueprint):
                     ".album", id=id, highlighted_id=highlighted_id
                 )
                 return response
+        elif req_method(request) == "PUT" and highlighted_id is not None:
+            starred = request.form.get("starred", type=str_to_bool, default=None)
+            if starred is not None:
+                with connection(current_app.config["DB_NAME"]) as conn:
+                    photos_repo(conn).update(id=highlighted_id, starred=starred)
 
         with connection(current_app.config["DB_NAME"]) as conn:
             photos = sorted(

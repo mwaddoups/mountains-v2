@@ -17,7 +17,7 @@ from flask import (
 
 from mountains.db import connection
 from mountains.errors import MountainException
-from mountains.utils import now_utc, req_method
+from mountains.utils import now_utc, req_method, str_to_bool
 
 from ..events import Attendee, Event, EventType, attendees
 from ..events import events as events_repo
@@ -333,15 +333,11 @@ def event_routes(blueprint: Blueprint):
                     if method == "PUT":
                         updates = {}
                         for allowed in ("is_waiting_list", "is_trip_paid"):
-                            if allowed in request.form:
-                                if request.form[allowed] == "True":
-                                    updates[allowed] = True
-                                elif request.form[allowed] == "False":
-                                    updates[allowed] = False
-                                else:
-                                    raise MountainException(
-                                        f"Unrecognized boolean {request.form[allowed]} for {allowed}!"
-                                    )
+                            if (
+                                value := request.form.get("allowed", type=str_to_bool)
+                            ) is not None:
+                                request.form[allowed] = value
+
                         attendees_repo.update(
                             _where=dict(event_id=event.id, user_id=user_id),
                             **updates,

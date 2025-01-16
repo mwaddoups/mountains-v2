@@ -40,3 +40,12 @@ def req_method(request: Request) -> str:
         return request.form["method"]
     else:
         return request.method
+
+
+def str_to_bool(val: str) -> bool:
+    if val in ("True", "true"):
+        return True
+    elif val in ("False", "false"):
+        return False
+    else:
+        raise ValueError(f"Could not interpret string {val:!r} as bool")
