@@ -1,6 +1,5 @@
 import logging
 import uuid
-from inspect import currentframe
 from typing import Mapping
 
 from flask import (

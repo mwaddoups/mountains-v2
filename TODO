@@ -63,6 +63,7 @@ Basic linking and setting from members page
 TODO
 Add to attendee popup
 Add member role setting / unsetting
+Maybe cache discord / HTMX for faster loading?
 
 Caching
 
