@@ -1,17 +1,24 @@
 import copy
+import dis
 import logging
 
 from flask import (
     Blueprint,
+    abort,
     current_app,
+    g,
+    redirect,
     render_template,
     request,
+    url_for,
 )
 
 from mountains.db import connection
+from mountains.discord import DiscordAPI
 from mountains.errors import MountainException
 
-from ..users import User, users
+from ..users import User
+from ..users import users as users_repo
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +27,7 @@ def member_routes(blueprint: Blueprint):
     @blueprint.route("/members")
     def members():
         with connection(current_app.config["DB_NAME"]) as conn:
-            members = users(conn).list()
+            members = users_repo(conn).list()
 
         if search := request.args.get("search"):
             # Have the search match either first or last name, in lowercase
@@ -42,7 +49,7 @@ def member_routes(blueprint: Blueprint):
     @blueprint.route("/members/<slug>", methods=["GET", "POST", "PUT"])
     def member(slug: str):
         with connection(current_app.config["DB_NAME"]) as conn:
-            user = users(conn).get(slug=slug)
+            user = users_repo(conn).get(slug=slug)
         if user is None:
             raise MountainException("User not found!")
 
@@ -67,12 +74,65 @@ def member_routes(blueprint: Blueprint):
                 # TODO: actually do it
             # TODO: Audit the event
 
-        return render_template("platform/member.html.j2", user=user)
+        discord_name = None
+        if user.discord_id is not None:
+            discord = DiscordAPI.from_app(current_app)
+            member = discord.get_member(member_id=user.discord_id)
+            if member is not None:
+                discord_name = discord.member_username(member)
+
+        return render_template(
+            "platform/member.html.j2", user=user, discord_name=discord_name
+        )
+
+    @blueprint.route("/members/<slug>/discord", methods=["GET", "POST"])
+    def member_discord(slug: str):
+        with connection(current_app.config["DB_NAME"]) as conn:
+            user = users_repo(conn).get(slug=slug)
+            if user is None:
+                abort(404)
+
+        if request.method == "POST":
+            if not g.current_user.is_authorised(user.id):
+                abort(403)
+
+            if "remove_id" in request.form:
+                discord_id = None
+            else:
+                discord_id = request.form["discord_id"]
+
+            with connection(current_app.config["DB_NAME"]) as conn:
+                users_repo(conn).update(id=user.id, discord_id=discord_id)
+
+            return redirect(url_for("platform.member", slug=slug))
+
+        with connection(current_app.config["DB_NAME"]) as conn:
+            taken_ids = set(
+                u.discord_id
+                for u in users_repo(conn).list()
+                if u.discord_id is not None
+            )
+
+        discord = DiscordAPI.from_app(current_app)
+        discord_members = sorted(
+            [
+                {"id": m["user"]["id"], "name": discord.member_username(m)}
+                for m in discord.fetch_all_members()
+                if m["user"]["id"] not in taken_ids
+            ],
+            key=lambda m: m["name"].lower(),
+        )
+
+        return render_template(
+            "platform/member.discord.html.j2",
+            user=user,
+            discord_members=discord_members,
+        )
 
     @blueprint.route("/members/<id>/edit")
     def edit_member(id: str):
         with connection(current_app.config["DB_NAME"]) as conn:
-            user = users(conn).get(id=id)
+            user = users_repo(conn).get(id=id)
         if user is None:
             raise MountainException("User not found!")
         return render_template("platform/member.edit.html.j2", user=user)

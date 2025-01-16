@@ -95,9 +95,6 @@
   </li>
 {% endmacro %}
 {% block platform %}
-  {% if g.current_user.is_site_admin %}
-    <a href="{{ url_for('platform.edit_event') }}" class="button admin">Create Event</a>
-  {% endif %}
   <form>
     <details>
       <summary>Event Filters</summary>
@@ -135,6 +132,10 @@
            placeholder="Search for an event..."
            value="{{ search if search else '' }}" />
   </form>
+  {% if g.current_user.is_site_admin %}
+    <a href="{{ url_for('platform.edit_event') }}"
+       class="button admin w-full">Create Event</a>
+  {% endif %}
   <section>
     {# These are in ascending order for future, followed by descending for past #}
     {% for event in events %}

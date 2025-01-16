@@ -47,7 +47,7 @@ TODO
 
 Discord / Payments work
 
-Dormant users (inc returning)
+Dormant users (inc returning, last login, etc)
 
 Pages
 DONE
@@ -56,6 +56,13 @@ DONE
 - Committee editor
 - Previews
 - Versioning
+
+Discord
+DONE
+Basic linking and setting from members page
+TODO
+Add to attendee popup
+Add member role setting / unsetting
 
 Caching
 
@@ -71,25 +78,22 @@ Breadcrumbs
 Details/summary styling
 Audit logging
 Permissions
-Events admin tools
 Editable users
 Payments
-Discord
 Membership rework
 Admin block for managing admin
 Admin class for generally denoting admin stuff
+Committee stats
 Repeating events ?
 Privacy policy / Footer
 FAQS / Committee bios
 Mobile layout
 Parse lists correctly (-) in markdown
 Backups
-
 Mid-roles (coordinator, not committee, + site admin)
+General look over for TODOs
+Testing!
 
-- General look over for TODOs
-- Testing!
-
-Other Issues
+Other Issues (after release)
 
 - Add is_deleted for attending users, so if someone is removed from a trip they've paid for that info is preserved

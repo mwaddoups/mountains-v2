@@ -1,0 +1,19 @@
+{% extends "platform/base.html.j2" %}
+{% block platform %}
+  <dialog open>
+    <form method="post">
+      <label>
+        Discord Username
+        <small>(If you can't find your name, let us know on Discord)</small>
+        <select name="discord_id" required>
+          {% for member in discord_members %}<option value="{{ member.id }}">{{ member.name }}</option>{% endfor %}
+        </select>
+      </label>
+      <input type="submit" value="Link account" />
+      <input class="btn-secondary"
+             type="submit"
+             name="remove_id"
+             value="Remove Link" />
+    </form>
+  </dialog>
+{% endblock platform %}

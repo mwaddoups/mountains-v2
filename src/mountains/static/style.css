@@ -338,7 +338,6 @@
 
   /* Basic styling for dialogs */
   dialog {
-    height: 90vh;
     border: 0;
     outline: 0;
     padding: 1rem;
@@ -484,6 +483,10 @@
     color: var(--accent);
   }
 
+  .w-full {
+    width: 100%;
+  }
+
   .drop-shadow {
     border-radius: var(--standard-border-radius);
     border: 1px solid var(--border);
@@ -547,6 +550,21 @@
   }
   .color-members-only {
     --cmc-highlight: var(--cmc-color-member);
+  }
+
+  mark.discord {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    > svg {
+      height: 1em;
+    }
+
+    button,
+    .button {
+      padding: 0.125rem 0.25rem;
+      font-size: small;
+    }
   }
 
   .markdown-preview {
@@ -835,6 +853,7 @@
     }
 
     #highlighted {
+      height: 90vh;
       width: 90vw;
     }
 
