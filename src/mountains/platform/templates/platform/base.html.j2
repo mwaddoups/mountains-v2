@@ -33,13 +33,15 @@
           <a href="https://www.tshirtstudio.com/marketplace/clyde-mountaineering-club">Club Merch</a>
         </li>
         {% if g.current_user.is_site_admin %}
-          {% call nav_link('platform.committee', 'Committee') %}
-            <ul>
-              {{ nav_link('platform.committee', 'Overview') }}
-              {{ nav_link('platform.committee_pages', 'Pages') }}
-            </ul>
-          {% endcall %}
-        {% endif %}
+          <div class="admin">
+            {% call nav_link('platform.committee', 'Committee') %}
+              <ul>
+                {{ nav_link('platform.committee', 'Overview') }}
+                {{ nav_link('platform.committee_pages', 'Pages') }}
+              </ul>
+            {% endcall %}
+          {% endif %}
+        </div>
       </ul>
     </nav>
   </aside>

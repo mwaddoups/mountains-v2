@@ -139,7 +139,7 @@ def upload_profile(
     file: FileStorage,
     static_dir: Path,
     user: User,
-    size: int = 256,
+    size: int = 512,
     th_size: int = 32,
 ) -> str:
     assert file.filename is not None, (

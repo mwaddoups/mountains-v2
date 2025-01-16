@@ -28,11 +28,12 @@ Mobile
 Profile
 Main page
 Attended Events
-
-TODO
 Profile picture upload
 Editing in general
+
+TODO
 Admin tools for members
+Use profile picture thumbnails + process these
 
 Photos
 DONE
@@ -47,6 +48,7 @@ HTMX Gallery
 HTMX Uploads
 
 TODO
+Process different sizes for different uses
 Front page photos
 
 Dormant users (inc returning, last login, etc)
@@ -70,6 +72,7 @@ Maybe cache discord / HTMX for faster loading?
 Other stuff
 DONE
 Editable pages
+FAQs
 
 TODO
 Breadcrumbs
@@ -85,7 +88,7 @@ Admin class for generally denoting admin stuff
 Committee stats
 Repeating events ?
 Privacy policy / Footer
-FAQS / Committee bios
+Committee bios
 Mobile layout
 Parse lists correctly (-) in markdown
 Backups

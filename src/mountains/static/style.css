@@ -587,6 +587,10 @@
     --accent: var(--cmc-color-committee);
     --accent-hover: rgb(from var(--accent) r g b / 0.6);
     --text: var(--cmc-color-committee);
+
+    a {
+      color: var(--cmc-color-committee);
+    }
   }
 
   span.admin {
