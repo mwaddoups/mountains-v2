@@ -2,85 +2,80 @@ Big plan: STOP STYLING! Get all the functionality in and style AT THE END
 
 Events
 DONE
-
-- Event filter
-- Past / future events
-- Editing events / deleting events
-- Attendee adder
-- Attendee list / editing
-- Signup open date
-- Close filter
+Event filter
+Past / future events
+Editing events / deleting events
+Attendee adder
+Attendee list / editing
+Signup open date
+Close filter
 
 DOING
-
-- Attending popups
+Attending popups
 
 TODO
-
-- Paid buttons
-- HTMX juicing - refresh button
-- Event templates
-- Event description previews
-- Drafts
-- Calendar
+Paid buttons
+TMX juicing - refresh button
+Event templates
+Event description previews
+Drafts
+Calendar
 
 Users
-
-- Profile picture upload
-- Editing in general
-
-Photos and images
 DONE
-
-- Gallery
-- Album page
-- Dialog
-- Basic upload
-- Album creation form
+Discord
+Mobile
+Profile
+Main page
 
 TODO
+Profile picture upload
+Editing in general
 
-- Photo processing in upload
-- Starring (server-side)
-- Front page photos
-- HTMX
+Photos
+DONE
+Gallery
+Album page
+Dialog
+Basic upload
+Album creation form
 
-Discord / Payments work
+TODO
+Photo processing in upload
+Starring (server-side)
+Front page photos
+HTMX
 
 Dormant users (inc returning, last login, etc)
 
 Pages
 DONE
-
-- Editable text
-- Committee editor
-- Previews
-- Versioning
+Editable text
+Committee editor
+Previews
+Versioning
 
 Discord
 DONE
 Basic linking and setting from members page
+
 TODO
 Add to attendee popup
 Add member role setting / unsetting
 Maybe cache discord / HTMX for faster loading?
-
-Caching
-
-- Etags / last modified
 
 Other stuff
 DONE
 Editable pages
 
 TODO
-
 Breadcrumbs
 Details/summary styling
 Audit logging
 Permissions
 Editable users
 Payments
+Email
 Membership rework
 Admin block for managing admin
 Admin class for generally denoting admin stuff
@@ -97,4 +92,5 @@ Testing!
 
 Other Issues (after release)
 
+- Caching / etags / last_modified
 - Add is_deleted for attending users, so if someone is removed from a trip they've paid for that info is preserved

@@ -2,7 +2,8 @@
 {% extends "platform/base.html.j2" %}
 {% block platform %}
   {% if g.current_user.is_site_admin %}
-    <a class="button admin" href="{{ url_for('platform.add_album') }}">Create Event</a>
+    <a class="button admin w-full"
+       href="{{ url_for('platform.add_album') }}">Create Album</a>
   {% endif %}
   <section>
     {% for album in albums %}
@@ -20,7 +21,7 @@
           <div>
             {% for photo in album_photos[album.id][:5] %}
               {# djlint:off #}
-            <img src="{{ url_for('static', filename=photo.photo_path) }}" />
+            <img src="{{ url_for('static', filename=photo.photo_path) }}" loading="lazy" />
               {# djlint:on #}
             {% endfor %}
           </div>

@@ -323,6 +323,13 @@
     padding: 0.5em;
   }
 
+  [role="status"] {
+    background-color: var(--primary);
+    color: var(--text-white);
+    border-radius: var(--standard-border-radius);
+    padding: 0.5em;
+  }
+
   details {
     display: block;
     > summary {

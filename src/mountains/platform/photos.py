@@ -7,6 +7,7 @@ from flask import (
     abort,
     current_app,
     g,
+    make_response,
     redirect,
     render_template,
     request,
@@ -76,9 +77,16 @@ def photo_routes(blueprint: Blueprint):
         else:
             return render_template("platform/album.add.html.j2")
 
+    @blueprint.route(
+        "/photos/<int:id>/<int:highlighted_id>", methods=["GET", "POST", "PUT"]
+    )
     @blueprint.route("/photos/<int:id>", methods=["GET", "POST"])
-    @blueprint.route("/photos/<int:id>/<int:highlighted_id>", methods=["GET", "PUT"])
     def album(id: int, highlighted_id: int | None = None):
+        with connection(current_app.config["DB_NAME"]) as conn:
+            album = albums_repo(conn).get(id=id)
+            if album is None:
+                abort(404)
+
         if request.method == "POST" and highlighted_id is None:
             for file in request.files.getlist("photos"):
                 if file.filename:
@@ -97,11 +105,14 @@ def photo_routes(blueprint: Blueprint):
                         )
                         photos_db.insert(photo)
 
-        with connection(current_app.config["DB_NAME"]) as conn:
-            album = albums_repo(conn).get(id=id)
-            if album is None:
-                abort(404)
+            if request.headers.get("HX-Request"):
+                response = make_response()
+                response.headers["HX-Location"] = url_for(
+                    ".album", id=id, highlighted_id=highlighted_id
+                )
+                return response
 
+        with connection(current_app.config["DB_NAME"]) as conn:
             photos = sorted(
                 photos_repo(conn).list_where(album_id=album.id),
                 key=lambda p: p.created_at_utc,

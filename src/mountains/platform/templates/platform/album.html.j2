@@ -1,16 +1,16 @@
 {% extends "platform/base.html.j2" %}
 {% block platform %}
   <header>
-    <a href="{{ url_for('platform.albums') }}">< Back to Photos</a>
+    <a href="{{ url_for('.albums') }}">< Back to Photos</a>
   </header>
   <details>
     <summary>Upload Photos</summary>
-    <form method="post" enctype="multipart/form-data">
-      <label>
-        <input type="file" name="photos" multiple />
-      </label>
-      <input type="submit" value="Upload" />
-    </form>
+    {% include "platform/album._upload.html.j2" %}
+    <script>
+        htmx.on('#upload', 'htmx:xhr:progress', function(evt) {
+          htmx.find('#progress').setAttribute('value', evt.detail.loaded/evt.detail.total * 100)
+        });
+    </script>
   </details>
   <section id="gallery">
     {% if highlighted_ix != None %}
@@ -18,7 +18,7 @@
       <dialog id="highlighted">
         {# Extra <div> to ensure clicks in dialog dont close it #}
         <div>
-          <a href="{{ url_for('platform.album', id=album.id) }}">< exit fullscreen</a>
+          <a href="{{ url_for('.album', id=album.id) }}">< exit fullscreen</a>
           {# djlint:off #}
           <img src="{{ url_for('static', filename=h_photo.photo_path) }}" />
           {# djlint:on #}
@@ -28,7 +28,7 @@
               {% set prev_photo_id = photos[highlighted_ix - 1].id %}
               {# djlint:off #}
               <a class="button"
-                 href="{{ url_for('platform.album', id=album.id, highlighted_id=prev_photo_id) }}">Previous</a>
+                 href="{{ url_for('.album', id=album.id, highlighted_id=prev_photo_id) }}">Previous</a>
               {# djlint:on #}
             {% else %}
               <a class="button" aria-disabled="true">Previous</a>
@@ -44,11 +44,11 @@
                 {% endif %}
               </form>
             {% endif %}
-            {% if highlighted_ix - 1 != (photos | length) %}
+            {% if (highlighted_ix + 1) < (photos | length) %}
               {% set next_photo_id = photos[highlighted_ix + 1].id %}
               {# djlint:off #}
               <a class="button"
-                 href="{{ url_for('platform.album', id=album.id, highlighted_id=next_photo_id) }}">Next</a>
+                 href="{{ url_for('.album', id=album.id, highlighted_id=next_photo_id) }}">Next</a>
               {# djlint:on #}
             {% else %}
               <a class="button" aria-disabled="true">Next</a>
@@ -69,7 +69,7 @@
     {% endif %}
     {% for photo in photos %}
       {# djlint:off #}
-      <a href="{{ url_for('platform.album', id=album.id, highlighted_id=photo.id) }}">
+      <a href="{{ url_for('.album', id=album.id, highlighted_id=photo.id) }}">
         <img id="photo-{{ photo.id }}"
             height="160"
             src="{{ url_for('static', filename=photo.photo_path) }}"
