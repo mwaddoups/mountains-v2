@@ -1,5 +1,4 @@
 import copy
-import dis
 import logging
 
 from flask import (
@@ -16,7 +15,10 @@ from flask import (
 from mountains.db import connection
 from mountains.discord import DiscordAPI
 from mountains.errors import MountainException
+from mountains.utils import req_method
 
+from ..events import attendees as attendees_repo
+from ..events import events as events_repo
 from ..users import User
 from ..users import users as users_repo
 
@@ -53,27 +55,37 @@ def member_routes(blueprint: Blueprint):
         if user is None:
             raise MountainException("User not found!")
 
-        if request.method != "GET":
-            form = request.form
-            if request.headers.get("HX-Request"):
-                method = request.method
-            else:
-                method = form["method"]
-
+        if (method := req_method(request)) != "GET":
             if method == "PUT":
                 # TODO: Remove password, unless it's included
                 new_user = copy.replace(
                     user,
-                    email=form["email"],
-                    first_name=form["first_name"],
-                    last_name=form["last_name"],
-                    about=form["about"],
-                    mobile=form["mobile"],
+                    email=request.form["email"],
+                    first_name=request.form["first_name"],
+                    last_name=request.form["last_name"],
+                    about=request.form["about"],
+                    mobile=request.form["mobile"],
                 )
                 logger.info("Updating user %s,  %r -> %r", user, user, new_user)
                 # TODO: actually do it
             # TODO: Audit the event
 
+        # Get member activity
+        with connection(current_app.config["DB_NAME"]) as conn:
+            events_db = events_repo(conn)
+            attended = [
+                events_db.get(id=att.event_id)
+                for att in attendees_repo(conn).list_where(user_id=user.id)
+            ]
+
+        num_attended = request.args.get("num_attended", type=int, default=20)
+        attended = sorted(
+            [e for e in attended if e is not None],
+            key=lambda e: e.event_dt,
+            reverse=True,
+        )
+
+        # Get discord name of member
         discord_name = None
         if user.discord_id is not None:
             discord = DiscordAPI.from_app(current_app)
@@ -82,7 +94,11 @@ def member_routes(blueprint: Blueprint):
                 discord_name = discord.member_username(member)
 
         return render_template(
-            "platform/member.html.j2", user=user, discord_name=discord_name
+            "platform/member.html.j2",
+            user=user,
+            discord_name=discord_name,
+            attended=attended,
+            num_attended=num_attended,
         )
 
     @blueprint.route("/members/<slug>/discord", methods=["GET", "POST"])

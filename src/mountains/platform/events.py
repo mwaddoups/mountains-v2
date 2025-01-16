@@ -81,7 +81,7 @@ def event_routes(blueprint: Blueprint):
                 event_types=event_types,
             )
 
-    @blueprint.route("/events/<id>", methods=["POST", "DELETE"])
+    @blueprint.route("/events/<id>", methods=["GET", "POST", "DELETE"])
     def event(id: int):
         with connection(current_app.config["DB_NAME"]) as conn:
             event = events_repo(conn).get(id=id)

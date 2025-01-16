@@ -886,4 +886,20 @@
       }
     }
   }
+
+  ul.member-attended {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0 0.5rem;
+    > li {
+      display: grid;
+      grid-column: 1 / -1;
+      grid-template-columns: subgrid;
+      font-size: small;
+      width: 100%;
+    }
+  }
 }
