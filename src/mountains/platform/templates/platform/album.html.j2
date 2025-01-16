@@ -34,7 +34,7 @@
               <a class="button" aria-disabled="true">Previous</a>
             {% endif %}
             {% if g.current_user.is_site_admin %}
-              <form class="color-admin" method="post">
+              <form class="admin" method="post">
                 {% if h_photo.starred %}
                   <input type="hidden" name="starred" value="false">
                   <button type="submit">Unstar Photo</button>

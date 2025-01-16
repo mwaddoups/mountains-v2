@@ -95,7 +95,11 @@
       <form method="post"
             action="{{ url_for('platform.attend_event', event_id=event.id) }}">
         <input type="hidden" name="method" value="POST" />
-        <input type="submit" value="Attend" />
+        {% if total_wait > 0 or (total > 0 and total == event.max_attendees) %}
+          <input type="submit" value="Join Waiting List" />
+        {% else %}
+          <input type="submit" value="Attend" />
+        {% endif %}
       </form>
     {% endif %}
   {% endif %}

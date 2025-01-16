@@ -2,7 +2,7 @@
 {% extends "platform/base.html.j2" %}
 {% block platform %}
   {% if g.current_user.is_site_admin %}
-    <a class="button color-admin" href="{{ url_for('platform.add_album') }}">Create Event</a>
+    <a class="button admin" href="{{ url_for('platform.add_album') }}">Create Event</a>
   {% endif %}
   <section>
     {% for album in albums %}

@@ -170,7 +170,7 @@
     border: 1px solid var(--accent);
     background-color: var(--accent);
     color: var(--accent-text);
-    padding: 0.5rem 0.9rem;
+    padding: 0.5rem;
     border-radius: var(--standard-border-radius);
 
     /* Hover */
@@ -180,6 +180,13 @@
       background-color: var(--accent-hover);
       border-color: var(--accent-hover);
       cursor: pointer;
+    }
+
+    /* Icon buttons */
+    &:has(svg) {
+      padding: 0.25rem;
+      display: inline-flex;
+      align-items: center;
     }
   }
 
@@ -340,6 +347,19 @@
     background-color: var(--bg);
     filter: drop-shadow(1px 1px 2px var(--border));
   }
+
+  /* Tooltips */
+  [data-tooltip]:hover::after {
+    transform: translate(1em, -1.5em);
+    position: absolute;
+    content: attr(data-tooltip);
+    font-size: small;
+    background-color: var(--accent);
+    color: var(--accent-text);
+    opacity: 75%;
+    padding: 0.125rem;
+    border-radius: var(--standard-border-radius);
+  }
 }
 
 @layer navigation {
@@ -447,6 +467,10 @@
     gap: 1rem;
   }
 
+  .flex-gap-small {
+    gap: 0.125rem;
+  }
+
   .float-right {
     float: right;
   }
@@ -525,11 +549,6 @@
     --cmc-highlight: var(--cmc-color-member);
   }
 
-  .color-admin {
-    --accent: var(--cmc-color-committee);
-    --accent-hover: rgb(from var(--accent) r g b / 0.6);
-  }
-
   .markdown-preview {
     width: 100%;
     margin: 0.5rem 0;
@@ -540,6 +559,19 @@
   }
 
   .admin {
+    --accent: var(--cmc-color-committee);
+    --accent-hover: rgb(from var(--accent) r g b / 0.6);
+    --text: var(--cmc-color-committee);
+  }
+
+  span.admin {
+    color: var(--text);
+    small {
+      color: inherit;
+    }
+  }
+
+  details.admin {
     --accent: var(--cmc-color-committee);
     color: var(--cmc-color-committee);
     background-color: white;

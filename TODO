@@ -14,6 +14,7 @@ DOING
 
 TODO
 
+- Signup open date / paid buttons
 - Attendee adder
 - HTMX juicing
 - Event templates
@@ -44,7 +45,7 @@ TODO
 
 Discord / Payments work
 
-Dormant users
+Dormant users (inc returning)
 
 Pages
 DONE
@@ -52,10 +53,17 @@ DONE
 - Editable text
 - Committee editor
 - Previews
+- Versioning
 
 Caching
 
 - Etags / last modified
+
+Other stuff
+DONE
+Editable pages
+
+TODO
 
 Breadcrumbs
 Details/summary styling
@@ -63,7 +71,6 @@ Audit logging
 Permissions
 Events admin tools
 Editable users
-Editable pages
 Payments
 Discord
 Membership rework
@@ -71,6 +78,8 @@ Admin block for managing admin
 Admin class for generally denoting admin stuff
 Repeating events ?
 Privacy policy / Footer
+FAQS / Committee bios
+Mobile layout
 Backups
 
 - General look over for TODOs
