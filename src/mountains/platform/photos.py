@@ -146,6 +146,7 @@ def photo_routes(blueprint: Blueprint):
                     highlighted_ix=highlighted_ix,
                 )
             else:
+                # Empty response is fine, the dialog gets closed by htmx
                 return ""
         else:
             return render_template(

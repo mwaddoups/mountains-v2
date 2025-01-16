@@ -39,12 +39,13 @@ Album page
 Dialog
 Basic upload
 Album creation form
-
-TODO
 Photo processing in upload
 Starring (server-side)
+HTMX Gallery
+HTMX Uploads
+
+TODO
 Front page photos
-HTMX
 
 Dormant users (inc returning, last login, etc)
 

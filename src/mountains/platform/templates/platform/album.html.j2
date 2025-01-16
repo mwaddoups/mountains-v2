@@ -28,16 +28,14 @@
       {% endif %}
     </dialog>
     <script>
-      const openDialog = () => {
+      // set to recall every htmx request
+      htmx.on('#gallery', 'htmx:afterSettle', function(evt) {
         const dialog = document.getElementById('highlighted');
         if (dialog.hasChildNodes() && (!dialog.open)) {
           dialog.showModal();
-        } else {
+        } else if (dialog.open) {
           dialog.close()
         }
-      }
-      htmx.on('#gallery', 'htmx:afterSettle', function(evt) {
-        openDialog();
       });
     </script>
     {# hide duplicate attribute and image width/height/alt warnings #}
@@ -47,9 +45,9 @@
          hx-on::afterRequest="openDialog()"
          href="{{ url_for('.album', id=album.id, highlighted_id=photo.id) }}">
         <img height="160"
+             width="300"
              src="{{ url_for('static', filename=photo.photo_path) }}"
-             loading="lazy"
-             data-starred="{{ 'true' if photo.starred else 'false' }}" />
+             loading="lazy" />
       </a>
     {% endfor %}
   </section>
