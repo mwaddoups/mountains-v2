@@ -352,6 +352,10 @@
     border: 1px solid var(--border);
     background-color: var(--bg);
     filter: drop-shadow(1px 1px 2px var(--border));
+
+    &::backdrop {
+      backdrop-filter: blur(5px);
+    }
   }
 
   /* Tooltips */
@@ -751,6 +755,17 @@
 
     a {
       align-self: flex-start;
+    }
+  }
+
+  #selectedEvent {
+    width: 75vw;
+
+    .event-description {
+      cursor: auto;
+      max-height: none;
+      background-image: none;
+      background-color: var(--text);
     }
   }
 

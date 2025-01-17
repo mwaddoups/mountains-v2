@@ -9,6 +9,7 @@ Attendee adder
 Attendee list / editing
 Signup open date
 Close filter
+Single event page
 
 DOING
 Attending popups
@@ -75,6 +76,7 @@ Editable pages
 FAQs
 
 TODO
+Kill slugs?
 Breadcrumbs
 Details/summary styling
 Audit logging
@@ -86,7 +88,6 @@ Membership rework
 Admin block for managing admin
 Admin class for generally denoting admin stuff
 Committee stats
-Repeating events ?
 Privacy policy / Footer
 Committee bios
 Mobile layout
@@ -100,3 +101,6 @@ Other Issues (after release)
 
 - Caching / etags / last_modified
 - Add is_deleted for attending users, so if someone is removed from a trip they've paid for that info is preserved
+- Upcoming signups section
+- Signup open countdown
+- Repeating events

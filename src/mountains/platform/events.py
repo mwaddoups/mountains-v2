@@ -89,7 +89,13 @@ def event_routes(blueprint: Blueprint):
                 abort(404, f"Event {id} not found!")
 
         if request.method == "GET":
-            return redirect(_single_event_url(event))
+            event_attendees, event_members = _events_attendees(conn, [event])
+            return render_template(
+                "platform/event.html.j2",
+                event=event,
+                attendees=event_attendees,
+                members=event_members,
+            )
 
         if not g.current_user.is_authorised():
             abort(403)
