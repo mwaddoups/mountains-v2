@@ -13,30 +13,42 @@
     <h3>{{ month_dt.strftime("%B %Y") }}</h3>
     <a href="{{ url_for('.events_calendar', year=next_month_dt.year, month=next_month_dt.month) }}">{{ next_month_dt.strftime("%B %Y") }} ></a>
   </div>
-  <div class="events-calendar">
-    {% for day in ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] %}
-      <h4>{{ day }}</h4>
-    {% endfor %}
-    {% for day_dt in days %}
-      <article class="events-calendar-day{{ ' not-month' if day_dt.month != month_dt.month }}{{ ' is-today' if day_dt.month == today.month and day_dt.day == today.day }}">
-        <h4>{{ day_dt.day }}</h4>
-        {% for event in events %}
-          {% if event.is_happening_on(day_dt) %}
-            <a href="{{ url_for('.event', id=event.id) }}">
-              <article class="calendar-event {{ color_class(event.event_type.name) }}">
-                {% if event.event_dt.date() == day_dt %}
-                  <span>{{ event.event_dt.strftime("%H:%M") }}</span>
-                {% elif event.event_dt.date() < day_dt and event.event_end_dt and event.event_end_dt.date() > day_dt %}
-                  <span>All Day</span>
-                {% elif event.event_end_dt and event.event_end_dt.date() == day_dt %}
-                  <span>{{ event.event_end_dt.strftime("%H:%M") }}</span>
-                {% endif %}
-                <span>{{ event.title }}</span>
-              </article>
-            </a>
+  <table class="events-calendar">
+    <thead>
+      <tr>
+        {% for day in ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] %}
+          <th scope="col">{{ day }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        {% for day_dt in days %}
+          <td class="events-calendar-day{{ ' not-month' if day_dt.month != month_dt.month }}{{ ' is-today' if day_dt.month == today.month and day_dt.day == today.day }}">
+            <h4>{{ day_dt.day }}</h4>
+            {% for event in events %}
+              {% if event.is_happening_on(day_dt) %}
+                <a href="{{ url_for('.event', id=event.id) }}">
+                  <article class="calendar-event {{ color_class(event.event_type.name) }}">
+                    {% if event.event_dt.date() == day_dt %}
+                      <span>{{ event.event_dt.strftime("%H:%M") }}</span>
+                    {% elif event.event_dt.date() < day_dt and event.event_end_dt and event.event_end_dt.date() > day_dt %}
+                      <span>All Day</span>
+                    {% elif event.event_end_dt and event.event_end_dt.date() == day_dt %}
+                      <span>{{ event.event_end_dt.strftime("%H:%M") }}</span>
+                    {% endif %}
+                    <span>{{ event.title }}</span>
+                  </article>
+                </a>
+              {% endif %}
+            {% endfor %}
+          </td>
+          {% if loop.index % 7 == 0 %}
+          </tr>
+          <tr>
           {% endif %}
         {% endfor %}
-      </article>
-    {% endfor %}
-  </div>
+      </tr>
+    </tbody>
+  </table>
 {% endblock platform %}
