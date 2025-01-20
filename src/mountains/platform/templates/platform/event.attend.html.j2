@@ -1,35 +1,4 @@
 {% extends "platform/base.html.j2" %}
 {% block platform %}
-  <dialog open>
-    <header>
-      Attending {{ event.title }}
-    </header>
-    <form method="post"
-          action="{{ url_for('platform.attendee', event_id=event.id, user_id=g.current_user.id) }}">
-      <input type="hidden" name="method" value="POST" />
-      <section>
-        <h2>Contact Details</h2>
-        <p>Please check contact details below</p>
-        <label>
-          Emergency Contact
-          <input type="text"
-                 name="in_case_emergency"
-                 value="{{ user.in_case_emergency }}"
-                 required />
-        </label>
-        <label>
-          Mobile Number
-          <input type="text" name="mobile" value="{{ user.mobile }}" required />
-        </label>
-      </section>
-      <section>
-        <h2>Participation Statement</h2>
-        <label>
-          Do you agree?
-          <input type="checkbox" name="participation" required />
-        </label>
-      </section>
-      <input type="submit" value="Attend Event">
-    </form>
-  </dialog>
+  {% include "platform/event._attend.html.j2" %}
 {% endblock platform %}

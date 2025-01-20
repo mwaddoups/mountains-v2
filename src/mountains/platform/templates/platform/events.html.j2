@@ -142,8 +142,11 @@
       // set to recall every htmx request
       htmx.on('#selectedEvent', 'htmx:afterSettle', function(evt) {
         const dialog = document.getElementById('selectedEvent');
-        if (dialog.hasChildNodes() && (!dialog.open)) {
-          dialog.showModal();
+        console.log(dialog)
+        if (dialog.innerHTML) {
+          if (!dialog.open) {
+            dialog.showModal();
+          }
         } else if (dialog.open) {
           dialog.close()
         }

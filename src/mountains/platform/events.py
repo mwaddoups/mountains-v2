@@ -331,9 +331,22 @@ def event_routes(blueprint: Blueprint):
             return redirect(url_for(".event", id=event.id))
 
         # TODO: Editable popup text
-        return render_template(
-            "platform/event.attend.html.j2", event=event, popups=popups, user=user
-        )
+        if request.headers.get("HX-Request"):
+            response = make_response(
+                render_template(
+                    "platform/event._attend.html.j2",
+                    event=event,
+                    popups=popups,
+                    user=user,
+                )
+            )
+            response.headers["HX-Retarget"] = "#selectedEvent"
+            response.headers["HX-Reswap"] = "innerHTML"
+            return response
+        else:
+            return render_template(
+                "platform/event.attend.html.j2", event=event, popups=popups, user=user
+            )
 
     @blueprint.route(
         "/events/<int:event_id>/attendees/<int:user_id>",

@@ -1,0 +1,34 @@
+<header>
+  <a hx-boost="true"
+     hx-target="#selectedEvent"
+     href="{{ url_for('.event', id=event.id) }}">< return to event ({{ event.title }})</a>
+</header>
+<form method="post"
+      hx-boost="true"
+      hx-target="#selectedEvent"
+      action="{{ url_for('platform.attendee', event_id=event.id, user_id=g.current_user.id) }}">
+  <input type="hidden" name="method" value="POST" />
+  <section>
+    <h2>Contact Details</h2>
+    <p>Please check contact details below</p>
+    <label>
+      Emergency Contact
+      <input type="text"
+             name="in_case_emergency"
+             value="{{ user.in_case_emergency }}"
+             required />
+    </label>
+    <label>
+      Mobile Number
+      <input type="text" name="mobile" value="{{ user.mobile }}" required />
+    </label>
+  </section>
+  <section>
+    <h2>Participation Statement</h2>
+    <label>
+      Do you agree?
+      <input type="checkbox" name="participation" required />
+    </label>
+  </section>
+  <input type="submit" value="Attend Event">
+</form>
