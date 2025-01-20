@@ -88,25 +88,33 @@ def event_routes(blueprint: Blueprint):
             if event is None:
                 abort(404, f"Event {id} not found!")
 
-        if request.method == "GET":
-            event_attendees, event_members = _events_attendees(conn, [event])
+        if request.method != "GET":
+            if not g.current_user.is_authorised():
+                abort(403)
+
+            with connection(current_app.config["DB_NAME"]) as conn:
+                if req_method(request) == "DELETE":
+                    logger.info("Soft deleting event %s", event)
+                    events_repo(conn).update(id=id, is_deleted=True)
+                    return redirect(url_for("platform.events"))
+
+        event_attendees, event_members = _events_attendees(conn, [event])
+
+        if request.headers.get("HX-Target") == "selectedEvent":
+            return render_template(
+                "platform/_event.html.j2",
+                is_dialog=True,
+                event=event,
+                attendees=event_attendees,
+                members=event_members,
+            )
+        else:
             return render_template(
                 "platform/event.html.j2",
                 event=event,
                 attendees=event_attendees,
                 members=event_members,
             )
-
-        if not g.current_user.is_authorised():
-            abort(403)
-
-        with connection(current_app.config["DB_NAME"]) as conn:
-            if req_method(request) == "DELETE":
-                logger.info("Soft deleting event %s", event)
-                events_repo(conn).update(id=id, is_deleted=True)
-                return redirect(url_for("platform.events"))
-            else:
-                return redirect(url_for("platform.events") + "#" + event.slug)
 
     @blueprint.route("/events/calendar")
     @blueprint.route("/events/calendar/<int:year>/<int:month>")

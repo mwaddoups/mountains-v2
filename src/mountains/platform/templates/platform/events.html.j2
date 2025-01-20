@@ -137,6 +137,19 @@
        class="button admin w-full">Create Event</a>
   {% endif %}
   <section>
+    <dialog id="selectedEvent"></dialog>
+    <script>
+      // set to recall every htmx request
+      htmx.on('#selectedEvent', 'htmx:afterSettle', function(evt) {
+        const dialog = document.getElementById('selectedEvent');
+        if (dialog.hasChildNodes() && (!dialog.open)) {
+          dialog.showModal();
+        } else if (dialog.open) {
+          dialog.close()
+        }
+      });
+    </script>
+    {% set is_dialog = False %}
     {# These are in ascending order for future, followed by descending for past #}
     {% for event in events %}
       {% if not event.is_upcoming() and loop.changed(event.is_upcoming()) %}<h1>Past Events</h1>{% endif %}

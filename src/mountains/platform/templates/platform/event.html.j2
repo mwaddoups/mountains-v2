@@ -1,7 +1,7 @@
 {% extends "platform/base.html.j2" %}
 {% block platform %}
   <dialog id="selectedEvent">
-    <a href="{{ url_for('.events', _anchor=event.slug) }}">< Return to Events</a>
+    {% set is_dialog = True %}
     {% include "platform/_event.html.j2" %}
   </dialog>
   <script>document.getElementById('selectedEvent').showModal()</script>
