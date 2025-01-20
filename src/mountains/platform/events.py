@@ -102,6 +102,7 @@ def event_routes(blueprint: Blueprint):
 
         event_attendees, event_members = _events_attendees(conn, [event])
 
+        print(request.headers)
         if request.headers.get("HX-Target") == "selectedEvent":
             # This request also needs the is_dialog part
             return render_template(
@@ -217,7 +218,7 @@ def event_routes(blueprint: Blueprint):
                         abort(405)
 
                 # TODO: Audit the event
-                return redirect(_single_event_url(event))
+                return redirect(url_for(".event", id=event.id))
             except MountainException as e:
                 error = str(e)
 
@@ -282,7 +283,7 @@ def event_routes(blueprint: Blueprint):
                     logger.error(
                         "User %s tried to add self to closed event!", g.current_user
                     )
-                return redirect(_single_event_url(event))
+                return redirect(url_for(".event", id=event.id))
         else:
             with connection(current_app.config["DB_NAME"]) as conn:
                 users = users_repo(conn).list()
@@ -319,7 +320,7 @@ def event_routes(blueprint: Blueprint):
 
         if len(popups) == 0:
             _add_user_to_event(event, user.id, db_name=current_app.config["DB_NAME"])
-            return redirect(_single_event_url(event))
+            return redirect(url_for(".event", id=event.id))
 
         # TODO: Editable popup text
         return render_template(
@@ -382,10 +383,6 @@ def event_routes(blueprint: Blueprint):
             )
         else:
             return redirect(url_for(".event", id=event.id))
-
-
-def _single_event_url(event: Event) -> str:
-    return url_for("platform.events", _anchor=event.slug)
 
 
 def _events_attendees(

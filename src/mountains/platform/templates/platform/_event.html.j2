@@ -27,7 +27,6 @@
         <small>({{ user.mobile }})</small>
         <small>ICE: {{ user.in_case_emergency }}</small>
         <form method="post"
-              hx-put="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}"
               action="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
           <input type="hidden" name="method" value="PUT" />
           <input type="hidden"
@@ -58,7 +57,6 @@
           </button>
         </form>
         <form method="post"
-              hx-put="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}"
               action="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
           <input type="hidden" name="method" value="PUT" />
           <input type="hidden"
@@ -79,7 +77,6 @@
           </button>
         </form>
         <form method="post"
-              hx-delete="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}"
               action="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
           <input type="hidden" name="method" value="DELETE" />
           <button type="submit" data-tooltip="Remove User">
@@ -112,6 +109,7 @@
       <span class="flex">
         <h1>
           <a hx-target="#selectedEvent"
+             hx-swap="innerHTML"
              hx-boost="true"
              href="{{ url_for('platform.event', id=event.id) }}">{{ event.title }}</a>
         </h1>
@@ -148,75 +146,81 @@
            onclick="this.dataset.expanded = (this.dataset.expanded === 'false' ? 'true' : 'false') ">
     {{ event.description | markdown | safe }}
   </section>
-  {% set evt_attendees = attendees[event.id] | sort(attribute='joined_at_utc') %}
-  {% set total = evt_attendees | length %}
-  {% set total_wait = evt_attendees | map(attribute='is_waiting_list') | sum %}
-  <details class="attendees" {{ 'open' if expanded_attendees }}>
-    <summary>
-      <span>Attendees ({{ total - total_wait }} total, {{ event.max_attendees if event.max_attendees and event.max_attendees > 0 else 'no' }} max)</span>
-      <div class="attendees-summary">
-        {% for attendee in evt_attendees if not attendee.is_waiting_list %}
-          {{ profile_picture(members[attendee.user_id], '32') }}
-        {% else %}
-          <small>No attendees yet!</small>
-        {% endfor %}
-      </div>
-    </summary>
-    <ul>
-      {% for attendee in evt_attendees if not attendee.is_waiting_list %}
-        {{ attending_user(attendee, members[attendee.user_id]) }}
-      {% else %}
-        <li>No attendees yet!</li>
-      {% endfor %}
-      {% if g.current_user.is_site_admin %}
-        <form class="admin"
-              action="{{ url_for('platform.event_attendee_add', event_id=event.id) }}">
-          <input type="search" name="search" placeholder="Add a new attendee..." />
-        </form>
-      {% endif %}
-    </ul>
-  </details>
-  {% if total_wait > 0 %}
+  <section>
+    {% set evt_attendees = attendees[event.id] | sort(attribute='joined_at_utc') %}
+    {% set total = evt_attendees | length %}
+    {% set total_wait = evt_attendees | map(attribute='is_waiting_list') | sum %}
     <details class="attendees" {{ 'open' if expanded_attendees }}>
       <summary>
-        <span>Waiting List ({{ total_wait }} total)</span>
+        <span>Attendees ({{ total - total_wait }} total, {{ event.max_attendees if event.max_attendees and event.max_attendees > 0 else 'no' }} max)</span>
         <div class="attendees-summary">
-          {% for attendee in evt_attendees if attendee.is_waiting_list %}
+          {% for attendee in evt_attendees if not attendee.is_waiting_list %}
             {{ profile_picture(members[attendee.user_id], '32') }}
+          {% else %}
+            <small>No attendees yet!</small>
           {% endfor %}
         </div>
       </summary>
       <ul>
-        {% for attendee in evt_attendees if attendee.is_waiting_list %}
+        {% for attendee in evt_attendees if not attendee.is_waiting_list %}
           {{ attending_user(attendee, members[attendee.user_id]) }}
         {% else %}
-          <li>No waiting list yet!</li>
+          <li>No attendees yet!</li>
         {% endfor %}
+        {% if g.current_user.is_site_admin %}
+          <form class="admin"
+                action="{{ url_for('platform.event_attendee_add', event_id=event.id) }}">
+            <input type="search" name="search" placeholder="Add a new attendee..." />
+          </form>
+        {% endif %}
       </ul>
     </details>
-  {% endif %}
-  {% if event.is_upcoming() %}
-    {% if g.current_user.id in (evt_attendees | map(attribute='user_id') | list) %}
-      <form method="post"
-            action="{{ url_for('platform.attendee', event_id=event.id, user_id=g.current_user.id) }}">
-        <input type="hidden" name="method" value="DELETE" />
-        <input type="submit" class="btn-cancel" value="Leave" />
-      </form>
-    {% else %}
-      <form method="post"
-            action="{{ url_for('platform.attend_event', event_id=event.id) }}">
-        <input type="hidden" name="method" value="POST" />
-        {% if total_wait > 0 or (total > 0 and event.max_attendees and total >= event.max_attendees) %}
-          <input type="submit" value="Join Waiting List" />
-        {% else %}
-          {% if event.is_open() %}
-            <input type="submit" value="Attend" />
+    {% if total_wait > 0 %}
+      <details class="attendees" {{ 'open' if expanded_attendees }}>
+        <summary>
+          <span>Waiting List ({{ total_wait }} total)</span>
+          <div class="attendees-summary">
+            {% for attendee in evt_attendees if attendee.is_waiting_list %}
+              {{ profile_picture(members[attendee.user_id], '32') }}
+            {% endfor %}
+          </div>
+        </summary>
+        <ul>
+          {% for attendee in evt_attendees if attendee.is_waiting_list %}
+            {{ attending_user(attendee, members[attendee.user_id]) }}
           {% else %}
-            {% set open_str = event.signup_open_dt.strftime('%b %-d, %Y %H:%M') %}
-            <input type="button" disabled value="Signup opens at {{ open_str }}" />
-          {% endif %}
+            <li>No waiting list yet!</li>
+          {% endfor %}
+        </ul>
+      </details>
+    {% endif %}
+    {% if event.is_upcoming() %}
+      {% if g.current_user.id in (evt_attendees | map(attribute='user_id') | list) %}
+        <form method="post"
+              hx-boost="true"
+              hx-delete="{{ url_for('platform.attendee', event_id=event.id, user_id=g.current_user.id) }}"
+              action="{{ url_for('platform.attendee', event_id=event.id, user_id=g.current_user.id) }}">
+          <input type="hidden" name="method" value="DELETE" />
+          <input type="submit" class="btn-cancel" value="Leave" />
         </form>
+      {% else %}
+        <form method="post"
+              hx-boost="true"
+              hx-post="{{ url_for('platform.attend_event', event_id=event.id) }}"
+              action="{{ url_for('platform.attend_event', event_id=event.id) }}">
+          <input type="hidden" name="method" value="POST" />
+          {% if total_wait > 0 or (total > 0 and event.max_attendees and total >= event.max_attendees) %}
+            <input type="submit" value="Join Waiting List" />
+          {% else %}
+            {% if event.is_open() %}
+              <input type="submit" value="Attend" />
+            {% else %}
+              {% set open_str = event.signup_open_dt.strftime('%b %-d, %Y %H:%M') %}
+              <input type="button" disabled value="Signup opens at {{ open_str }}" />
+            {% endif %}
+          </form>
+        {% endif %}
       {% endif %}
     {% endif %}
-  {% endif %}
+  </section>
 </article>
