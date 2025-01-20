@@ -57,28 +57,28 @@
     color: var(--text);
     background-color: var(--bg);
     font-size: 1rem;
-    line-height: 1.5em;
+    line-height: 1.5;
 
     /* Make the body centered, using 3-col grid */
     display: grid;
-    grid-template-columns: 1fr min(60rem, 90%) 1fr;
+    grid-template-columns: 1fr fit-content(60rem) 1fr;
     margin: 0;
+    width: 100vw;
 
     /* Center all content */
-    > * {
+    > :not(header, aside) {
       grid-column: 2;
+      margin: 0 0.25rem;
     }
 
     /* Except the header */
     > header {
       grid-column: 1 / -1;
-      text-align: center;
     }
 
     /* And any non-header nav as a sidebar */
     > aside:has(nav) {
       grid-column: 1;
-      text-align: right;
     }
   }
 
@@ -380,6 +380,8 @@
 @layer navigation {
   /* Reset for navigation */
   nav {
+    line-height: normal;
+
     ul,
     ol {
       list-style-type: none;
@@ -408,10 +410,11 @@
     white-space: nowrap;
     gap: 0.5rem;
     padding: 0.5rem;
-    @media (max-width: 900px) {
+    @media (max-width: 800px) {
       flex-direction: column;
 
       /* Handle expanding the hamburger */
+      /* We set the height manually here, may be a better way to do this */
       max-height: 2.5rem;
       transition: max-height ease-in-out 0.2s;
       overflow: hidden;
@@ -433,7 +436,7 @@
     #nav-hamburger {
       display: none;
     }
-    @media (max-width: 900px) {
+    @media (max-width: 800px) {
       #nav-hamburger {
         display: inherit;
       }
@@ -454,7 +457,7 @@
       display: flex;
       gap: 0.5rem;
       align-items: center;
-      @media (max-width: 900px) {
+      @media (max-width: 800px) {
         width: 100%;
         flex-direction: column;
       }
@@ -465,12 +468,9 @@
       gap: 0.5rem;
       align-items: center;
       margin-left: auto;
-      @media (max-width: 900px) {
+      @media (max-width: 800px) {
         margin-left: unset;
         flex-direction: column;
-        > * {
-          width: 100%;
-        }
       }
     }
   }
@@ -488,14 +488,19 @@
     ol {
       display: flex;
       flex-direction: column;
-      align-items: right;
-      gap: 0.5rem;
+    }
+
+    li {
+      margin: 0.25rem 0;
     }
 
     ul ul,
     ol ol {
-      font-size: small;
-      gap: 0.125rem;
+      margin-left: 1rem;
+    }
+
+    #sidebar-hamburger {
+      display: none;
     }
 
     /* Style active links for final layer only */
@@ -504,15 +509,56 @@
     }
   }
 
+  @media (max-width: 800px) {
+    aside {
+      > nav {
+        position: fixed;
+        bottom: 1.8rem;
+        right: 1.5rem;
+        z-index: 99;
+        text-align: right;
+
+        > ul {
+          text-align: left;
+          visibility: hidden;
+          transition: all ease-in-out 0.1s;
+          padding: 1em;
+          border-radius: var(--standard-border-radius);
+          filter: drop-shadow(1px 1px 2px var(--border));
+        }
+
+        opacity: 0.8;
+        &[data-expanded="true"] {
+          opacity: 1;
+          > ul {
+            visibility: visible;
+            margin-right: 1rem;
+            background-color: white;
+            font-size: 1.2rem;
+          }
+        }
+
+        #sidebar-hamburger {
+          display: inline-block;
+          margin-left: auto;
+          background-color: var(--primary);
+          padding: 0.5rem;
+          border-radius: 100rem;
+          > svg {
+            width: 2rem;
+            height: 2rem;
+          }
+        }
+      }
+    }
+  }
+
   /* CMC Logo */
   .cmc-logo::before {
-    content: "hello";
+    display: inline-block;
+    content: "a";
     width: 3rem;
-    height: 3rem;
-    overflow: none;
     color: transparent;
-    margin: 0;
-    padding: 0;
     margin-right: 0.25rem;
     background-image: url("logo_256.png");
     background-repeat: no-repeat;
