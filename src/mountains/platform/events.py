@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import datetime
-import json
 import logging
 from sqlite3 import Connection
 
@@ -100,33 +99,42 @@ def event_routes(blueprint: Blueprint):
                     events_repo(conn).update(id=id, is_deleted=True)
                     return redirect(url_for("platform.events"))
 
+        expanded = request.args.get("expanded", type=str_to_bool, default=False)
         event_attendees, event_members = _events_attendees(conn, [event])
 
-        print(request.headers)
         if request.headers.get("HX-Target") == "selectedEvent":
-            # This request also needs the is_dialog part
+            # This request also needs the is_dialog part, since its acting
+            # more like a link to events/<id>
             return render_template(
                 "platform/_event.html.j2",
                 is_dialog=True,
                 event=event,
                 attendees=event_attendees,
                 members=event_members,
+                expanded=expanded,
             )
         elif request.headers.get("HX-Target") == event.slug:
-            # This can skip is_dialog
-            return render_template(
-                "platform/_event.html.j2",
-                is_dialog=False,
-                event=event,
-                attendees=event_attendees,
-                members=event_members,
+            # This can skip is_dialog, and should not update the URL as its acting like
+            # a refresh
+            response = make_response(
+                render_template(
+                    "platform/_event.html.j2",
+                    is_dialog=False,
+                    event=event,
+                    attendees=event_attendees,
+                    members=event_members,
+                    expanded=expanded,
+                )
             )
+            response.headers["HX-Replace-Url"] = "false"
+            return response
         else:
             return render_template(
                 "platform/event.html.j2",
                 event=event,
                 attendees=event_attendees,
                 members=event_members,
+                expanded=expanded,
             )
 
     @blueprint.route("/events/calendar")
@@ -370,19 +378,7 @@ def event_routes(blueprint: Blueprint):
                         attendees_repo.delete_where(event_id=event.id, user_id=user_id)
                 # TODO: Audit!
 
-        if request.headers.get("HX-Target") == event.slug:
-            event_attendees, event_members = _events_attendees(conn, [event])
-            # This can skip is_dialog
-            return render_template(
-                "platform/_event.html.j2",
-                is_dialog=False,
-                event=event,
-                attendees=event_attendees,
-                members=event_members,
-                expanded_attendees=True,
-            )
-        else:
-            return redirect(url_for(".event", id=event.id))
+        return redirect(url_for(".event", id=event.id, expanded=True))
 
 
 def _events_attendees(

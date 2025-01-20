@@ -96,6 +96,7 @@ Parse lists correctly (-) in markdown
 Backups
 Mid-roles (coordinator, not committee, + site admin)
 General look over for TODOs
+Note on HTMX - in forms try to just POST to emulate POST -> 302 -> GET behaviour
 Testing!
 
 Other Issues (after release)

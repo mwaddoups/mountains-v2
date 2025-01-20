@@ -23,10 +23,11 @@
       </span>
     {% endif %}
     {% if g.current_user.is_site_admin %}
-      <span class="admin flex flex-gap-small" hx-boost="true">
+      <span class="admin flex flex-gap-small">
         <small>({{ user.mobile }})</small>
         <small>ICE: {{ user.in_case_emergency }}</small>
         <form method="post"
+              hx-post="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}"
               action="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
           <input type="hidden" name="method" value="PUT" />
           <input type="hidden"
@@ -57,6 +58,7 @@
           </button>
         </form>
         <form method="post"
+              hx-post="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}"
               action="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
           <input type="hidden" name="method" value="PUT" />
           <input type="hidden"
@@ -77,6 +79,7 @@
           </button>
         </form>
         <form method="post"
+              hx-post="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}"
               action="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
           <input type="hidden" name="method" value="DELETE" />
           <button type="submit" data-tooltip="Remove User">
@@ -150,7 +153,7 @@
     {% set evt_attendees = attendees[event.id] | sort(attribute='joined_at_utc') %}
     {% set total = evt_attendees | length %}
     {% set total_wait = evt_attendees | map(attribute='is_waiting_list') | sum %}
-    <details class="attendees" {{ 'open' if expanded_attendees }}>
+    <details class="attendees" {{ 'open' if expanded }}>
       <summary>
         <span>Attendees ({{ total - total_wait }} total, {{ event.max_attendees if event.max_attendees and event.max_attendees > 0 else 'no' }} max)</span>
         <div class="attendees-summary">
@@ -176,7 +179,7 @@
       </ul>
     </details>
     {% if total_wait > 0 %}
-      <details class="attendees" {{ 'open' if expanded_attendees }}>
+      <details class="attendees" {{ 'open' if expanded }}>
         <summary>
           <span>Waiting List ({{ total_wait }} total)</span>
           <div class="attendees-summary">
@@ -197,15 +200,13 @@
     {% if event.is_upcoming() %}
       {% if g.current_user.id in (evt_attendees | map(attribute='user_id') | list) %}
         <form method="post"
-              hx-boost="true"
-              hx-delete="{{ url_for('platform.attendee', event_id=event.id, user_id=g.current_user.id) }}"
+              hx-post="{{ url_for('platform.attendee', event_id=event.id, user_id=g.current_user.id) }}"
               action="{{ url_for('platform.attendee', event_id=event.id, user_id=g.current_user.id) }}">
           <input type="hidden" name="method" value="DELETE" />
           <input type="submit" class="btn-cancel" value="Leave" />
         </form>
       {% else %}
         <form method="post"
-              hx-boost="true"
               hx-post="{{ url_for('platform.attend_event', event_id=event.id) }}"
               action="{{ url_for('platform.attend_event', event_id=event.id) }}">
           <input type="hidden" name="method" value="POST" />
