@@ -1,34 +1,42 @@
 {% from "platform/macros/profile.html.j2" import profile_picture %}
-{% from "platform/macros/theme.html.j2" import badge %}
+{% from "platform/macros/theme.html.j2" import badge, color_class %}
 {% extends "platform/base.html.j2" %}
+{% macro calendar_event(event, time_str) %}
+  <div class="calendar-event {{ color_class(event.event_type.name) }}">
+    <span>{{ time_str }}</span>
+    <span>{{ event.title }}</span>
+  </div>
+{% endmacro %}
 {% block platform %}
-  <h1>Calendar {{ year }} {{ month }}</h1>
+  <div class="calendar-controls">
+    <a href="{{ url_for('.events_calendar', year=prev_month_dt.year, month=prev_month_dt.month) }}">< {{ prev_month_dt.strftime("%B %Y") }}</a>
+    <h3>{{ month_dt.strftime("%B %Y") }}</h3>
+    <a href="{{ url_for('.events_calendar', year=next_month_dt.year, month=next_month_dt.month) }}">{{ next_month_dt.strftime("%B %Y") }} ></a>
+  </div>
   <div class="events-calendar">
     {% for day in ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] %}
       <h4>{{ day }}</h4>
     {% endfor %}
     {% for day_dt in days %}
-      <div class="events-calendar-day">
+      <article class="events-calendar-day{{ ' not-month' if day_dt.month != month_dt.month }}{{ ' is-today' if day_dt.month == today.month and day_dt.day == today.day }}">
         <h4>{{ day_dt.day }}</h4>
         {% for event in events %}
-          {% if event.event_dt.date() == day_dt %}
-            <div>
-              <span>{{ event.event_dt.strftime("%H:%M") }}</span>
-              <span>{{ event.title }}</span>
-            </div>
-          {% elif event.event_dt.date() < day_dt and event.event_end_dt and event.event_end_dt.date() > day_dt %}
-            <div>
-              <span>All Day</span>
-              <span>{{ event.title }}</span>
-            </div>
-          {% elif event.event_end_dt and event.event_end_dt.date() == day_dt %}
-            <div>
-              <span>{{ event.event_end_dt.strftime("%H:%M") }}</span>
-              <span>{{ event.title }}</span>
-            </div>
+          {% if event.is_happening_on(day_dt) %}
+            <a href="{{ url_for('.event', id=event.id) }}">
+              <article class="calendar-event {{ color_class(event.event_type.name) }}">
+                {% if event.event_dt.date() == day_dt %}
+                  <span>{{ event.event_dt.strftime("%H:%M") }}</span>
+                {% elif event.event_dt.date() < day_dt and event.event_end_dt and event.event_end_dt.date() > day_dt %}
+                  <span>All Day</span>
+                {% elif event.event_end_dt and event.event_end_dt.date() == day_dt %}
+                  <span>{{ event.event_end_dt.strftime("%H:%M") }}</span>
+                {% endif %}
+                <span>{{ event.title }}</span>
+              </article>
+            </a>
           {% endif %}
         {% endfor %}
-      </div>
+      </article>
     {% endfor %}
   </div>
 {% endblock platform %}

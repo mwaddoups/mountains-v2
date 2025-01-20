@@ -128,7 +128,7 @@ with (
             is_locked=bool(ev["signup_open"]),
             price_id=ev["price_id"],
             is_draft=False,
-            is_deleted=False,
+            is_deleted=bool(ev["is_deleted"]),
         )
 
         events_repo.insert(new_event)

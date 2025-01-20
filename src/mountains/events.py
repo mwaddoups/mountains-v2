@@ -71,6 +71,12 @@ class Event:
     def is_upcoming(self) -> bool:
         return self.is_upcoming_on(now_utc().date())
 
+    def is_happening_on(self, dt: datetime.date) -> bool:
+        if self.event_end_dt is None:
+            return self.event_dt.date() == dt
+        else:
+            return self.event_dt.date() <= dt and self.event_end_dt.date() >= dt
+
     def is_open(self) -> bool:
         if self.signup_open_dt is None:
             return True

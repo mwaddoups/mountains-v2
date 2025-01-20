@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import logging
+from faulthandler import is_enabled
 from sqlite3 import Connection
 
 from flask import (
@@ -166,7 +167,7 @@ def event_routes(blueprint: Blueprint):
             # TODO: Use WHERE in DB
             events = [
                 e
-                for e in events_repo(conn).list()
+                for e in events_repo(conn).list_where(is_deleted=False)
                 if (e.event_dt >= start and e.event_dt <= end)
                 or (
                     e.event_end_dt is not None
@@ -179,11 +180,18 @@ def event_routes(blueprint: Blueprint):
             start.date() + datetime.timedelta(days=i) for i in range((end - start).days)
         ]
 
+        # These just need to be accurate down to year-month
+        month_dt = datetime.datetime(year, month, 1)
+        prev_month_dt = month_dt - datetime.timedelta(days=1)
+        next_month_dt = month_dt + datetime.timedelta(days=40)
+
         return render_template(
             "platform/events.calendar.html.j2",
-            year=year,
-            month=month,
+            month_dt=month_dt,
+            prev_month_dt=prev_month_dt,
+            next_month_dt=next_month_dt,
             days=days,
+            today=now,
             events=events,
         )
 
