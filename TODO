@@ -6,7 +6,6 @@ Big plan: STOP STYLING! Get all the functionality in and style AT THE END
 - Dormant users
 - Activity
 - Event templates
-- Calendar styling
 - Mobile layout
 - The new pages
 
@@ -28,6 +27,7 @@ Close filter
 Single event page
 Refresh button (decided against this)
 Attending popups
+Calendar
 
 TODO
 Attending popup - dormant user
@@ -36,7 +36,6 @@ Signup countdown
 Event templates
 Event description previews
 Drafts
-Calendar
 
 Users
 DONE

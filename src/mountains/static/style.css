@@ -125,6 +125,7 @@
   h5,
   h6 {
     overflow-wrap: break-word;
+    margin: 0.5em 0;
   }
 
   /* Links and buttons */
@@ -185,6 +186,10 @@
       padding: 0.25rem;
       display: inline-flex;
       align-items: center;
+      > svg {
+        width: 1em;
+        height: 1em;
+      }
     }
   }
 
@@ -394,35 +399,78 @@
     }
   }
 
+  /* Main nav */
   body > header > nav {
+    width: 100vw;
     display: flex;
     align-items: center;
     font-size: 1rem;
     white-space: nowrap;
     gap: 0.5rem;
-    padding: 0 1rem 0 1rem;
+    padding: 0.5rem;
+    @media (max-width: 900px) {
+      flex-direction: column;
+
+      /* Handle expanding the hamburger */
+      max-height: 2.5rem;
+      transition: max-height ease-in-out 0.2s;
+      overflow: hidden;
+      &[data-expanded="true"] {
+        max-height: 50rem;
+        #nav-hamburger {
+          background-color: white;
+          color: var(--text-light);
+        }
+      }
+    }
 
     h1 {
       font-size: 1.25em;
       letter-spacing: -0.025em;
-      margin-right: 1em;
+      margin: 0;
+    }
+
+    #nav-hamburger {
+      display: none;
+    }
+    @media (max-width: 900px) {
+      #nav-hamburger {
+        display: inherit;
+      }
+
+      ul li {
+        width: 100%;
+      }
+
+      li:has(#nav-hamburger) {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
     }
 
     ul,
     ol {
       display: flex;
-      gap: 1rem;
+      gap: 0.5rem;
       align-items: center;
+      @media (max-width: 900px) {
+        width: 100%;
+        flex-direction: column;
+      }
     }
 
     aside {
       display: flex;
-      gap: 1rem;
+      gap: 0.5rem;
       align-items: center;
       margin-left: auto;
-
-      a {
-        color: inherit;
+      @media (max-width: 900px) {
+        margin-left: unset;
+        flex-direction: column;
+        > * {
+          width: 100%;
+        }
       }
     }
   }
@@ -430,6 +478,7 @@
   /* Sidebar */
   aside > nav {
     padding: 0 1rem;
+    white-space: nowrap;
 
     :is(a, a:visited) {
       color: var(--primary);
@@ -457,11 +506,14 @@
 
   /* CMC Logo */
   .cmc-logo::before {
-    content: "";
+    content: "hello";
     width: 3rem;
     height: 3rem;
+    overflow: none;
+    color: transparent;
     margin: 0;
     padding: 0;
+    margin-right: 0.25rem;
     background-image: url("logo_256.png");
     background-repeat: no-repeat;
     background-position: center;
