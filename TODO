@@ -10,13 +10,14 @@ Attendee list / editing
 Signup open date
 Close filter
 Single event page
+Refresh button (decided against this)
 
 DOING
 Attending popups
 
 TODO
 Paid buttons
-HTMX juicing - refresh button
+Signup countdown
 Event templates
 Event description previews
 Drafts

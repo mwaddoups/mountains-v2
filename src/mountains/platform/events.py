@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import json
 import logging
 from sqlite3 import Connection
 
@@ -9,6 +10,7 @@ from flask import (
     abort,
     current_app,
     g,
+    make_response,
     redirect,
     render_template,
     request,
@@ -101,9 +103,19 @@ def event_routes(blueprint: Blueprint):
         event_attendees, event_members = _events_attendees(conn, [event])
 
         if request.headers.get("HX-Target") == "selectedEvent":
+            # This request also needs the is_dialog part
             return render_template(
                 "platform/_event.html.j2",
                 is_dialog=True,
+                event=event,
+                attendees=event_attendees,
+                members=event_members,
+            )
+        elif request.headers.get("HX-Target") == event.slug:
+            # This can skip is_dialog
+            return render_template(
+                "platform/_event.html.j2",
+                is_dialog=False,
                 event=event,
                 attendees=event_attendees,
                 members=event_members,
@@ -330,10 +342,7 @@ def event_routes(blueprint: Blueprint):
             if user is None:
                 abort(404, f"User {user_id} not found!")
 
-        if request.method == "POST":
-            method = request.form["method"]
-        else:
-            method = request.method
+        method = req_method(request)
 
         if method == "POST":
             _add_user_to_event(event, user_id, db_name=current_app.config["DB_NAME"])
@@ -348,9 +357,9 @@ def event_routes(blueprint: Blueprint):
                         updates = {}
                         for allowed in ("is_waiting_list", "is_trip_paid"):
                             if (
-                                value := request.form.get("allowed", type=str_to_bool)
+                                value := request.form.get(allowed, type=str_to_bool)
                             ) is not None:
-                                request.form[allowed] = value
+                                updates[allowed] = value
 
                         attendees_repo.update(
                             _where=dict(event_id=event.id, user_id=user_id),
@@ -360,7 +369,19 @@ def event_routes(blueprint: Blueprint):
                         attendees_repo.delete_where(event_id=event.id, user_id=user_id)
                 # TODO: Audit!
 
-        return redirect(_single_event_url(event))
+        if request.headers.get("HX-Target") == event.slug:
+            event_attendees, event_members = _events_attendees(conn, [event])
+            # This can skip is_dialog
+            return render_template(
+                "platform/_event.html.j2",
+                is_dialog=False,
+                event=event,
+                attendees=event_attendees,
+                members=event_members,
+                expanded_attendees=True,
+            )
+        else:
+            return redirect(url_for(".event", id=event.id))
 
 
 def _single_event_url(event: Event) -> str:

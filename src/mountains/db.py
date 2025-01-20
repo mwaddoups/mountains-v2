@@ -65,22 +65,29 @@ class Repository[T]:
     def _field_names(self) -> list[str]:
         return [f.name for f in attrs.fields(self.storage_cls)]
 
+    def _try_execute(self, query, *args, **kwargs):
+        try:
+            return self.conn.execute(query, *args, **kwargs)
+        except sqlite3.OperationalError as e:
+            e.add_note(query)
+            raise e
+
     def next_id(self) -> int:
-        cur = self.conn.execute(f"SELECT MAX({self.id_col}) + 1 FROM {self.table_name}")
+        cur = self._try_execute(f"SELECT MAX({self.id_col}) + 1 FROM {self.table_name}")
         return cur.fetchone()[0]
 
     def create_table(self):
-        self.conn.execute(f"""
+        self._try_execute(f"""
             CREATE TABLE IF NOT EXISTS {self.table_name} 
             ({",".join(self.schema)})
             WITHOUT ROWID
         """)
 
     def drop_table(self):
-        self.conn.execute(f"DROP TABLE IF EXISTS {self.table_name}")
+        self._try_execute(f"DROP TABLE IF EXISTS {self.table_name}")
 
     def insert(self, obj: T) -> None:
-        self.conn.execute(
+        self._try_execute(
             f"""
             INSERT INTO {self.table_name} (
                 {",".join(self._field_names)}
@@ -100,7 +107,7 @@ class Repository[T]:
             assert id is not None
             _where = {"id": id}
 
-        self.conn.execute(
+        self._try_execute(
             f"""
             UPDATE {self.table_name}
             SET {",".join([f"{k} = :{k}" for k in kwargs])}
@@ -110,7 +117,7 @@ class Repository[T]:
         )
 
     def get(self, **kwargs) -> T | None:
-        cur = self.conn.execute(
+        cur = self._try_execute(
             f"""
             SELECT {",".join(self._field_names)} FROM {self.table_name}
             WHERE {" AND ".join([f"{k} = :{k}" for k in kwargs])}
@@ -126,7 +133,7 @@ class Repository[T]:
             return structure(dict(row), self.storage_cls)
 
     def list(self) -> list[T]:
-        cur = self.conn.execute(f"""
+        cur = self._try_execute(f"""
             SELECT {",".join(self._field_names)} FROM {self.table_name}
         """)
         rows = cur.fetchall()
@@ -134,7 +141,7 @@ class Repository[T]:
         return [structure(dict(row), self.storage_cls) for row in rows]
 
     def list_where(self, **kwargs) -> typing.List[T]:
-        cur = self.conn.execute(
+        cur = self._try_execute(
             f"""
             SELECT {",".join(self._field_names)} 
             FROM {self.table_name}
@@ -147,7 +154,7 @@ class Repository[T]:
         return [structure(dict(row), self.storage_cls) for row in rows]
 
     def delete_where(self, **kwargs):
-        self.conn.execute(
+        self._try_execute(
             f"""
             DELETE FROM {self.table_name}
             WHERE {" AND ".join([f"{k} = :{k}" for k in kwargs])}

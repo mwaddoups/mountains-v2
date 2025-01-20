@@ -23,10 +23,11 @@
       </span>
     {% endif %}
     {% if g.current_user.is_site_admin %}
-      <span class="admin flex flex-gap-small">
+      <span class="admin flex flex-gap-small" hx-boost="true">
         <small>({{ user.mobile }})</small>
         <small>ICE: {{ user.in_case_emergency }}</small>
         <form method="post"
+              hx-put="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}"
               action="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
           <input type="hidden" name="method" value="PUT" />
           <input type="hidden"
@@ -57,6 +58,7 @@
           </button>
         </form>
         <form method="post"
+              hx-put="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}"
               action="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
           <input type="hidden" name="method" value="PUT" />
           <input type="hidden"
@@ -77,6 +79,7 @@
           </button>
         </form>
         <form method="post"
+              hx-delete="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}"
               action="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
           <input type="hidden" name="method" value="DELETE" />
           <button type="submit" data-tooltip="Remove User">
@@ -96,6 +99,8 @@
 {% endmacro %}
 {% if is_dialog %}<a href="{{ url_for('.events', _anchor=event.slug) }}">< Return to Events</a>{% endif %}
 <article id="{{ event.slug }}"
+         hx-target="this"
+         hx-swap="outerHTML"
          class="event card{{ ' event-past' if not event.is_upcoming() }}">
   <header class="flex">
     <div class="event-date">
@@ -104,11 +109,13 @@
       <span>{{ event.event_dt.strftime("%b %Y") }}</span>
     </div>
     <div>
-      <h1>
-        <a hx-target="#selectedEvent"
-           hx-boost="true"
-           href="{{ url_for('platform.event', id=event.id) }}">{{ event.title }}</a>
-      </h1>
+      <span class="flex">
+        <h1>
+          <a hx-target="#selectedEvent"
+             hx-boost="true"
+             href="{{ url_for('platform.event', id=event.id) }}">{{ event.title }}</a>
+        </h1>
+      </span>
       {{ badge(event.event_type.name) }}
       {% if event.is_members_only %}{{ badge("Members Only") }}{% endif %}
       {% if event.event_end_dt %}
@@ -144,7 +151,7 @@
   {% set evt_attendees = attendees[event.id] | sort(attribute='joined_at_utc') %}
   {% set total = evt_attendees | length %}
   {% set total_wait = evt_attendees | map(attribute='is_waiting_list') | sum %}
-  <details class="attendees">
+  <details class="attendees" {{ 'open' if expanded_attendees }}>
     <summary>
       <span>Attendees ({{ total - total_wait }} total, {{ event.max_attendees if event.max_attendees and event.max_attendees > 0 else 'no' }} max)</span>
       <div class="attendees-summary">
@@ -170,7 +177,7 @@
     </ul>
   </details>
   {% if total_wait > 0 %}
-    <details class="attendees">
+    <details class="attendees" {{ 'open' if expanded_attendees }}>
       <summary>
         <span>Waiting List ({{ total_wait }} total)</span>
         <div class="attendees-summary">
