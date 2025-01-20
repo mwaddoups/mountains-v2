@@ -61,7 +61,7 @@
 
     /* Make the body centered, using 3-col grid */
     display: grid;
-    grid-template-columns: 1fr fit-content(60rem) 1fr;
+    grid-template-columns: 1fr min(60rem, 90%) 1fr;
     margin: 0;
     width: 100vw;
 
@@ -579,10 +579,6 @@
     gap: 0.125rem;
   }
 
-  .float-right {
-    float: right;
-  }
-
   .btn-secondary {
     background-color: var(--primary);
   }
@@ -618,8 +614,10 @@
 
   /* Badges */
   .badge {
+    display: inline-block;
     background-color: var(--cmc-highlight);
     border-radius: var(--standard-border-radius);
+    white-space: nowrap;
     padding: 0.25em 0.5em;
     text-align: center;
     color: var(--text-badge);
@@ -663,10 +661,12 @@
 
   mark.discord {
     display: inline-flex;
+    white-space: nowrap;
     align-items: center;
     gap: 0.25rem;
     > svg {
       height: 1em;
+      width: 1em;
     }
 
     button,
