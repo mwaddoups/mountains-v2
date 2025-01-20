@@ -292,7 +292,7 @@ def event_routes(blueprint: Blueprint):
                     logger.error(
                         "User %s tried to add self to closed event!", g.current_user
                     )
-                return redirect(url_for(".event", id=event.id))
+                return redirect(url_for(".event", id=event.id, expanded=True))
         else:
             with connection(current_app.config["DB_NAME"]) as conn:
                 users = users_repo(conn).list()
