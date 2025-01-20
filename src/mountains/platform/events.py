@@ -18,6 +18,7 @@ from flask import (
 
 from mountains.db import connection
 from mountains.errors import MountainException
+from mountains.pages import latest_page, pages_repo
 from mountains.utils import now_utc, req_method, str_to_bool
 
 from ..events import Attendee, Event, EventType, attendees
@@ -316,21 +317,27 @@ def event_routes(blueprint: Blueprint):
                 abort(404, f"Event {event_id} not found!")
 
         user: User = g.current_user
-        popups = []
+        popups = {}
         # TODO: TRIAL EVENTS!
 
-        if user.discord_id is None:
-            popups.append("Discord")
-        if event.show_participation_ice or len(user.in_case_emergency) == 0:
-            popups.append("Contact Details")
-        if event.show_participation_ice:
-            popups.append("Participation Statement")
+        with connection(current_app.config["DB_NAME"]) as conn:
+            if user.discord_id is None:
+                popups["discord"] = latest_page(
+                    name="discord-popup", repo=pages_repo(conn)
+                ).markdown
+            if event.show_participation_ice or len(user.in_case_emergency) == 0:
+                popups["ice"] = latest_page(
+                    name="ice-popup", repo=pages_repo(conn)
+                ).markdown
+            if event.show_participation_ice:
+                popups["statement"] = latest_page(
+                    name="participation-statement", repo=pages_repo(conn)
+                ).markdown
 
         if len(popups) == 0:
             _add_user_to_event(event, user.id, db_name=current_app.config["DB_NAME"])
             return redirect(url_for(".event", id=event.id))
 
-        # TODO: Editable popup text
         if request.headers.get("HX-Request"):
             response = make_response(
                 render_template(

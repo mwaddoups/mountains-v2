@@ -8,27 +8,39 @@
       hx-target="#selectedEvent"
       action="{{ url_for('platform.attendee', event_id=event.id, user_id=g.current_user.id) }}">
   <input type="hidden" name="method" value="POST" />
-  <section>
-    <h2>Contact Details</h2>
-    <p>Please check contact details below</p>
-    <label>
-      Emergency Contact
-      <input type="text"
-             name="in_case_emergency"
-             value="{{ user.in_case_emergency }}"
-             required />
-    </label>
-    <label>
-      Mobile Number
-      <input type="text" name="mobile" value="{{ user.mobile }}" required />
-    </label>
-  </section>
-  <section>
-    <h2>Participation Statement</h2>
-    <label>
-      Do you agree?
-      <input type="checkbox" name="participation" required />
-    </label>
-  </section>
-  <input type="submit" value="Attend Event">
+  {% if "discord" in popups %}
+    <section>
+      {{ popups['discord'] | markdown | safe }}
+      <a href="{{ url_for('platform.member_discord', slug=user.slug) }}"
+         hx-boost="false"
+         class="button">Set Discord Username</a>
+    </section>
+  {% else %}
+    {% if "ice" in popups %}
+      <section>
+        {{ popups['ice'] | markdown | safe }}
+        <label>
+          Emergency Contact
+          <input type="text"
+                 name="in_case_emergency"
+                 value="{{ user.in_case_emergency }}"
+                 required />
+        </label>
+        <label>
+          Mobile Number
+          <input type="text" name="mobile" value="{{ user.mobile }}" required />
+        </label>
+      </section>
+    {% endif %}
+    {% if "statement" in popups %}
+      <section>
+        {{ popups['statement'] | markdown | safe }}
+        <label>
+          Do you understand the participation statement and our equipment expectations?
+          <input type="checkbox" name="participation" required />
+        </label>
+      </section>
+    {% endif %}
+    <input type="submit" value="Attend Event">
+  {% endif %}
 </form>
