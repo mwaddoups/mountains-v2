@@ -224,15 +224,6 @@ wheels = [
 ]
 
 [[package]]
-name = "markdown"
-version = "3.7"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/54/28/3af612670f82f4c056911fbbbb42760255801b3068c48de792d354ff4472/markdown-3.7.tar.gz", hash = "sha256:2ae2471477cfd02dbbf038d5d9bc226d40def84b4fe2986e49b59b6b472bbed2", size = 357086 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/3f/08/83871f3c50fc983b88547c196d11cf8c3340e37c32d2e9d6152abe2c61f7/Markdown-3.7-py3-none-any.whl", hash = "sha256:7eb6df5690b81a1d7942992c97fad2938e956e79df20cbc6186e9c3a77b1c803", size = 106349 },
-]
-
-[[package]]
 name = "markupsafe"
 version = "3.0.2"
 source = { registry = "https://pypi.org/simple" }
@@ -271,6 +262,15 @@ wheels = [
 ]
 
 [[package]]
+name = "mistune"
+version = "3.1.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/79/6e/96fc7cb3288666c5de2c396eb0e338dc95f7a8e4920e43e38783a22d0084/mistune-3.1.0.tar.gz", hash = "sha256:dbcac2f78292b9dc066cd03b7a3a26b62d85f8159f2ea5fd28e55df79908d667", size = 94401 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b4/b3/743ffc3f59da380da504d84ccd1faf9a857a1445991ff19bf2ec754163c2/mistune-3.1.0-py3-none-any.whl", hash = "sha256:b05198cf6d671b3deba6c87ec6cf0d4eb7b72c524636eddb6dbf13823b52cee1", size = 53694 },
+]
+
+[[package]]
 name = "mountains"
 version = "0.1.0"
 source = { virtual = "." }
@@ -278,7 +278,7 @@ dependencies = [
     { name = "attrs" },
     { name = "cattrs" },
     { name = "flask", extra = ["dotenv"] },
-    { name = "markdown" },
+    { name = "mistune" },
     { name = "pillow" },
     { name = "requests" },
 ]
@@ -294,7 +294,7 @@ requires-dist = [
     { name = "attrs", specifier = ">=24.3.0" },
     { name = "cattrs", specifier = ">=24.1.2" },
     { name = "flask", extras = ["dotenv"], specifier = ">=3.1.0" },
-    { name = "markdown", specifier = ">=3.7" },
+    { name = "mistune", specifier = ">=3.1.0" },
     { name = "pillow", specifier = ">=11.0.0" },
     { name = "requests", specifier = ">=2.32.3" },
 ]

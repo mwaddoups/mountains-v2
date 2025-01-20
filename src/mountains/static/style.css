@@ -78,6 +78,7 @@
 
     /* And any non-header nav as a sidebar */
     > aside:has(nav) {
+      justify-self: right;
       grid-column: 1;
     }
   }

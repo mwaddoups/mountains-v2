@@ -1,7 +1,7 @@
 import datetime
 import logging
 
-import markdown
+import mistune
 from flask import Flask, Response, g, render_template, request, session
 from flask.logging import default_handler
 
@@ -36,7 +36,7 @@ def create_app():
 
     @app.template_filter("markdown")
     def convert_markdown(s: str) -> str:
-        return markdown.markdown(s, extensions=["tables"])
+        return mistune.html(s)  # type: ignore
 
     @app.context_processor
     def now_dt() -> dict:
