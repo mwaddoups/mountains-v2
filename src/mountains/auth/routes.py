@@ -18,6 +18,7 @@ from mountains.email import send_mail
 from mountains.errors import MountainException
 from mountains.tokens import AuthToken, tokens
 from mountains.users import User, users
+from mountains.utils import now_utc
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +36,6 @@ def routes(blueprint: Blueprint):
                 if user is None or not check_password_hash(
                     user.password_hash, form["password"]
                 ):
-                    # TODO: Error handling
                     return redirect(
                         url_for(
                             "auth.login",
@@ -43,7 +43,10 @@ def routes(blueprint: Blueprint):
                         )
                     )
                 else:
+                    # Do login (update last_login)
                     logger.info("Logging in %s", user)
+                    user_db.update(id=user.id, last_login_utc=now_utc())
+
                     logger.debug("Expiring any old tokens for %s...", user)
                     for token in token_db.list_where(id=user.id):
                         if not token.is_valid():

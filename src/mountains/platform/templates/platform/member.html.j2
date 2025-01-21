@@ -43,6 +43,7 @@
               {% if user.membership_expiry %}
                 <mark>Member until: {{ user.membership_expiry.strftime("%Y-%m-%d") }}</mark>
               {% endif %}
+              <mark>Last login: {{ user.last_login_utc }}</mark>
             </article>
           </details>
         {% endif %}
