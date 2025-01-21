@@ -150,6 +150,29 @@
     }
   }
 
+  /* Reset for navigation */
+  nav {
+    line-height: normal;
+
+    ul,
+    ol {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    ul li,
+    ol li,
+    a {
+      display: inline-block;
+    }
+
+    a:not(.button),
+    a:visited:not(.button) {
+      color: inherit;
+    }
+  }
+
   /* Buttons */
   button,
   .button,
@@ -379,29 +402,6 @@
 }
 
 @layer navigation {
-  /* Reset for navigation */
-  nav {
-    line-height: normal;
-
-    ul,
-    ol {
-      list-style-type: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    ul li,
-    ol li,
-    a {
-      display: inline-block;
-    }
-
-    a,
-    a:visited {
-      color: inherit;
-    }
-  }
-
   /* Main nav */
   body > header > nav {
     width: 100vw;
@@ -497,7 +497,8 @@
 
     ul ul,
     ol ol {
-      margin-left: 1rem;
+      border-left: 1px solid rgb(from var(--primary) r g b / 0.5);
+      padding-left: 1rem;
     }
 
     #sidebar-hamburger {
@@ -687,13 +688,10 @@
   }
 
   .admin {
+    --primary: var(--cmc-color-committee);
     --accent: var(--cmc-color-committee);
     --accent-hover: rgb(from var(--accent) r g b / 0.6);
     --text: var(--cmc-color-committee);
-
-    a {
-      color: var(--cmc-color-committee);
-    }
   }
 
   span.admin {
@@ -854,6 +852,10 @@
 
     a {
       align-self: flex-start;
+    }
+
+    .attendee-name {
+      color: var(--cmc-highlight);
     }
   }
 

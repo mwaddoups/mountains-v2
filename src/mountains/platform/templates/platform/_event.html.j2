@@ -5,7 +5,16 @@
     <a href="{{ url_for('platform.member', slug=user.slug) }}"
        class="flex flex-gap-small">
       {{ profile_picture(user, '32') }}
-      <span>{{ user.full_name }}</span>
+      {% if user.is_committee %}
+        {% set color = "color-committee" %}
+      {% elif user.is_coordinator %}
+        {% set color = "color-coordinator" %}
+      {% elif user.is_member %}
+        {% set color = "color-member" %}
+      {% else %}
+        {% set color = "color-guest" %}
+      {% endif %}
+      <span class="attendee-name {{ color }}">{{ user.full_name }}</span>
     </a>
     {% if att_user.is_trip_paid %}
       <span>
