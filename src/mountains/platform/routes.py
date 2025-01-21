@@ -1,5 +1,7 @@
 import datetime
 import logging
+from collections import defaultdict
+from enum import member
 
 from flask import (
     Blueprint,
@@ -37,10 +39,35 @@ def routes(blueprint: Blueprint):
         else:
             with connection(current_app.config["DB_NAME"]) as conn:
                 token = tokens_repo(conn).get(id=token_id)
-                if token is None or users_repo(conn).get(id=token.user_id) is None:
+                if token is None:
                     # Something weird happened
                     del session["token_id"]
                     return redirect(url_for("auth.login"))
+
+                user = users_repo(conn).get(id=token.user_id)
+                if user is None:
+                    # Something weird happened
+                    del session["token_id"]
+                    return redirect(url_for("auth.login"))
+                elif (
+                    user.is_dormant
+                    and request.endpoint
+                    and not request.endpoint.endswith("dormant")
+                ):
+                    return redirect(url_for(".dormant"))
+
+    @blueprint.route("/dormant", methods=["GET", "POST"])
+    def dormant():
+        if request.method == "POST":
+            with connection(current_app.config["DB_NAME"]) as conn:
+                users_repo(conn).update(id=g.current_user.id, is_dormant=False)
+            return redirect(url_for(".home"))
+        else:
+            with connection(current_app.config["DB_NAME"]) as conn:
+                page = latest_page(
+                    name="dormant-return", repo=pages_repo(conn)
+                ).markdown
+            return render_template("platform/dormant.html.j2", content=page)
 
     @blueprint.route("/info")
     @blueprint.route("/info/<page>")
@@ -100,41 +127,34 @@ def routes(blueprint: Blueprint):
             user_map = {u.id: u for u in users_repo(conn).list()}
             event_map = {e.id: e for e in events_repo(conn).list()}
 
-            # Get member counts
-            member_stats = [
-                dict(s)
-                for s in conn.execute("""
-                SELECT membership_expiry, COUNT(id) as num_members 
-                FROM users GROUP BY membership_expiry
-            """).fetchall()
-            ]
-            for r in member_stats:
-                if r["membership_expiry"] is not None:
-                    r["membership_expiry"] = datetime.datetime.fromisoformat(
-                        r["membership_expiry"]
-                    )
-
+            # Get activities
             activities = sorted(
                 activity_repo(conn).list(), key=lambda a: a.dt, reverse=True
             )
 
-            # Get dormant user info
-            dormant_users = [
-                {
-                    "user": u,
-                    "discord_name": discord_names.get(
-                        u.discord_id, "<ID missing from Discord?>"
-                    )
-                    if u.discord_id
-                    else None,
-                    "last_activity": max(
-                        [a.dt for a in activities if a.user_id == u.id],
-                        default=None,
-                    ),
-                }
-                for u in user_map.values()
-                if not u.is_dormant and u.is_inactive_on(now_utc(), threshold_days=90)
-            ]
+        # Get member counts
+        member_stats = defaultdict(int)
+        for u in user_map.values():
+            if not u.is_dormant:
+                member_stats[u.membership_expiry] += 1
+
+        # Calculate dormant user info
+        dormant_users = [
+            {
+                "user": u,
+                "discord_name": discord_names.get(
+                    u.discord_id, "<ID missing from Discord?>"
+                )
+                if u.discord_id
+                else None,
+                "last_activity": max(
+                    [a.dt for a in activities if a.user_id == u.id],
+                    default=None,
+                ),
+            }
+            for u in user_map.values()
+            if not u.is_dormant and u.is_inactive_on(now_utc(), threshold_days=90)
+        ]
 
         return render_template(
             "platform/committee.html.j2",
@@ -145,6 +165,18 @@ def routes(blueprint: Blueprint):
             user_map=user_map,
             event_map=event_map,
         )
+
+    @blueprint.route("/committee/dormant/<int:user_id>", methods=["POST"])
+    def committee_member_dormant(user_id: int):
+        with connection(current_app.config["DB_NAME"]) as conn:
+            users_db = users_repo(conn)
+            user = users_db.get(id=user_id)
+            if user is None:
+                abort(404)
+
+            users_db.update(id=user.id, is_dormant=True)
+
+        return redirect(url_for(".committee", _anchor="dormant-users"))
 
     @blueprint.route("/committee/pages", methods=["GET", "POST"])
     def committee_pages():

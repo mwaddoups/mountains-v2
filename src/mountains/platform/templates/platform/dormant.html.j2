@@ -1,0 +1,7 @@
+{% extends "platform/base.html.j2" %}
+{% block platform %}
+  {{ content | markdown | safe }}
+  <form method="post">
+    <input type="submit" value="Reactivate your account" />
+  </form>
+{% endblock platform %}

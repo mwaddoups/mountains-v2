@@ -84,31 +84,39 @@
   </section>
   <section>
     <h1>How do events work?</h1>
-    <a href="#">
+    <a href="{{ url_for('platform.home', page='day-walks') }}">
       <article class="event-detail color-summer-day-walk">
         <h2>Day Walks</h2>
         <div>{{ bullet_pages['day-walks'] | markdown | safe }}</div>
       </article>
     </a>
-    <article class="event-detail color-summer-weekend">
-      <h2>Hut Trips</h2>
-      <div>{{ bullet_pages['hut-weekends'] | markdown | safe }}</div>
-    </article>
+    <a href="{{ url_for('platform.home', page='hut-weekends') }}">
+      <article class="event-detail color-summer-weekend">
+        <h2>Hut Trips</h2>
+        <div>{{ bullet_pages['hut-weekends'] | markdown | safe }}</div>
+      </article>
+    </a>
+    <a href="{{ url_for('platform.home', page='climbing') }}">
+      <article class="event-detail color-indoor-climbing">
+        <h2>Indoor Climbing</h2>
+        <div>{{ bullet_pages['indoor-climbing'] | markdown | safe }}</div>
+      </article>
+    </a>
+    <a href="{{ url_for('platform.home', page='climbing') }}">
+      <article class="event-detail color-outdoor-climbing">
+        <h2>Outdoor Climbing</h2>
+        <div>{{ bullet_pages['outdoor-climbing'] | markdown | safe }}</div>
+      </article>
+    </a>
+    <a href="{{ url_for('platform.home', page='running') }}">
+      <article class="event-detail color-running">
+        <h2>Trail Running</h2>
+        <div>{{ bullet_pages['running'] | markdown | safe }}</div>
+      </article>
+    </a>
     <article class="event-detail color-winter-weekend">
       <h2>Winter</h2>
       <div>{{ bullet_pages['winter'] | markdown | safe }}</div>
-    </article>
-    <article class="event-detail color-indoor-climbing">
-      <h2>Indoor Climbing</h2>
-      <div>{{ bullet_pages['indoor-climbing'] | markdown | safe }}</div>
-    </article>
-    <article class="event-detail color-outdoor-climbing">
-      <h2>Outdoor Climbing</h2>
-      <div>{{ bullet_pages['outdoor-climbing'] | markdown | safe }}</div>
-    </article>
-    <article class="event-detail color-running">
-      <h2>Trail Running</h2>
-      <div>{{ bullet_pages['running'] | markdown | safe }}</div>
     </article>
     <article class="event-detail color-social">
       <h2>Social</h2>

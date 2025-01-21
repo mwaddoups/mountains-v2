@@ -38,15 +38,16 @@ main {
     justify-content: space-around;
   }
 
+  a:hover h2 {
+    text-decoration: underline;
+  }
+
   .step {
     display: flex;
     flex-direction: column;
     align-items: center;
     * {
       margin: 0;
-    }
-    &:hover h2 {
-      text-decoration: underline;
     }
 
     p {
@@ -75,9 +76,6 @@ main {
 
     h2 {
       text-align: left;
-    }
-    &:hover h2 {
-      text-decoration: underline;
     }
 
     p {

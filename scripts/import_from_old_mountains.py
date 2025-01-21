@@ -52,7 +52,7 @@ with (
     skipped = 0
     for u in old_users:
         u = dict(u)
-        if not u["first_name"] or not u["last_name"]:
+        if not u["first_name"] or not u["last_name"] or not bool(u["is_approved"]):
             skipped += 1
             continue
         u_slug = readable_id([u["first_name"], u["last_name"], str(u["id"])])
@@ -90,7 +90,7 @@ with (
         user_repo.insert(new_user)
         inserted += 1
     print(f"Inserted {inserted} users (password: password)")
-    print(f"Skipped {skipped} users (blank names)")
+    print(f"Skipped {skipped} users (blank names, or not approved)")
 
     # Do the events import
     events_repo = events(out_conn)

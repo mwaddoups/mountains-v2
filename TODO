@@ -3,7 +3,8 @@ Big plan: STOP STYLING! Get all the functionality in and style AT THE END
 # Missing features we NEED
 
 [] Payments
-[] Dormant users
+[x] Dormant users
+[x] Dormant popup / dormant deactvation
 [x] Activity
 [x] Event templates
 [x] Mobile layout
@@ -15,6 +16,7 @@ Big plan: STOP STYLING! Get all the functionality in and style AT THE END
 
 # Nice to have before done
 
+- Images for new pages
 - Drafts
 - Signup countdown
 - Cleverer photo / profile processing

@@ -7,11 +7,11 @@
   <h1>Committee</h1>
   <section>
     <h2>Member Statistics</h2>
-    {% for row in member_stats %}
-      {% if row.membership_expiry %}
-        <p>{{ row.num_members }} paid members (ending {{ row.membership_expiry.strftime("%Y-%m-%d") }})</p>
+    {% for membership_expiry, num_members in member_stats.items() %}
+      {% if membership_expiry %}
+        <p>{{ num_members }} paid members (ending {{ membership_expiry.strftime("%Y-%m-%d") }})</p>
       {% else %}
-        <p>{{ row.num_members }} unpaid users</p>
+        <p>{{ num_members }} users in trial period</p>
       {% endif %}
     {% endfor %}
   </section>
@@ -46,8 +46,8 @@
             <td>{{ dormant.user.created_on_utc.strftime("%b %d, %Y") }}</td>
             <td>{{ dormant.discord_name if dormant.discord_name }}</td>
             <td>
-              <form method="post">
-                <input type="hidden" name="user_id" value="{{ dormant.user.id }}" />
+              <form method="post"
+                    action="{{ url_for('.committee_member_dormant', user_id=dormant.user.id) }}">
                 <input type="submit" value="Deactivate" />
               </form>
             </td>
