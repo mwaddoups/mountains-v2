@@ -375,6 +375,12 @@
     object-fit: contain;
   }
 
+  table {
+    width: 100%;
+    table-layout: fixed;
+    text-align: center;
+  }
+
   /* Basic styling for dialogs */
   dialog {
     border: 0;

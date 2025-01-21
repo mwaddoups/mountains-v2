@@ -1,8 +1,5 @@
 #dormant-users {
   table {
-    width: 100%;
-    table-layout: fixed;
-    text-align: center;
     font-size: 0.875rem;
   }
 }
