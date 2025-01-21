@@ -15,10 +15,12 @@ from flask import (
 
 from mountains.activity import activity_repo
 from mountains.db import connection
+from mountains.discord import DiscordAPI
 from mountains.events import events as events_repo
 from mountains.pages import Page, latest_page, pages_repo
 from mountains.tokens import tokens as tokens_repo
 from mountains.users import users as users_repo
+from mountains.utils import now_utc
 
 from .events import event_routes
 from .members import member_routes
@@ -87,7 +89,18 @@ def routes(blueprint: Blueprint):
 
         num_activities = request.args.get("num_activities", type=int, default=50)
 
+        discord = DiscordAPI.from_app(current_app)
+        discord_names = {
+            m["user"]["id"]: discord.member_username(m)
+            for m in discord.fetch_all_members()
+        }
+
         with connection(current_app.config["DB_NAME"]) as conn:
+            # Get these for sharing data
+            user_map = {u.id: u for u in users_repo(conn).list()}
+            event_map = {e.id: e for e in events_repo(conn).list()}
+
+            # Get member counts
             member_stats = [
                 dict(s)
                 for s in conn.execute("""
@@ -95,25 +108,40 @@ def routes(blueprint: Blueprint):
                 FROM users GROUP BY membership_expiry
             """).fetchall()
             ]
-
             for r in member_stats:
                 if r["membership_expiry"] is not None:
                     r["membership_expiry"] = datetime.datetime.fromisoformat(
                         r["membership_expiry"]
                     )
 
-            user_map = {u.id: u for u in users_repo(conn).list()}
-            event_map = {e.id: e for e in events_repo(conn).list()}
-
             activities = sorted(
                 activity_repo(conn).list(), key=lambda a: a.dt, reverse=True
             )
+
+            # Get dormant user info
+            dormant_users = [
+                {
+                    "user": u,
+                    "discord_name": discord_names.get(
+                        u.discord_id, "<ID missing from Discord?>"
+                    )
+                    if u.discord_id
+                    else None,
+                    "last_activity": max(
+                        [a.dt for a in activities if a.user_id == u.id],
+                        default=None,
+                    ),
+                }
+                for u in user_map.values()
+                if not u.is_dormant and u.is_inactive_on(now_utc(), threshold_days=90)
+            ]
 
         return render_template(
             "platform/committee.html.j2",
             member_stats=member_stats,
             activities=activities,
             num_activities=num_activities,
+            dormant_users=dormant_users,
             user_map=user_map,
             event_map=event_map,
         )

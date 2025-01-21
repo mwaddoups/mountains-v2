@@ -1,8 +1,12 @@
 {% extends "platform/base.html.j2" %}
+{% block stylesheets %}
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/committee.css') }}?v=1.0" />
+{% endblock stylesheets %}
 {% block platform %}
   <h1>Committee</h1>
   <section>
-    <h3>Member Statistics</h3>
+    <h2>Member Statistics</h2>
     {% for row in member_stats %}
       {% if row.membership_expiry %}
         <p>{{ row.num_members }} paid members (ending {{ row.membership_expiry.strftime("%Y-%m-%d") }})</p>
@@ -11,8 +15,49 @@
       {% endif %}
     {% endfor %}
   </section>
+  <section id="dormant-users">
+    <h2>Dormant Users</h2>
+    <p>
+      This shows non-member users who either joined more than 3 months ago and have not become a member,
+      or have let their membership expire for longer than 3 months. Note we only started monitoring login in 2024, and activity in 2023.
+    </p>
+    <p>
+      <strong>Found {{ dormant_users | length }} inactive users!</strong>
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Last Login</th>
+          <th scope="col">Last Activity</th>
+          <th scope="col">Membership Expiry</th>
+          <th scope="col">Account Created</th>
+          <th scope="col">Discord Name</th>
+          <th scope="col">Make Inactive</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for dormant in dormant_users %}
+          <tr>
+            <td>{{ dormant.user.full_name }}</td>
+            <td>{{ dormant.user.last_login_utc.strftime("%b %d, %Y") if dormant.user.last_login_utc else 'Pre-2024' }}</td>
+            <td>{{ dormant.last_activity.strftime("%b %d, %Y") if dormant.last_activity else 'Pre-2023' }}</td>
+            <td>{{ dormant.user.membership_expiry if dormant.user.membership_expiry }}</td>
+            <td>{{ dormant.user.created_on_utc.strftime("%b %d, %Y") }}</td>
+            <td>{{ dormant.discord_name if dormant.discord_name }}</td>
+            <td>
+              <form method="post">
+                <input type="hidden" name="user_id" value="{{ dormant.user.id }}" />
+                <input type="submit" value="Deactivate" />
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
   <section id="committee-activity">
-    <h3>Activity</h3>
+    <h2>Activity</h2>
     <ol>
       {% for act in activities[:num_activities] %}
         {% set user = user_map[act.user_id] %}

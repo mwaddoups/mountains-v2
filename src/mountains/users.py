@@ -74,6 +74,24 @@ class User:
     def is_authorised(self, user_id: int | None = None) -> bool:
         return self.is_site_admin or self.id == user_id
 
+    def is_inactive_on(self, dt_utc: datetime.datetime, threshold_days: int) -> bool:
+        if self.is_member:
+            return False
+
+        if self.membership_expiry is None:
+            if self.created_on_utc + datetime.timedelta(days=threshold_days) < dt_utc:
+                return True
+            else:
+                return False
+        else:
+            expiry_dt = datetime.datetime.combine(
+                self.membership_expiry, datetime.time(0)
+            )
+            if expiry_dt + datetime.timedelta(days=threshold_days) < dt_utc:
+                return True
+            else:
+                return False
+
     @classmethod
     def from_registration(
         cls,
