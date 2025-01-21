@@ -24,18 +24,20 @@
   --cancel: var(--disabled);
 
   /* CMC-specific colors */
-  --cmc-highlight: #f472b6;
+  --cmc-highlight: #d97706;
+  --cmc-color-discord: rgb(79, 70, 229);
   --cmc-color-committee: rgb(192, 132, 252);
-  --cmc-color-coordinator: rgb(251, 146, 60);
+  --cmc-color-coordinator: #d97706;
   --cmc-color-member: #3b82f6;
-  --cmc-color-guest: #4ade80;
-  --cmc-color-summer-day-walk: #4ade80;
+  --cmc-color-guest: #16a34a;
+  --cmc-color-summer-day-walk: #65a30d;
   --cmc-color-summer-weekend: #15803d;
   --cmc-color-winter-day-walk: #3b82f6;
   --cmc-color-winter-weekend: #1d4ed8;
   --cmc-color-indoor-climbing: #c084fc;
   --cmc-color-outdoor-climbing: #9333ea;
   --cmc-color-run: #eab308;
+  --cmc-color-social: #ec4899;
   --cmc-color-other: #f472b6;
 }
 
@@ -562,7 +564,7 @@
     width: 3rem;
     color: transparent;
     margin-right: 0.25rem;
-    background-image: url("logo_256.png");
+    background-image: url("../logo_256.png");
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
@@ -659,6 +661,12 @@
   }
   .color-members-only {
     --cmc-highlight: var(--cmc-color-member);
+  }
+  .color-social {
+    --cmc-highlight: var(--cmc-color-social);
+  }
+  .color-discord {
+    --cmc-highlight: var(--cmc-color-discord);
   }
 
   mark.discord {

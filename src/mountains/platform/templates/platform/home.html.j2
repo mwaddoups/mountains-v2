@@ -1,7 +1,110 @@
 {% extends "platform/base.html.j2" %}
+{% block stylesheets %}
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/info.css') }}?v=1.0" />
+{% endblock stylesheets %}
 {% block platform %}
-  <h1>Welcome to Clyde Mountaineering Club!</h1>
+  <header>
+    <img src="{{ url_for('static', filename='logo_256.png') }}"
+         width="183"
+         alt="CMC logo"
+         height="100" />
+    <h1>Welcome to Clyde Mountaineering Club!</h1>
+  </header>
   <section>
-    Our homepage
+    <h1>New to the club?</h1>
+    <div class="steps">
+      <a class="step color-discord" href="https://discord.gg/98K3CafRxk">
+        <article>
+          <h2>Step 1</h2>
+          <p>Join our Discord server</p>
+          <small>We use it for everything!</small>
+        </article>
+      </a>
+      <a class="step"
+         href="{{ url_for('.member', slug=g.current_user.slug) }}">
+        <article>
+          <h2>Step 2</h2>
+          <p>Update your profile</p>
+          <small>A photo helps so we can spot you!</small>
+        </article>
+      </a>
+      <a class="step color-guest" href="{{ url_for('.events_calendar') }}">
+        <article>
+          <h2>Step 3</h2>
+          <p>Try an event</p>
+          <small>As a non-member you can attend up to 4 events.</small>
+        </article>
+      </a>
+      <a class="step color-member" href="{{ url_for('.join') }}">
+        <article>
+          <h2>Step 4</h2>
+          <p>Join the club</p>
+          <small>MScot membership, discounts, kit library, hut access and more...</small>
+        </article>
+      </a>
+    </div>
+    <small>
+      Please note that we wish to avoid the number of prospective members getting too large - if you haven't joined the club within three months, your account will be deactivated and you will lose access to Discord.
+    </small>
+  </section>
+  <section>
+    <h1>How do events work?</h1>
+    <a href="#">
+      <article class="event-detail color-summer-day-walk">
+        <h2>Day Walks</h2>
+        <div>
+          <p>Something</p>
+          <p>Something else</p>
+          <p>Something else</p>
+          <p>Something else</p>
+          <p>Something else</p>
+          <p>Something else</p>
+        </div>
+      </article>
+    </a>
+    <article class="event-detail color-summer-weekend">
+      <h2>Hut Trips</h2>
+      <div>
+        <p>Something</p>
+        <p>Something else</p>
+      </div>
+    </article>
+    <article class="event-detail color-outdoor-climbing">
+      <h2>Climbing</h2>
+      <div>
+        <p>Something</p>
+        <p>Something else</p>
+      </div>
+    </article>
+    <article class="event-detail color-winter-weekend">
+      <h2>Winter</h2>
+      <div>
+        <p>Something</p>
+        <p>Something else</p>
+      </div>
+    </article>
+    <article class="event-detail color-running">
+      <h2>Trail Running</h2>
+      <div>
+        <p>Something</p>
+        <p>Something else</p>
+      </div>
+    </article>
+    <article class="event-detail color-social">
+      <h2>Social</h2>
+      <div>
+        <p>Something</p>
+        <p>Something else</p>
+      </div>
+    </article>
+  </section>
+  <section>
+    <h1>Club Feedback</h1>
+    <p>
+      We are always happy to hear feedback and ideas. Either let us know by bringing up issues in the Discord, speaking privately to one of our committee members, or if you'd like to give feedback anonymously, use the link below.
+    </p>
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLScz6Fn6l1XVN-G2VEz6e9mJG-_EqftuFrs_CmZbs6UtEYqw6A/viewform?usp=sf_link"
+       class="button">Give Feedback</a>
   </section>
 {% endblock platform %}

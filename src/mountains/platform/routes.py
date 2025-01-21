@@ -40,7 +40,7 @@ def routes(blueprint: Blueprint):
                     del session["token_id"]
                     return redirect(url_for("auth.login"))
 
-    @blueprint.route("/home")
+    @blueprint.route("/info")
     def home():
         return render_template("platform/home.html.j2")
 
