@@ -139,7 +139,7 @@
     {% if g.current_user.is_site_admin %}
       <details class="admin">
         <summary>Admin</summary>
-        <article class="card">
+        <article class="admin-panel">
           <a class="button"
              href="{{ url_for('platform.edit_event', id=event.id) }}">Edit event</a>
           <a class="button"

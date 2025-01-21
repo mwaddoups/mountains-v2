@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from socket import IP_ADD_SOURCE_MEMBERSHIP
 from typing import TYPE_CHECKING, TypedDict
 
 import requests
@@ -78,8 +77,8 @@ class DiscordAPI:
                 f"DEBUG: Not actually posting to Discord, would set user_id {user_id} to member!"
             )
 
-    def remove_member_role(self, user_id: str, debug: bool):
-        if not debug:
+    def remove_member_role(self, user_id: str):
+        if not self.debug:
             res = requests.delete(
                 f"https://discord.com/api/v10/guilds/{GUILD_ID}/members/{user_id}/roles/{MEMBER_ROLE_ID}",
                 headers=self._api_headers(),

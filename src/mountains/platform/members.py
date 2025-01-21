@@ -60,15 +60,28 @@ def member_routes(blueprint: Blueprint):
         if request.method == "POST":
             with connection(current_app.config["DB_NAME"]) as conn:
                 if "membership_expiry" in request.form:
+                    discord = DiscordAPI.from_app(current_app)
                     if expiry_str := request.form["membership_expiry"]:
+                        # We are making them a member
                         users_repo(conn).update(
                             id=user.id,
                             membership_expiry=datetime.datetime.strptime(
                                 expiry_str, "%Y-%m-%d"
                             ).date(),
                         )
+
+                        if (
+                            user.membership_expiry is None
+                            and user.discord_id is not None
+                        ):
+                            # They were previously not a member, lets set it on Discord.
+                            discord.set_member_role(user.discord_id)
                     else:
-                        users_repo(conn).update(id=user.id, membership_expiry=None)
+                        # We are removing membership
+                        if user.membership_expiry is not None:
+                            users_repo(conn).update(id=user.id, membership_expiry=None)
+                            if user.discord_id is not None:
+                                discord.remove_member_role(user.discord_id)
                 elif (
                     is_coordinator := request.form.get(
                         "is_coordinator", type=str_to_bool, default=None
@@ -76,6 +89,7 @@ def member_routes(blueprint: Blueprint):
                 ) is not None:
                     users_repo(conn).update(id=user.id, is_coordinator=is_coordinator)
 
+                # We update the user here so we have the right values
                 user = users_repo(conn).get(id=user.id)
                 assert user is not None
 
