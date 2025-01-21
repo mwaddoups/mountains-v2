@@ -1,14 +1,16 @@
 {% extends "base.html.j2" %}
 {% macro nav_link(endpoint, name) -%}
+  {% set url = url_for(endpoint, **kwargs) %}
   {% if request.endpoint.startswith(endpoint) %}
     <li>
-      <a href="{{ url_for(endpoint) }}"
-         aria-selected="{{ 'true' if request.endpoint.endswith(endpoint) else 'false' }}">{{ name }}</a>
+      {% set is_selected = url == url_for(request.endpoint, **request.view_args) %}
+      <a href="{{ url }}"
+         aria-selected="{{ 'true' if is_selected else 'false' }}">{{ name }}</a>
       {% if caller %}{{ caller() }}{% endif %}
     </li>
   {% else %}
     <li>
-      <a href="{{ url_for(endpoint) }}">{{ name }}</a>
+      <a href="{{ url }}">{{ name }}</a>
     </li>
   {% endif %}
 {%- endmacro %}
@@ -16,7 +18,12 @@
   <aside>
     <nav id="sidebar-nav" data-expanded="false">
       <ul preload>
-        {{ nav_link('platform.home', 'Club Info') }}
+        {% call nav_link('platform.home', 'Club Info') %}
+          <ul>
+            {{ nav_link('platform.home', 'Overview') }}
+            {{ nav_link('platform.home', 'Day Walks', page='day-walks') }}
+          </ul>
+        {% endcall %}
         {% call nav_link('platform.events', 'Events') %}
           <ul>
             {{ nav_link('platform.events', 'Upcoming') }}

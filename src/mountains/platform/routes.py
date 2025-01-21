@@ -41,8 +41,16 @@ def routes(blueprint: Blueprint):
                     return redirect(url_for("auth.login"))
 
     @blueprint.route("/info")
-    def home():
-        return render_template("platform/home.html.j2")
+    @blueprint.route("/info/<page>")
+    def home(page: str = None):
+        if page is None:
+            return render_template("platform/home.html.j2")
+        else:
+            with connection(current_app.config["DB_NAME"]) as conn:
+                page_text = latest_page(
+                    name="join-club", repo=pages_repo(conn)
+                ).markdown
+            return render_template("platform/home.html.j2")
 
     @blueprint.route("/join")
     def join():
