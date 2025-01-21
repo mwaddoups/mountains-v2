@@ -117,7 +117,7 @@ def member(slug: str):
         discord = DiscordAPI.from_app(current_app)
         member = discord.get_member(member_id=user.discord_id)
         if member is not None:
-            discord_name = discord.member_username(member)
+            discord_name = member.member_name
 
     return render_template(
         "members/member.html.j2",
@@ -156,12 +156,8 @@ def member_discord(slug: str):
 
     discord = DiscordAPI.from_app(current_app)
     discord_members = sorted(
-        [
-            {"id": m["user"]["id"], "name": discord.member_username(m)}
-            for m in discord.fetch_all_members()
-            if m["user"]["id"] not in taken_ids
-        ],
-        key=lambda m: m["name"].lower(),
+        [m for m in discord.fetch_all_members() if m.id not in taken_ids],
+        key=lambda m: m.member_name.lower(),
     )
 
     return render_template(

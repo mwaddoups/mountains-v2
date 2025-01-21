@@ -6,7 +6,7 @@
         Discord Username
         <small>(If you can't find your name, let us know on Discord)</small>
         <select name="discord_id" required>
-          {% for member in discord_members %}<option value="{{ member.id }}">{{ member.name }}</option>{% endfor %}
+          {% for member in discord_members %}<option value="{{ member.id }}">{{ member.member_name }}</option>{% endfor %}
         </select>
       </label>
       <input type="submit" value="Link account" />

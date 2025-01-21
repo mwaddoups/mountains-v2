@@ -115,10 +115,7 @@ def routes(blueprint: Blueprint):
         num_activities = request.args.get("num_activities", type=int, default=50)
 
         discord = DiscordAPI.from_app(current_app)
-        discord_names = {
-            m["user"]["id"]: discord.member_username(m)
-            for m in discord.fetch_all_members()
-        }
+        discord_names = {m.id: m.member_name for m in discord.fetch_all_members()}
 
         with connection(current_app.config["DB_NAME"]) as conn:
             # Get these for sharing data
