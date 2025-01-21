@@ -4,12 +4,18 @@ from datetime import datetime
 
 from werkzeug.security import generate_password_hash
 
-from mountains.activity import Activity, activity_repo
 from mountains.db import connection
-from mountains.events import Attendee, Event, EventType, attendees, events
-from mountains.photos import Album, Photo, albums, photos
-from mountains.tokens import tokens
-from mountains.users import User, users_repo
+from mountains.models.activity import Activity, activity_repo
+from mountains.models.events import (
+    Attendee,
+    Event,
+    EventType,
+    attendees_repo,
+    events_repo,
+)
+from mountains.models.photos import Album, Photo, albums_repo, photos_repo
+from mountains.models.tokens import tokens_repo
+from mountains.models.users import User, users_repo
 from mountains.utils import readable_id
 
 parser = argparse.ArgumentParser()
@@ -38,10 +44,10 @@ with (
 ):
     in_conn.row_factory = sqlite3.Row
     user_repo = users_repo(out_conn)
-    token_repo = tokens(out_conn)
+    tokens_db = tokens_repo(out_conn)
     # recreate tokens
-    token_repo.drop_table()
-    token_repo.create_table()
+    tokens_db.drop_table()
+    tokens_db.create_table()
 
     # Do the user import
     user_repo.drop_table()
@@ -93,9 +99,9 @@ with (
     print(f"Skipped {skipped} users (blank names, or not approved)")
 
     # Do the events import
-    events_repo = events(out_conn)
-    events_repo.drop_table()
-    events_repo.create_table()
+    events_db = events_repo(out_conn)
+    events_db.drop_table()
+    events_db.create_table()
 
     old_events = in_conn.execute("SELECT * FROM events_event").fetchall()
     inserted = 0
@@ -132,14 +138,14 @@ with (
             is_deleted=bool(ev["is_deleted"]),
         )
 
-        events_repo.insert(new_event)
+        events_db.insert(new_event)
         inserted += 1
     print(f"Inserted {inserted} events.")
 
     # Do the attendees import
-    attendees_repo = attendees(out_conn)
-    attendees_repo.drop_table()
-    attendees_repo.create_table()
+    attendees_db = attendees_repo(out_conn)
+    attendees_db.drop_table()
+    attendees_db.create_table()
 
     old_attendees = in_conn.execute("SELECT * FROM events_attendinguser").fetchall()
     inserted = 0
@@ -154,14 +160,14 @@ with (
             joined_at_utc=datetime.fromisoformat(au["list_join_date"]),
         )
 
-        attendees_repo.insert(new_au)
+        attendees_db.insert(new_au)
         inserted += 1
     print(f"Inserted {inserted} attendees.")
 
     # Do the albums import
-    albums_repo = albums(out_conn)
-    albums_repo.drop_table()
-    albums_repo.create_table()
+    albums_db = albums_repo(out_conn)
+    albums_db.drop_table()
+    albums_db.create_table()
 
     old_albums = in_conn.execute("SELECT * FROM photos_album").fetchall()
     inserted = 0
@@ -177,14 +183,14 @@ with (
             created_at_utc=datetime.fromisoformat(al["created"]),
         )
 
-        albums_repo.insert(new_al)
+        albums_db.insert(new_al)
         inserted += 1
     print(f"Inserted {inserted} albums.")
 
     # Do the photos import
-    photos_repo = photos(out_conn)
-    photos_repo.drop_table()
-    photos_repo.create_table()
+    photos_db = photos_repo(out_conn)
+    photos_db.drop_table()
+    photos_db.create_table()
 
     old_photos = in_conn.execute("SELECT * FROM photos_photo").fetchall()
     inserted = 0
@@ -201,7 +207,7 @@ with (
                 created_at_utc=datetime.fromisoformat(p["uploaded"]),
             )
 
-            photos_repo.insert(new_p)
+            photos_db.insert(new_p)
             inserted += 1
         else:
             skipped += 1

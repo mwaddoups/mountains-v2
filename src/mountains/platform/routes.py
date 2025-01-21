@@ -14,9 +14,9 @@ from flask import (
 )
 
 from mountains import members
-from mountains.activity import activity_repo
 from mountains.db import connection
 from mountains.discord import DiscordAPI
+from mountains.models.activity import activity_repo
 from mountains.models.events import events_repo
 from mountains.models.pages import Page, latest_page, pages_repo
 from mountains.models.tokens import tokens_repo

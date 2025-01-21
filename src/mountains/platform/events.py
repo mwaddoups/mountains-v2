@@ -16,9 +16,9 @@ from flask import (
     url_for,
 )
 
-from mountains.activity import Activity, activity_repo
 from mountains.db import connection
 from mountains.errors import MountainException
+from mountains.models.activity import Activity, activity_repo
 from mountains.models.events import (
     Attendee,
     Event,
