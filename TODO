@@ -2,13 +2,13 @@ Big plan: STOP STYLING! Get all the functionality in and style AT THE END
 
 # Missing features we NEED
 
-- Payments
-- Dormant users
-- Activity
-- Event templates
-- Mobile layout
-- The new pages
-- Email
+[] Payments
+[] Dormant users
+[x] Activity
+[] Event templates
+[x] Mobile layout
+[] The new pages
+[x] Email
 
 # Nice to have before done
 

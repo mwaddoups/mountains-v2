@@ -81,9 +81,11 @@ def routes(blueprint: Blueprint):
                         "auth.reset_password", token=token.id, _external=True
                     )
                     send_mail(
-                        user.email,
-                        "Password reset for CMC",
-                        f"Reset your password: {reset_url}",
+                        to=[user.email],
+                        subject="Password reset for CMC",
+                        msg_markdown=f"Reset your password: {reset_url}",
+                        debug=current_app.debug,
+                        api_key=current_app.config["MAILGUN_API_KEY"],
                     )
             return render_template("auth/forgotpassword.html.j2", was_reset=True)
         else:
