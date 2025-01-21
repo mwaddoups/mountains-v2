@@ -4,6 +4,7 @@ from datetime import datetime
 
 from werkzeug.security import generate_password_hash
 
+from mountains.activity import Activity, activity_repo
 from mountains.db import connection
 from mountains.events import Attendee, Event, EventType, attendees, events
 from mountains.photos import Album, Photo, albums, photos
@@ -207,3 +208,24 @@ with (
     print(
         f"Inserted {inserted} photos (skipped {skipped} for missing album or uploader id)."
     )
+
+    # Do the activity import
+    activity_db = activity_repo(out_conn)
+    activity_db.drop_table()
+    activity_db.create_table()
+
+    old_activity = in_conn.execute("SELECT * FROM activity_activity").fetchall()
+    inserted = 0
+    skipped = 0
+    for a in old_activity:
+        a = dict(a)
+        new_a = Activity(
+            user_id=a["user_id"],
+            event_id=a["event_id"],
+            dt=datetime.fromisoformat(a["timestamp"]),
+            action=a["action"],
+        )
+
+        activity_db.insert(new_a)
+        inserted += 1
+    print(f"Inserted {inserted} activities")

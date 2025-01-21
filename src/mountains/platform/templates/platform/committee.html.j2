@@ -11,4 +11,25 @@
       {% endif %}
     {% endfor %}
   </section>
+  <section id="committee-activity">
+    <h3>Activity</h3>
+    <ol>
+      {% for act in activities[:num_activities] %}
+        {% set user = user_map[act.user_id] %}
+        {% set event = event_map[act.event_id] %}
+        <li>
+          <span>{{ act.dt.strftime("%d %b %H:%M") }}</span>
+          <b>{{ user.full_name }}</b>
+          {{ act.action }}
+          <a href="{{ url_for('.event', id=event.id) }}">{{ event.title }} ({{ event.event_dt.strftime("%b %d") }})</a>
+        </li>
+      {% endfor %}
+    </ol>
+    <form>
+      <input type="hidden"
+             name="num_activities"
+             value="{{ num_activities + 100 }}" />
+      <input type="submit" value="Show more" />
+    </form>
+  </section>
 {% endblock platform %}

@@ -13,8 +13,9 @@ from flask import (
     url_for,
 )
 
+from mountains.activity import activity_repo
 from mountains.db import connection
-from mountains.errors import MountainException
+from mountains.events import events as events_repo
 from mountains.pages import Page, latest_page, pages_repo
 from mountains.tokens import tokens as tokens_repo
 from mountains.users import users as users_repo
@@ -54,6 +55,8 @@ def routes(blueprint: Blueprint):
         if not g.current_user.is_authorised():
             abort(403)
 
+        num_activities = request.args.get("num_activities", type=int, default=50)
+
         with connection(current_app.config["DB_NAME"]) as conn:
             member_stats = [
                 dict(s)
@@ -69,7 +72,21 @@ def routes(blueprint: Blueprint):
                         r["membership_expiry_utc"]
                     )
 
-        return render_template("platform/committee.html.j2", member_stats=member_stats)
+            user_map = {u.id: u for u in users_repo(conn).list()}
+            event_map = {e.id: e for e in events_repo(conn).list()}
+
+            activities = sorted(
+                activity_repo(conn).list(), key=lambda a: a.dt, reverse=True
+            )
+
+        return render_template(
+            "platform/committee.html.j2",
+            member_stats=member_stats,
+            activities=activities,
+            num_activities=num_activities,
+            user_map=user_map,
+            event_map=event_map,
+        )
 
     @blueprint.route("/committee/pages", methods=["GET", "POST"])
     def committee_pages():

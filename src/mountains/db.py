@@ -80,7 +80,6 @@ class Repository[T]:
         self._try_execute(f"""
             CREATE TABLE IF NOT EXISTS {self.table_name} 
             ({",".join(self.schema)})
-            WITHOUT ROWID
         """)
 
     def drop_table(self):

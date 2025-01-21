@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import datetime
 import logging
-from faulthandler import is_enabled
 from sqlite3 import Connection
 
 from flask import (
@@ -17,6 +16,7 @@ from flask import (
     url_for,
 )
 
+from mountains.activity import Activity, activity_repo
 from mountains.db import connection
 from mountains.errors import MountainException
 from mountains.pages import latest_page, pages_repo
@@ -99,6 +99,13 @@ def event_routes(blueprint: Blueprint):
                 if req_method(request) == "DELETE":
                     logger.info("Soft deleting event %s", event)
                     events_repo(conn).update(id=id, is_deleted=True)
+                    activity_repo(conn).insert(
+                        Activity(
+                            user_id=g.current_user.id,
+                            event_id=event.id,
+                            action="deleted event",
+                        )
+                    )
                     return redirect(url_for("platform.events"))
 
         expanded = request.args.get("expanded", type=str_to_bool, default=False)
@@ -221,6 +228,7 @@ def event_routes(blueprint: Blueprint):
                             id=events_db.next_id(), form=request.form
                         )
                         events_db.insert(event)
+                        action = "created event"
                     elif method == "PUT" and event is not None:
                         assert event is not None
                         event = Event.from_form(
@@ -231,10 +239,15 @@ def event_routes(blueprint: Blueprint):
                         )
                         events_db.delete_where(id=event.id)
                         events_db.insert(event)
+                        action = "edited event"
                     else:
                         abort(405)
+                    activity_repo(conn).insert(
+                        Activity(
+                            user_id=g.current_user.id, event_id=event.id, action=action
+                        )
+                    )
 
-                # TODO: Audit the event
                 return redirect(url_for(".event", id=event.id))
             except MountainException as e:
                 error = str(e)
@@ -294,7 +307,10 @@ def event_routes(blueprint: Blueprint):
 
                 if event.is_open() or g.current_user.is_site_admin:
                     _add_user_to_event(
-                        event, user.id, db_name=current_app.config["DB_NAME"]
+                        event,
+                        user.id,
+                        db_name=current_app.config["DB_NAME"],
+                        current_user=g.current_user,
                     )
                 else:
                     logger.error(
@@ -343,7 +359,12 @@ def event_routes(blueprint: Blueprint):
                 ).markdown
 
         if len(popups) == 0:
-            _add_user_to_event(event, user.id, db_name=current_app.config["DB_NAME"])
+            _add_user_to_event(
+                event,
+                user.id,
+                db_name=current_app.config["DB_NAME"],
+                current_user=g.current_user,
+            )
             return redirect(url_for(".event", id=event.id))
 
         if request.headers.get("HX-Request"):
@@ -382,7 +403,18 @@ def event_routes(blueprint: Blueprint):
         method = req_method(request)
 
         if method == "POST":
-            _add_user_to_event(event, user_id, db_name=current_app.config["DB_NAME"])
+            if event.is_open() or g.current_user.is_site_admin:
+                _add_user_to_event(
+                    event,
+                    user.id,
+                    db_name=current_app.config["DB_NAME"],
+                    current_user=g.current_user,
+                )
+            else:
+                logger.error(
+                    "User %s tried to add self to closed event!", g.current_user
+                )
+
         elif method in ("PUT", "DELETE"):
             with connection(current_app.config["DB_NAME"]) as conn:
                 attendees_repo = attendees(conn)
@@ -402,8 +434,31 @@ def event_routes(blueprint: Blueprint):
                             _where=dict(event_id=event.id, user_id=user_id),
                             **updates,
                         )
-                    else:
+                        if "is_waiting_list" in updates:
+                            if updates["is_waiting_list"]:
+                                action = f"was moved by {g.current_user.full_name} to waiting list for"
+                            else:
+                                action = f"was moved by {g.current_user.full_name} to attending for"
+                            activity_repo(conn).insert(
+                                Activity(
+                                    user_id=user_id,
+                                    event_id=event_id,
+                                    action=action,
+                                )
+                            )
+                    elif method == "DELETE":
                         attendees_repo.delete_where(event_id=event.id, user_id=user_id)
+                        if g.current_user.id != user_id:
+                            action = f"removed {user.full_name} from"
+                        else:
+                            action = "left"
+                        activity_repo(conn).insert(
+                            Activity(
+                                user_id=g.current_user.id,
+                                event_id=event_id,
+                                action=action,
+                            )
+                        )
                 # TODO: Audit!
 
         return redirect(url_for(".event", id=event.id, expanded=True))
@@ -434,7 +489,9 @@ def _events_attendees(
     return event_attendees, event_members
 
 
-def _add_user_to_event(event: Event, user_id: int, *, db_name: str):
+def _add_user_to_event(
+    event: Event, user_id: int, *, db_name: str, current_user: User
+) -> None | Attendee:
     # Lock here as we need to check the waiting list
     with connection(db_name, locked=True) as conn:
         attendees_repo = attendees(conn)
@@ -445,6 +502,7 @@ def _add_user_to_event(event: Event, user_id: int, *, db_name: str):
                 user_id,
                 event,
             )
+            return None
         else:
             attendee = Attendee(
                 user_id=user_id,
@@ -454,4 +512,20 @@ def _add_user_to_event(event: Event, user_id: int, *, db_name: str):
 
             attendees_repo.insert(attendee)
 
-        # TODO: AUDIT!
+            # Now log the event
+            if current_user.id == user_id:
+                if attendee.is_waiting_list:
+                    action = "joined waiting list for"
+                else:
+                    action = "joined"
+            else:
+                if attendee.is_waiting_list:
+                    action = (
+                        f"was added by {current_user.full_name} to waiting list for"
+                    )
+                else:
+                    action = f"was added by {current_user.full_name} to attending for"
+            activity_repo(conn).insert(
+                Activity(user_id=user_id, event_id=event.id, action=action)
+            )
+            return attendee
