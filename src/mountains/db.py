@@ -12,6 +12,16 @@ from cattrs import (
     structure,
     unstructure,
 )
+from flask import abort, current_app
+
+
+@contextmanager
+def app_conn(locked: bool = False):
+    """
+    A helper method to save us typing.
+    """
+    with connection(current_app.config["DB_NAME"], locked=locked) as conn:
+        yield conn
 
 
 @contextmanager
@@ -130,6 +140,13 @@ class Repository[T]:
             return None
         else:
             return structure(dict(row), self.storage_cls)
+
+    def get_or_404(self, **kwargs) -> T:
+        instance = self.get(**kwargs)
+        if instance is None:
+            abort(404)
+        else:
+            return instance
 
     def list(self) -> list[T]:
         cur = self._try_execute(f"""

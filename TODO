@@ -30,7 +30,7 @@
 [] Signup countdown
 [] Cleverer photo / profile processing
 [] Discord caching
-[] General notifications
+[] General notifications (maybe over websocket)
 [] Get rid of slugs?
 [] Admin Toggle
 [] Testing

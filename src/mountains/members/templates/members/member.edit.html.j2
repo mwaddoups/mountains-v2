@@ -6,7 +6,6 @@
   <h2>Profile Picture</h2>
   {{ profile_picture(user, '128') }}
   <form method="post" enctype="multipart/form-data">
-    <input type="hidden" name="method" value="PUT" />
     <label>
       Profile Picture
       <input type="file" name="profile_picture" accept="image/*" required />
@@ -15,7 +14,6 @@
   </form>
   <h2>User Details</h2>
   <form method="post">
-    <input type="hidden" name="method" value="PUT" />
     <label>
       Email
       <small>(contact admin@clydemc.org to change this)</small>
@@ -50,7 +48,6 @@
   </form>
   <h2>Change Password</h2>
   <form method="post">
-    <input type="hidden" name="method" value="PUT" />
     <label>
       Password
       <input type="password" name="password" />
