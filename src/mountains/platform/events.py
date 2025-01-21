@@ -260,8 +260,9 @@ def event_routes(blueprint: Blueprint):
                 error=error,
             )
         else:
+            event_form = {}
+
             # For default, use a copy if passed as ?copy_from and the ID is found...
-            event_form = None
             if event is None and (copy_id := request.args.get("copy_from", type=int)):
                 with connection(current_app.config["DB_NAME"]) as conn:
                     copy_event = events_repo(conn).get(id=copy_id)
@@ -275,8 +276,45 @@ def event_routes(blueprint: Blueprint):
                     logger.error("Attempt to copy with a missing event ID %s", copy_id)
 
             # Or use the old event if editing...
-            if event is not None and event_form is None:
+            if event is not None and not event_form:
                 event_form = event.to_form()
+
+            # If still nothing, and we were passed a template, use that
+            if (
+                event is None
+                and not event_form
+                and (template := request.args.get("template", type=int))
+            ):
+                print("here")
+                template_names = {
+                    EventType.SUMMER_DAY_WALK: "template-summer-day-walk",
+                    EventType.SUMMER_WEEKEND: "template-summer-weekend",
+                    EventType.WINTER_DAY_WALK: "template-winter-day-walk",
+                    EventType.WINTER_WEEKEND: "template-winter-weekend",
+                    EventType.INDOOR_CLIMBING: "template-indoor-climbing",
+                    EventType.OUTDOOR_CLIMBING: "template-outdoor-climbing",
+                    EventType.RUNNING: "template-running",
+                    EventType.SOCIAL: "template-social",
+                }
+                event_type = EventType(template)
+                if event_type in template_names:
+                    with connection(current_app.config["DB_NAME"]) as conn:
+                        event_form["description"] = latest_page(
+                            template_names[event_type], pages_repo(conn)
+                        ).markdown
+
+                if event_type not in (
+                    EventType.INDOOR_CLIMBING,
+                    EventType.SOCIAL,
+                ):
+                    event_form["show_participation_ice"] = "true"
+
+                if event_type in (
+                    EventType.SUMMER_WEEKEND,
+                    EventType.WINTER_WEEKEND,
+                    EventType.OUTDOOR_CLIMBING,
+                ):
+                    event_form["is_members_only"] = "true"
 
             return render_template(
                 "platform/event.edit.html.j2",
@@ -349,6 +387,12 @@ def event_routes(blueprint: Blueprint):
                 popups["discord"] = latest_page(
                     name="discord-popup", repo=pages_repo(conn)
                 ).markdown
+
+            if user.membership_expiry_utc is None and event.is_members_only:
+                popups["members_only"] = latest_page(
+                    name="members-only-popup", repo=pages_repo(conn)
+                ).markdown
+
             if event.show_participation_ice or len(user.in_case_emergency) == 0:
                 popups["ice"] = latest_page(
                     name="ice-popup", repo=pages_repo(conn)

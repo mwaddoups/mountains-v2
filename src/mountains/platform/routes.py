@@ -128,7 +128,10 @@ def routes(blueprint: Blueprint):
         with connection(current_app.config["DB_NAME"]) as conn:
             all_pages = pages_repo(conn).list()
             page_names = set(p.name for p in all_pages)
-            pages = [latest_page(name, pages_repo(conn)) for name in page_names]
+            pages = sorted(
+                [latest_page(name, pages_repo(conn)) for name in page_names],
+                key=lambda p: p.description,
+            )
         return render_template(
             "platform/pages.edit.html.j2", pages=pages, preview=preview, message=message
         )

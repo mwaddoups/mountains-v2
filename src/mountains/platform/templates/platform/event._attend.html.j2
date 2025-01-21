@@ -15,6 +15,11 @@
          hx-boost="false"
          class="button">Set Discord Username</a>
     </section>
+  {% elif "members_only" in popups %}
+    <section>
+      {{ popups['members_only'] | markdown | safe }}
+      <a href="{{ url_for('platform.join') }}" hx-boost="false" class="button">Joining Information</a>
+    </section>
   {% else %}
     {% if "ice" in popups %}
       <section>

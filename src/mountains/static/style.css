@@ -692,12 +692,10 @@
     --accent: var(--cmc-color-committee);
     --accent-hover: rgb(from var(--accent) r g b / 0.6);
     --text: var(--cmc-color-committee);
-  }
 
-  span.admin {
-    color: var(--text);
-    small {
-      color: inherit;
+    &:is(span, label, small),
+    :is(span, label, small) {
+      color: var(--text);
     }
   }
 

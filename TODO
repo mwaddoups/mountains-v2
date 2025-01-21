@@ -5,10 +5,13 @@ Big plan: STOP STYLING! Get all the functionality in and style AT THE END
 [] Payments
 [] Dormant users
 [x] Activity
-[] Event templates
+[x] Event templates
 [x] Mobile layout
 [] The new pages
 [x] Email
+[x] Members only popup
+[] HTMX event search
+[] HTMX attendee adder
 
 # Nice to have before done
 

@@ -8,7 +8,11 @@
       <summary>{{ page.description }} ({{ page.name }}, v{{ page.version }})</summary>
       <form method="post" id="{{ page.id }}">
         <input type="hidden" name="name" value="{{ page.name }}" />
-        <input type="hidden" name="description" value="{{ page.description }}" />
+        <label>
+          Description
+          <small>(This probably doesn't need changing often)</small>
+          <input type="text" name="description" value="{{ page.description }}" />
+        </label>
         <label>
           <small>(Uses <a href="https://www.markdownguide.org/basic-syntax/">markdown</a>)</small>
           <textarea name="markdown">{{ preview.markdown if preview and preview.name == page.name else page.markdown }}</textarea>

@@ -133,8 +133,16 @@
            value="{{ search if search else '' }}" />
   </form>
   {% if g.current_user.is_site_admin %}
-    <a href="{{ url_for('platform.edit_event') }}"
-       class="button admin w-full">Create Event</a>
+    <form class="admin flex" action="{{ url_for('.edit_event') }}">
+      <label for="event_template">Event Template</label>
+      <select name="template" id="event_template">
+        {% for event_type in event_type_set %}
+          <option value="{{ event_type.value }}">{{ event_type.name | replace('_', ' ') | lower | title }}</option>
+        {% endfor %}
+        <option value="">No Template</option>
+      </select>
+      <input type="submit" value="Add new event" />
+    </form>
   {% endif %}
   <section>
     <dialog id="selectedEvent"></dialog>
