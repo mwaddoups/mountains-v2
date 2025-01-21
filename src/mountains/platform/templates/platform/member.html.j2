@@ -1,13 +1,15 @@
 {% from "platform/macros/profile.html.j2" import profile_picture %}
 {% from "platform/macros/theme.html.j2" import badge %}
 {% extends "platform/base.html.j2" %}
+{% block stylesheets %}
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/members.css') }}?v=1.0" />
+{% endblock stylesheets %}
 {% block platform %}
-  <div class="flex">
-    <figure>
+  <div id="member-profile">
+    <header>
       {{ profile_picture(user, "256") }}
-    </figure>
-    <div>
-      <div class="flex">
+      <hgroup class="member-header">
         <h1>
           {{ user.full_name }}
           {% if g.current_user.id == user.id %}<a href="{{ url_for('platform.edit_member', id=user.id) }}">Edit</a>{% endif %}
@@ -20,19 +22,17 @@
                 <input type="submit" value="Toggle something" />
                 <input type="submit" value="Toggle something else" />
               </form>
+              {% if user.mobile %}
+                <mark>{{ user.mobile }}</mark>
+              {% else %}
+                <mark><small>No mobile found</small></mark>
+              {% endif %}
               <span>Email: {{ user.email }}</span>
               {% if user.membership_expiry_utc %}
                 <span>Membership expires: {{ user.membership_expiry_utc.strftime("%Y-%m-%d") }}</span>
               {% endif %}
             </article>
           </details>
-        {% endif %}
-      </div>
-      <div class="flex">
-        {% if user.mobile %}
-          <mark>{{ user.mobile }}</mark>
-        {% else %}
-          <mark><small>No mobile found</small></mark>
         {% endif %}
         <mark class="discord">
           {# BI - Discord #}
@@ -54,41 +54,41 @@
                class="button admin">Change</a>
           {% endif %}
         </mark>
-      </div>
-      <div class="flex flex-gap-small">
-        {% if user.is_committee %}{{ badge("committee") }}{% endif %}
-        {% if user.is_coordinator %}{{ badge("coordinator") }}{% endif %}
-        {% if user.is_member %}{{ badge("member") }}{% endif %}
-      </div>
-    </div>
-  </div>
-  <hgroup>
-    <h2>About</h2>
-    {% if user.about %}
-      {{ user.about | markdown | safe }}
-    {% else %}
-      <em>No bio found!</em>
-    {% endif %}
-  </hgroup>
-  <hgroup>
-    <h2>Attended Events</h2>
-    {% if attended %}
-      <ul class="member-attended">
-        {% for event in attended[:num_attended] %}
-          <li>
-            <a href="{{ url_for('platform.event', id=event.id) }}">{{ event.title }}</a>
-            <span>{{ event.event_dt.strftime("%A, %b %-d %Y") }}</span>
-          </li>
-        {% endfor %}
-      </ul>
-      {% if num_attended < attended | length %}
-        <form>
-          <input type="hidden" name="num_attended" value="{{ num_attended * 10 }}" />
-          <button type="submit">Show more (showing {{ num_attended }} / {{ attended | length }})</button>
-        </form>
+        <div class="member-badges">
+          {% if user.is_committee %}{{ badge("committee") }}{% endif %}
+          {% if user.is_coordinator %}{{ badge("coordinator") }}{% endif %}
+          {% if user.is_member %}{{ badge("member") }}{% endif %}
+        </div>
+      </hgroup>
+    </header>
+    <section>
+      <h2>About</h2>
+      {% if user.about %}
+        {{ user.about | markdown | safe }}
+      {% else %}
+        <small>No bio found!</small>
       {% endif %}
-    {% else %}
-      <small>No events yet!</small>
-    {% endif %}
-  </hgroup>
+    </section>
+    <section class="member-attended-events">
+      <h2>Attended Events</h2>
+      {% if attended %}
+        <ul>
+          {% for event in attended[:num_attended] %}
+            <li>
+              <a href="{{ url_for('platform.event', id=event.id) }}">{{ event.title }}</a>
+              <span>{{ event.event_dt.strftime("%A, %b %-d %Y") }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+        {% if num_attended < attended | length %}
+          <form>
+            <input type="hidden" name="num_attended" value="{{ num_attended * 10 }}" />
+            <button type="submit">Show more (showing {{ num_attended }} / {{ attended | length }})</button>
+          </form>
+        {% endif %}
+      {% else %}
+        <small>No events yet!</small>
+      {% endif %}
+    </section>
+  </div>
 {% endblock platform %}

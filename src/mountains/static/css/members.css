@@ -1,0 +1,111 @@
+#members {
+  --member-width: 160px;
+  display: grid;
+  justify-content: space-between;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, var(--member-width));
+  align-items: stretch;
+
+  .member {
+    /* Make sure no member names overlap */
+    :is(h1, h2, h3, h4, h5, h6) {
+      padding: 0 0.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
+    }
+
+    .profile-picture {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    .badge {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
+  }
+}
+
+#member-profile {
+  display: contents;
+  > header {
+    display: grid;
+    gap: 0.5rem;
+    grid-template: ". profile" / auto auto;
+    justify-content: space-between;
+    place-items: center;
+    @media (max-width: 800px) {
+      grid-template: "profile" "." / 1fr;
+    }
+
+    > .profile-picture {
+      grid-area: profile;
+    }
+
+    > .member-header {
+      display: grid;
+      grid-auto-flow: column;
+      grid-template:
+        "name admin"
+        ". ."
+        ". ." / auto auto;
+      align-items: center;
+      justify-items: left;
+      gap: 0.5rem;
+
+      > h1 {
+        grid-area: name;
+      }
+
+      > .admin {
+        grid-area: admin;
+      }
+
+      > .discord,
+      .member-badges {
+        grid-column: span 2;
+      }
+    }
+  }
+
+  .member-attended-events {
+    > ul {
+      margin: 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: 1fr max-content;
+      align-items: center;
+      gap: 0.25rem 0.5rem;
+      > li {
+        display: contents;
+
+        :nth-child(2) {
+          text-align: right;
+        }
+      }
+    }
+
+    > form :is(input, button) {
+      width: 100%;
+    }
+  }
+}
+
+mark.discord {
+  display: inline-flex;
+  white-space: nowrap;
+  align-items: center;
+  gap: 0.25rem;
+  > svg {
+    height: 1em;
+    width: 1em;
+  }
+
+  button,
+  .button {
+    padding: 0.125rem 0.25rem;
+    font-size: small;
+  }
+}
