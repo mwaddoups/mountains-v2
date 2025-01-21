@@ -1,3 +1,4 @@
+import datetime
 import logging
 from pathlib import Path
 
@@ -16,7 +17,7 @@ from werkzeug.security import generate_password_hash
 from mountains.db import connection
 from mountains.discord import DiscordAPI
 from mountains.errors import MountainException
-from mountains.utils import req_method
+from mountains.utils import req_method, str_to_bool
 
 from ..events import attendees as attendees_repo
 from ..events import events as events_repo
@@ -49,12 +50,34 @@ def member_routes(blueprint: Blueprint):
             "platform/members.html.j2", members=members, search=search, limit=limit
         )
 
-    @blueprint.route("/members/<slug>")
+    @blueprint.route("/members/<slug>", methods=["GET", "POST"])
     def member(slug: str):
         with connection(current_app.config["DB_NAME"]) as conn:
             user = users_repo(conn).get(slug=slug)
         if user is None:
             raise MountainException("User not found!")
+
+        if request.method == "POST":
+            with connection(current_app.config["DB_NAME"]) as conn:
+                if "membership_expiry" in request.form:
+                    if expiry_str := request.form["membership_expiry"]:
+                        users_repo(conn).update(
+                            id=user.id,
+                            membership_expiry=datetime.datetime.strptime(
+                                expiry_str, "%Y-%m-%d"
+                            ).date(),
+                        )
+                    else:
+                        users_repo(conn).update(id=user.id, membership_expiry=None)
+                elif (
+                    is_coordinator := request.form.get(
+                        "is_coordinator", type=str_to_bool, default=None
+                    )
+                ) is not None:
+                    users_repo(conn).update(id=user.id, is_coordinator=is_coordinator)
+
+                user = users_repo(conn).get(id=user.id)
+                assert user is not None
 
         # Get member activity
         with connection(current_app.config["DB_NAME"]) as conn:

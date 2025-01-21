@@ -388,7 +388,7 @@ def event_routes(blueprint: Blueprint):
                     name="discord-popup", repo=pages_repo(conn)
                 ).markdown
 
-            if user.membership_expiry_utc is None and event.is_members_only:
+            if not user.is_member and event.is_members_only:
                 popups["members_only"] = latest_page(
                     name="members-only-popup", repo=pages_repo(conn)
                 ).markdown

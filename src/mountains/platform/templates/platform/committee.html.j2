@@ -4,8 +4,8 @@
   <section>
     <h3>Member Statistics</h3>
     {% for row in member_stats %}
-      {% if row.membership_expiry_utc %}
-        <p>{{ row.num_members }} paid members (ending {{ row.membership_expiry_utc.strftime("%Y-%m-%d") }})</p>
+      {% if row.membership_expiry %}
+        <p>{{ row.num_members }} paid members (ending {{ row.membership_expiry.strftime("%Y-%m-%d") }})</p>
       {% else %}
         <p>{{ row.num_members }} unpaid users</p>
       {% endif %}

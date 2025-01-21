@@ -6,7 +6,6 @@
     "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --mono-font: Consolas, Menlo, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
-  --standard-border-radius: 5px;
 
   /* Colors for theme */
   --primary: rgb(13, 148, 136);
@@ -22,6 +21,10 @@
   --accent-text: #ededed;
   --disabled: #efefef;
   --cancel: var(--disabled);
+
+  /* Standard thematic */
+  --standard-border-radius: 5px;
+  --standard-drop-shadow: drop-shadow(1px 1px 2px var(--border));
 
   /* CMC-specific colors */
   --cmc-highlight: #d97706;
@@ -682,6 +685,7 @@
     --accent-hover: rgb(from var(--accent) r g b / 0.6);
     --text: var(--cmc-color-committee);
 
+    /* Make sure we set color for these elements */
     &:is(span, label, small),
     :is(span, label, small) {
       color: var(--text);
@@ -690,42 +694,44 @@
     &:is(mark) {
       border-color: var(--cmc-color-committee);
     }
+
+    &:is(details) {
+      color: var(--cmc-color-committee);
+
+      &:has(.admin-panel) {
+        position: relative;
+
+        > .admin-panel {
+          /* Set popover position */
+          position: absolute;
+          top: 2em;
+          left: 1em;
+          padding: 1rem;
+
+          /* A nice background */
+          background-color: white;
+          border-radius: var(--standard-border-radius);
+          filter: var(--standard-drop-shadow);
+
+          /* Sort out a nice display */
+          display: grid;
+          grid-template-columns: max-content;
+          place-items: center stretch;
+          gap: 0.25rem;
+
+          > form {
+            display: contents;
+          }
+        }
+      }
+    }
   }
 
   details.admin {
-    --accent: var(--cmc-color-committee);
-    color: var(--cmc-color-committee);
-    background-color: white;
-    opacity: 50%;
-    border-radius: var(--standard-border-radius);
-    filter: drop-shadow(1px 1px 1px var(--cmc-color-committee));
-    padding: 1em;
-
     position: relative;
-
-    > .card {
-      position: absolute;
-      top: 2em;
-      left: 1em;
-      background-color: white;
-      width: max-content;
-      border-radius: var(--standard-border-radius);
-      padding: 1rem;
-      gap: 0.25rem;
-
-      a,
-      input,
-      button {
-        align-self: stretch;
-      }
-    }
 
     summary {
       font-weight: bold;
-    }
-
-    &[open] {
-      opacity: 100%;
     }
   }
 

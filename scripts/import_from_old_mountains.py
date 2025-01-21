@@ -78,7 +78,7 @@ with (
             is_committee=bool(u["is_committee"]),
             is_coordinator=bool(u["is_walk_coordinator"]),
             is_dormant=bool(u["is_dormant"]),
-            membership_expiry_utc=datetime.fromisoformat(u["membership_expiry"])
+            membership_expiry=datetime.fromisoformat(u["membership_expiry"]).date()
             if u["membership_expiry"] is not None
             else None,
             created_on_utc=datetime.fromisoformat(u["date_joined"]),

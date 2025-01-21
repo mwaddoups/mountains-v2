@@ -91,15 +91,15 @@ def routes(blueprint: Blueprint):
             member_stats = [
                 dict(s)
                 for s in conn.execute("""
-                SELECT membership_expiry_utc, COUNT(id) as num_members 
-                FROM users GROUP BY membership_expiry_utc
+                SELECT membership_expiry, COUNT(id) as num_members 
+                FROM users GROUP BY membership_expiry
             """).fetchall()
             ]
 
             for r in member_stats:
-                if r["membership_expiry_utc"] is not None:
-                    r["membership_expiry_utc"] = datetime.datetime.fromisoformat(
-                        r["membership_expiry_utc"]
+                if r["membership_expiry"] is not None:
+                    r["membership_expiry"] = datetime.datetime.fromisoformat(
+                        r["membership_expiry"]
                     )
 
             user_map = {u.id: u for u in users_repo(conn).list()}

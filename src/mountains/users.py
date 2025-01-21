@@ -33,7 +33,7 @@ class User:
     is_committee: bool = False
     is_coordinator: bool = False
     discord_id: str | None = None
-    membership_expiry_utc: datetime.datetime | None = None
+    membership_expiry: datetime.date | None = None
     is_dormant: bool = False
     created_on_utc: datetime.datetime = Factory(now_utc)
     last_login_utc: datetime.datetime | None = None
@@ -53,12 +53,13 @@ class User:
 
     @property
     def is_member(self) -> bool:
-        if self.membership_expiry_utc is None:
+        if self.membership_expiry is None:
             return False
         else:
-            return self.membership_expiry_utc > datetime.datetime.now(
-                tz=datetime.UTC
-            ).replace(tzinfo=None)
+            return (
+                self.membership_expiry
+                > datetime.datetime.now(tz=datetime.UTC).replace(tzinfo=None).date()
+            )
 
     @property
     def is_site_admin(self) -> bool:
@@ -126,7 +127,7 @@ def users(conn: sqlite3.Connection) -> Repository[User]:
             "is_committee BOOLEAN NOT NULL",
             "is_coordinator BOOLEAN NOT NULL",
             "discord_id TEXT",
-            "membership_expiry_utc DATETIME",
+            "membership_expiry DATE",
             "is_dormant BOOLEAN NOT NULL",
             "created_on_utc DATETIME NOT NULL",
             "last_login_utc DATETIME",

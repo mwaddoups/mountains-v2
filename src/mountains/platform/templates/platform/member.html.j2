@@ -17,19 +17,31 @@
         {% if g.current_user.is_site_admin %}
           <details class="admin">
             <summary>Admin</summary>
-            <article class="card">
-              <form>
-                <input type="submit" value="Toggle something" />
-                <input type="submit" value="Toggle something else" />
+            <article class="admin-panel">
+              {# Update this for a new year #}
+              {% set member_expiry = "2025-03-31" %}
+              <form method="post">
+                <input type="hidden" name="membership_expiry" value="{{ member_expiry }}" />
+                <input type="submit" value="Set Member ({{ member_expiry }})" />
+              </form>
+              <form method="post">
+                <input type="hidden" name="membership_expiry" value="" />
+                <input type="submit" value="Remove Member" />
+              </form>
+              <form method="post">
+                <input type="hidden"
+                       name="is_coordinator"
+                       value="{{ not user.is_coordinator }}" />
+                <input type="submit" value="Toggle Coordinator" />
               </form>
               {% if user.mobile %}
-                <mark>{{ user.mobile }}</mark>
+                <mark>Mobile: {{ user.mobile }}</mark>
               {% else %}
-                <mark><small>No mobile found</small></mark>
+                <mark>Mobile: <small>No mobile found</small></mark>
               {% endif %}
-              <span>Email: {{ user.email }}</span>
-              {% if user.membership_expiry_utc %}
-                <span>Membership expires: {{ user.membership_expiry_utc.strftime("%Y-%m-%d") }}</span>
+              <mark>Email: {{ user.email }}</mark>
+              {% if user.membership_expiry %}
+                <mark>Member until: {{ user.membership_expiry.strftime("%Y-%m-%d") }}</mark>
               {% endif %}
             </article>
           </details>
