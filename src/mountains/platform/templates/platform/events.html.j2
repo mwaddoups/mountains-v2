@@ -2,7 +2,7 @@
 {% extends "platform/base.html.j2" %}
 {% macro attending_user(att_user, user) %}
   <li class="flex flex-gap-small">
-    <a href="{{ url_for('platform.member', slug=user.slug) }}"
+    <a href="{{ url_for('.members.member', slug=user.slug) }}"
        class="flex flex-gap-small">
       {{ profile_picture(user, '32') }}
       <span>{{ user.full_name }}</span>

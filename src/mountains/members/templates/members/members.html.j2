@@ -1,10 +1,6 @@
 {% from "platform/macros/profile.html.j2" import profile_picture %}
 {% from "platform/macros/theme.html.j2" import badge %}
-{% extends "platform/base.html.j2" %}
-{% block stylesheets %}
-  <link rel="stylesheet"
-        href="{{ url_for('static', filename='css/members.css') }}?v=1.0" />
-{% endblock stylesheets %}
+{% extends "members/base.html.j2" %}
 {% block platform %}
   <form>
     <input type="search"
@@ -19,7 +15,7 @@
   </form>
   <section id="members">
     {% for member in members[:limit] %}
-      <a href="{{ url_for('platform.member', slug=member.slug) }}">
+      <a href="{{ url_for('.member', slug=member.slug) }}">
         <article class="card member">
           <header>
             {{ profile_picture(member, "160") }}

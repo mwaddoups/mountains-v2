@@ -50,7 +50,7 @@
         </ul>
         <aside>
           {% if 'current_user' in g %}
-            <a href="{{ url_for('platform.member', slug=g.current_user.slug) }}"
+            <a href="{{ url_for('platform.members.member', slug=g.current_user.slug) }}"
                class="flex">
               <span>{{ g.current_user.full_name }}</span>
               {{ profile_picture(g.current_user, '32') }}

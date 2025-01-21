@@ -17,7 +17,7 @@ from mountains.db import connection
 from mountains.email import send_mail
 from mountains.errors import MountainException
 from mountains.tokens import AuthToken, tokens
-from mountains.users import User, users
+from mountains.users import User, users_repo
 from mountains.utils import now_utc
 
 logger = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ def routes(blueprint: Blueprint):
         if request.method == "POST":
             form = request.form
             with connection(current_app.config["DB_NAME"]) as conn:
-                user_db = users(conn)
+                user_db = users_repo(conn)
                 token_db = tokens(conn)
 
                 user = user_db.get(email=form["email"])
@@ -66,7 +66,7 @@ def routes(blueprint: Blueprint):
         if request.method == "POST":
             email = request.form["email"]
             with connection(current_app.config["DB_NAME"]) as conn:
-                user_db = users(conn)
+                user_db = users_repo(conn)
                 if (user := user_db.get(email=email)) is not None:
                     logger.info("Resetting password for %s", user)
                     token_db = tokens(conn)
@@ -103,7 +103,7 @@ def routes(blueprint: Blueprint):
                 return render_template("auth/resetpassword.html.j2", is_valid=False)
 
             if request.method == "POST":
-                user_db = users(conn)
+                user_db = users_repo(conn)
                 user = user_db.get(id=token.user_id)
                 assert user is not None
                 form = request.form
@@ -148,7 +148,7 @@ def _register_new_user(db_name: str, form: Mapping[str, str]):
 
     # Lock the DB so we can generate a new user ID and insert
     with connection(db_name, locked=True) as conn:
-        user_db = users(conn)
+        user_db = users_repo(conn)
         if user_db.get(email=form["email"]) is not None:
             raise MountainException(
                 f"The email {form['email']} has already been registered."

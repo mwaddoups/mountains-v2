@@ -24,8 +24,7 @@ from mountains.utils import now_utc, req_method, str_to_bool
 
 from ..events import Attendee, Event, EventType, attendees
 from ..events import events as events_repo
-from ..users import User
-from ..users import users as users_repo
+from ..users import User, users_repo
 
 logger = logging.getLogger(__name__)
 

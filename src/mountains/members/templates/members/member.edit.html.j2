@@ -1,6 +1,6 @@
-{% extends "platform/base.html.j2" %}
+{% extends "members/base.html.j2" %}
 {% block platform %}
-  <a href="{{ url_for('platform.member', slug=user.slug) }}">< Return to profile</a>
+  <a href="{{ url_for('.member', slug=user.slug) }}">< Return to profile</a>
   <h1>Editing {{ user.full_name }}</h1>
   {% if message %}<strong role="alert">{{ message }}</strong>{% endif %}
   <h2>Profile Picture</h2>

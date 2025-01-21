@@ -2,7 +2,7 @@
 {% from "platform/macros/profile.html.j2" import profile_picture %}
 {% macro attending_user(att_user, user) %}
   <li class="flex flex-gap-small">
-    <a href="{{ url_for('platform.member', slug=user.slug) }}"
+    <a href="{{ url_for('.members.member', slug=user.slug) }}"
        class="flex flex-gap-small">
       {{ profile_picture(user, '32') }}
       {% if user.is_committee %}

@@ -1,10 +1,6 @@
 {% from "platform/macros/profile.html.j2" import profile_picture %}
 {% from "platform/macros/theme.html.j2" import badge %}
-{% extends "platform/base.html.j2" %}
-{% block stylesheets %}
-  <link rel="stylesheet"
-        href="{{ url_for('static', filename='css/members.css') }}?v=1.0" />
-{% endblock stylesheets %}
+{% extends "members/base.html.j2" %}
 {% block platform %}
   <div id="member-profile">
     <header>
@@ -60,10 +56,10 @@
             <small>Not found on Discord</small>
           {% endif %}
           {% if user.id == g.current_user.id %}
-            <a href="{{ url_for('platform.member_discord', slug=user.slug) }}"
+            <a href="{{ url_for('.member_discord', slug=user.slug) }}"
                class="button">Change</a>
           {% elif g.current_user.is_site_admin %}
-            <a href="{{ url_for('platform.member_discord', slug=user.slug) }}"
+            <a href="{{ url_for('.member_discord', slug=user.slug) }}"
                class="button admin">Change</a>
           {% endif %}
         </mark>

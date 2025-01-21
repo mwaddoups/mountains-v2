@@ -127,7 +127,7 @@ class User:
         )
 
 
-def users(conn: sqlite3.Connection) -> Repository[User]:
+def users_repo(conn: sqlite3.Connection) -> Repository[User]:
     return Repository(
         conn=conn,
         table_name="users",

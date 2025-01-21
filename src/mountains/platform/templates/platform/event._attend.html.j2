@@ -11,7 +11,7 @@
   {% if "discord" in popups %}
     <section>
       {{ popups['discord'] | markdown | safe }}
-      <a href="{{ url_for('platform.member_discord', slug=user.slug) }}"
+      <a href="{{ url_for('.members.member_discord', slug=user.slug) }}"
          hx-boost="false"
          class="button">Set Discord Username</a>
     </section>

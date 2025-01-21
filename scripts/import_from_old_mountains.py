@@ -9,7 +9,7 @@ from mountains.db import connection
 from mountains.events import Attendee, Event, EventType, attendees, events
 from mountains.photos import Album, Photo, albums, photos
 from mountains.tokens import tokens
-from mountains.users import User, users
+from mountains.users import User, users_repo
 from mountains.utils import readable_id
 
 parser = argparse.ArgumentParser()
@@ -37,7 +37,7 @@ with (
     connection(args.output_db) as out_conn,
 ):
     in_conn.row_factory = sqlite3.Row
-    user_repo = users(out_conn)
+    user_repo = users_repo(out_conn)
     token_repo = tokens(out_conn)
     # recreate tokens
     token_repo.drop_table()

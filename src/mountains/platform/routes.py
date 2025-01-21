@@ -1,7 +1,5 @@
-import datetime
 import logging
 from collections import defaultdict
-from enum import member
 
 from flask import (
     Blueprint,
@@ -15,17 +13,17 @@ from flask import (
     url_for,
 )
 
+from mountains import members
 from mountains.activity import activity_repo
 from mountains.db import connection
 from mountains.discord import DiscordAPI
 from mountains.events import events as events_repo
 from mountains.pages import Page, latest_page, pages_repo
 from mountains.tokens import tokens as tokens_repo
-from mountains.users import users as users_repo
+from mountains.users import users_repo
 from mountains.utils import now_utc
 
 from .events import event_routes
-from .members import member_routes
 from .photos import photo_routes
 
 logger = logging.getLogger(__name__)
@@ -230,7 +228,8 @@ def routes(blueprint: Blueprint):
             "platform/pages.edit.html.j2", pages=pages, preview=preview, message=message
         )
 
-    member_routes(blueprint)
+    # member_routes(blueprint)
+    blueprint.register_blueprint(members.blueprint, url_prefix="/members")
 
     event_routes(blueprint)
 

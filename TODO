@@ -1,8 +1,7 @@
-Big plan: STOP STYLING! Get all the functionality in and style AT THE END
-
 # Missing features we NEED
 
-[] Payments
+[] Payments, inc paid buttons for events,
+[] Treasurer admin
 [x] Dormant users
 [x] Dormant popup / dormant deactvation
 [x] Activity
@@ -13,117 +12,32 @@ Big plan: STOP STYLING! Get all the functionality in and style AT THE END
 [x] Members only popup
 [] HTMX event search
 [] HTMX attendee adder
+[] Permissions audit + mid-roles (coordinator vs. committee/admin)
+[] Front page content (sample photos, committee bios, footer)
+[] General styling / TODO checks
+[] Deployment testing for slow performance
+
+# Code nice to haves
+
+[] Blueprint breakout for the platform
+[] Look at consolidating some of the code
 
 # Nice to have before done
 
-- Images for new pages
-- Drafts
-- Signup countdown
-- Cleverer photo / profile processing
+[] Event description previews
+[] Images for new pages
+[] Drafts
+[] Signup countdown
+[] Cleverer photo / profile processing
+[] Discord caching
+[] General notifications
+[] Get rid of slugs?
+[] Admin Toggle
+[] Testing
 
-Events
-DONE
-Event filter
-Past / future events
-Editing events / deleting events
-Attendee adder
-Attendee list / editing
-Signup open date
-Close filter
-Single event page
-Refresh button (decided against this)
-Attending popups
-Calendar
-Event templates
+# Other Issues
 
-TODO
-Attending popup - dormant user
-Paid buttons
-Signup countdown
-Event description previews
-Drafts
-
-Users
-DONE
-Discord
-Mobile
-Profile
-Main page
-Attended Events
-Profile picture upload
-Editing in general
-
-TODO
-Admin tools for members
-Use profile picture thumbnails + process these
-
-Photos
-DONE
-Gallery
-Album page
-Dialog
-Basic upload
-Album creation form
-Photo processing in upload
-Starring (server-side)
-HTMX Gallery
-HTMX Uploads
-
-TODO
-Process different sizes for different uses
-Front page photos
-
-Dormant users (inc returning, last login, etc)
-
-Pages
-DONE
-Editable text
-Committee editor
-Previews
-Versioning
-
-Discord
-DONE
-Basic linking and setting from members page
-Add to attendee popup
-
-TODO
-Add member role setting / unsetting
-Maybe cache discord / HTMX for faster loading?
-
-Other stuff
-DONE
-Editable pages
-FAQs
-
-TODO
-Kill slugs?
-Breadcrumbs
-Details/summary styling
-Audit logging
-Permissions
-Editable users
-Payments
-Email
-Membership rework
-Admin block for managing admin
-Admin class for generally denoting admin stuff
-Committee stats
-Privacy policy / Footer
-Committee bios
-Mobile layout
-Parse lists correctly (-) in markdown
-Backups
-Mid-roles (coordinator, not committee, + site admin)
-General look over for TODOs
-Note on HTMX - in forms try to just POST to emulate POST -> 302 -> GET behaviour
-Notis for joining events
-Testing!
-
-Other Issues (after release)
-
-- Caching / etags / last_modified
-- Add is_deleted for attending users, so if someone is removed from a trip they've paid for that info is preserved
-- Upcoming signups section
-- Signup open countdown
-- Repeating events
+[] Membership rework
+[] Just-in-time repeating events
+[] is_deleted for attending users (to preseve payment)
+[] Upcoming signups section

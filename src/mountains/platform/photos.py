@@ -18,8 +18,7 @@ from mountains.db import connection
 from mountains.photos import Album, Photo, upload_photo
 from mountains.photos import albums as albums_repo
 from mountains.photos import photos as photos_repo
-from mountains.users import User
-from mountains.users import users as users_repo
+from mountains.users import User, users_repo
 from mountains.utils import req_method, str_to_bool
 
 logger = logging.getLogger(__name__)
