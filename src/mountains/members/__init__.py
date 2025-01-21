@@ -14,7 +14,7 @@ from flask import (
 )
 from werkzeug.security import generate_password_hash
 
-from mountains.db import app_conn
+from mountains.context import db_conn
 from mountains.discord import DiscordAPI
 from mountains.models.events import attendees_repo, events_repo
 from mountains.models.users import User, upload_profile, users_repo
@@ -31,7 +31,7 @@ blueprint = Blueprint(
 
 @blueprint.route("/")
 def members():
-    with app_conn() as conn:
+    with db_conn() as conn:
         members = users_repo(conn).list()
 
     if search := request.args.get("search"):
@@ -49,7 +49,7 @@ def members():
 @blueprint.route("/<slug>", methods=["GET", "POST"])
 def member(slug: str):
     if request.method == "POST":
-        with app_conn() as conn:
+        with db_conn() as conn:
             user = users_repo(conn).get_or_404(slug=slug)
             if "membership_expiry" in request.form:
                 discord = DiscordAPI.from_app(current_app)
@@ -80,7 +80,7 @@ def member(slug: str):
 
             return redirect(url_for(".member"))
 
-    with app_conn() as conn:
+    with db_conn() as conn:
         user = users_repo(conn).get_or_404(slug=slug)
 
         # Get member activity
@@ -117,7 +117,7 @@ def member(slug: str):
 @blueprint.route("/<slug>/discord", methods=["GET", "POST"])
 def member_discord(slug: str):
     if request.method == "POST":
-        with app_conn() as conn:
+        with db_conn() as conn:
             user = users_repo(conn).get_or_404(slug=slug)
             if not g.current_user.is_authorised(user.id):
                 abort(403)
@@ -131,7 +131,7 @@ def member_discord(slug: str):
 
         return redirect(url_for(".member", slug=slug))
     else:
-        with app_conn() as conn:
+        with db_conn() as conn:
             user = users_repo(conn).get_or_404(slug=slug)
             taken_ids = set(
                 u.discord_id
@@ -154,7 +154,7 @@ def member_discord(slug: str):
 
 @blueprint.route("/<int:id>/edit", methods=["GET", "POST"])
 def edit_member(id: int):
-    with app_conn() as conn:
+    with db_conn() as conn:
         user = users_repo(conn).get_or_404(id=id)
 
     message = None
@@ -198,7 +198,7 @@ def edit_member(id: int):
                         updates[field] = request.form[field]
 
         if updates:
-            with app_conn() as conn:
+            with db_conn() as conn:
                 users_repo(conn).update(id=user.id, **updates)
 
             # TODO: Flash message

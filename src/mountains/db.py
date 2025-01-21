@@ -12,16 +12,7 @@ from cattrs import (
     structure,
     unstructure,
 )
-from flask import abort, current_app
-
-
-@contextmanager
-def app_conn(locked: bool = False):
-    """
-    A helper method to save us typing.
-    """
-    with connection(current_app.config["DB_NAME"], locked=locked) as conn:
-        yield conn
+from flask import abort
 
 
 @contextmanager

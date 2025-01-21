@@ -5,9 +5,11 @@ import mistune
 from flask import Flask, Response, g, render_template, request, session
 from flask.logging import default_handler
 
+from mountains.context import db_conn
+
 from . import auth, platform
 from .db import connection
-from .models.pages import latest_page, pages_repo
+from .models.pages import latest_content
 from .models.tokens import tokens_repo
 from .models.users import users_repo
 
@@ -43,14 +45,14 @@ def create_app():
 
     @app.route("/")
     def index():
-        with connection(app.config["DB_NAME"]) as conn:
-            page = latest_page(name="front-page", repo=pages_repo(conn))
+        with db_conn() as conn:
+            page = latest_content(conn, "front-page")
         return render_template("page.html.j2", page=page)
 
     @app.route("/faqs")
     def faqs():
-        with connection(app.config["DB_NAME"]) as conn:
-            page = latest_page(name="faqs", repo=pages_repo(conn))
+        with db_conn() as conn:
+            page = latest_content(conn, "faqs")
         return render_template("page.html.j2", page=page)
 
     @app.after_request
@@ -64,7 +66,7 @@ def create_app():
     def current_user():
         # Ensure all requests have access to the current user, if logged in
         if (token_id := session.get("token_id")) is not None:
-            with connection(app.config["DB_NAME"]) as conn:
+            with db_conn() as conn:
                 token = tokens_repo(conn).get(id=token_id)
                 if (
                     token is not None

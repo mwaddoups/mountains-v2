@@ -19,14 +19,6 @@ class Page:
     version: int
 
 
-def latest_page(name: str, repo: Repository[Page]) -> Page:
-    pages = repo.list_where(name=name)
-    try:
-        return max(pages, key=lambda p: p.version)
-    except ValueError:
-        raise MountainException(f"No page found with name {name}!")
-
-
 def pages_repo(conn: Connection) -> Repository[Page]:
     repo = Repository(
         conn=conn,
@@ -44,3 +36,15 @@ def pages_repo(conn: Connection) -> Repository[Page]:
     repo.create_table()
 
     return repo
+
+
+def latest_page(name: str, repo: Repository[Page]) -> Page:
+    pages = repo.list_where(name=name)
+    try:
+        return max(pages, key=lambda p: p.version)
+    except ValueError:
+        raise MountainException(f"No page found with name {name}!")
+
+
+def latest_content(conn: Connection, name: str) -> str:
+    return latest_page(name, repo=pages_repo(conn)).markdown

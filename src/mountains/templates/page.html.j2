@@ -1,6 +1,6 @@
 {% extends "base.html.j2" %}
 {% block content %}
   <main>
-    {{ page.markdown | markdown | safe }}
+    {{ page | markdown | safe }}
   </main>
 {% endblock content %}
