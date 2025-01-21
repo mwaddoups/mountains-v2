@@ -87,50 +87,32 @@
     <a href="#">
       <article class="event-detail color-summer-day-walk">
         <h2>Day Walks</h2>
-        <div>
-          <p>Something</p>
-          <p>Something else</p>
-          <p>Something else</p>
-          <p>Something else</p>
-          <p>Something else</p>
-          <p>Something else</p>
-        </div>
+        <div>{{ bullet_pages['day-walks'] | markdown | safe }}</div>
       </article>
     </a>
     <article class="event-detail color-summer-weekend">
       <h2>Hut Trips</h2>
-      <div>
-        <p>Something</p>
-        <p>Something else</p>
-      </div>
-    </article>
-    <article class="event-detail color-outdoor-climbing">
-      <h2>Climbing</h2>
-      <div>
-        <p>Something</p>
-        <p>Something else</p>
-      </div>
+      <div>{{ bullet_pages['hut-weekends'] | markdown | safe }}</div>
     </article>
     <article class="event-detail color-winter-weekend">
       <h2>Winter</h2>
-      <div>
-        <p>Something</p>
-        <p>Something else</p>
-      </div>
+      <div>{{ bullet_pages['winter'] | markdown | safe }}</div>
+    </article>
+    <article class="event-detail color-indoor-climbing">
+      <h2>Indoor Climbing</h2>
+      <div>{{ bullet_pages['indoor-climbing'] | markdown | safe }}</div>
+    </article>
+    <article class="event-detail color-outdoor-climbing">
+      <h2>Outdoor Climbing</h2>
+      <div>{{ bullet_pages['outdoor-climbing'] | markdown | safe }}</div>
     </article>
     <article class="event-detail color-running">
       <h2>Trail Running</h2>
-      <div>
-        <p>Something</p>
-        <p>Something else</p>
-      </div>
+      <div>{{ bullet_pages['running'] | markdown | safe }}</div>
     </article>
     <article class="event-detail color-social">
       <h2>Social</h2>
-      <div>
-        <p>Something</p>
-        <p>Something else</p>
-      </div>
+      <div>{{ bullet_pages['socials'] | markdown | safe }}</div>
     </article>
   </section>
   <section>

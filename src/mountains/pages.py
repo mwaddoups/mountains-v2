@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from attrs import define
 
 from mountains.db import Repository
+from mountains.errors import MountainException
 
 if TYPE_CHECKING:
     from sqlite3 import Connection
@@ -20,7 +21,10 @@ class Page:
 
 def latest_page(name: str, repo: Repository[Page]) -> Page:
     pages = repo.list_where(name=name)
-    return max(pages, key=lambda p: p.version)
+    try:
+        return max(pages, key=lambda p: p.version)
+    except ValueError:
+        raise MountainException(f"No page found with name {name}!")
 
 
 def pages_repo(conn: Connection) -> Repository[Page]:

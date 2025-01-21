@@ -42,15 +42,37 @@ def routes(blueprint: Blueprint):
 
     @blueprint.route("/info")
     @blueprint.route("/info/<page>")
-    def home(page: str = None):
+    def home(page: str | None = None):
+        info_pages = {
+            "day-walks": "info-day-walks",
+            "hut-weekends": "info-hut-weekends",
+            "climbing": "info-climbing",
+            "running": "info-running",
+        }
         if page is None:
-            return render_template("platform/home.html.j2")
-        else:
+            with connection(current_app.config["DB_NAME"]) as conn:
+                pages_db = pages_repo(conn)
+                bullet_pages = {
+                    c: latest_page(f"bullet-{c}", pages_db).markdown
+                    for c in (
+                        "day-walks",
+                        "hut-weekends",
+                        "indoor-climbing",
+                        "outdoor-climbing",
+                        "running",
+                        "winter",
+                        "socials",
+                    )
+                }
+            return render_template("platform/home.html.j2", bullet_pages=bullet_pages)
+        elif page in info_pages:
             with connection(current_app.config["DB_NAME"]) as conn:
                 page_text = latest_page(
-                    name="join-club", repo=pages_repo(conn)
+                    name=info_pages[page], repo=pages_repo(conn)
                 ).markdown
-            return render_template("platform/home.html.j2")
+            return render_template("platform/info.page.html.j2", content=page_text)
+        else:
+            abort(404)
 
     @blueprint.route("/join")
     def join():
@@ -121,8 +143,7 @@ def routes(blueprint: Blueprint):
                             message = f"Created new page {page.name}"
                         else:
                             message = f"Could not create page - name {page.name} already exists!"
-
-                    if "edit" in request.form:
+                    elif "edit" in request.form:
                         latest = latest_page(request.form["name"], repo=pages_db)
                         page = Page(
                             name=request.form["name"],
@@ -132,6 +153,11 @@ def routes(blueprint: Blueprint):
                         )
                         pages_db.insert(page)
                         message = f"Page {page.name} was updated successfully!"
+                    elif "update_name" in request.form:
+                        old_name = request.form["old_name"]
+                        new_name = request.form["new_name"]
+                        pages_db.update(_where={"name": old_name}, name=new_name)
+                        message = f"Changed name from {old_name} -> {new_name}"
 
         with connection(current_app.config["DB_NAME"]) as conn:
             all_pages = pages_repo(conn).list()
