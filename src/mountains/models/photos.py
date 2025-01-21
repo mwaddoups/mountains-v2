@@ -53,7 +53,7 @@ def upload_photo(file: FileStorage, static_dir: Path, new_width: int = 1920) -> 
     return Path("uploads") / "photos" / filename
 
 
-def albums(conn: sqlite3.Connection) -> Repository[Album]:
+def albums_repo(conn: sqlite3.Connection) -> Repository[Album]:
     return Repository(
         conn=conn,
         table_name="albums",
@@ -67,7 +67,7 @@ def albums(conn: sqlite3.Connection) -> Repository[Album]:
     )
 
 
-def photos(conn: sqlite3.Connection) -> Repository[Photo]:
+def photos_repo(conn: sqlite3.Connection) -> Repository[Photo]:
     return Repository(
         conn=conn,
         table_name="photos",

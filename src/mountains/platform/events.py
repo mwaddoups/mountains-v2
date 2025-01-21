@@ -19,12 +19,16 @@ from flask import (
 from mountains.activity import Activity, activity_repo
 from mountains.db import connection
 from mountains.errors import MountainException
-from mountains.pages import latest_page, pages_repo
+from mountains.models.events import (
+    Attendee,
+    Event,
+    EventType,
+    attendees_repo,
+    events_repo,
+)
+from mountains.models.pages import latest_page, pages_repo
+from mountains.models.users import User, users_repo
 from mountains.utils import now_utc, req_method, str_to_bool
-
-from ..events import Attendee, Event, EventType, attendees
-from ..events import events as events_repo
-from ..users import User, users_repo
 
 logger = logging.getLogger(__name__)
 
@@ -460,8 +464,8 @@ def event_routes(blueprint: Blueprint):
 
         elif method in ("PUT", "DELETE"):
             with connection(current_app.config["DB_NAME"]) as conn:
-                attendees_repo = attendees(conn)
-                target_attendee = attendees_repo.get(event_id=event.id, user_id=user_id)
+                attendees_db = attendees_repo(conn)
+                target_attendee = attendees_db.get(event_id=event.id, user_id=user_id)
                 if target_attendee is None:
                     abort(404, "Attendee not found!")
                 else:
@@ -473,7 +477,7 @@ def event_routes(blueprint: Blueprint):
                             ) is not None:
                                 updates[allowed] = value
 
-                        attendees_repo.update(
+                        attendees_db.update(
                             _where=dict(event_id=event.id, user_id=user_id),
                             **updates,
                         )
@@ -490,7 +494,7 @@ def event_routes(blueprint: Blueprint):
                                 )
                             )
                     elif method == "DELETE":
-                        attendees_repo.delete_where(event_id=event.id, user_id=user_id)
+                        attendees_db.delete_where(event_id=event.id, user_id=user_id)
                         if g.current_user.id != user_id:
                             action = f"removed {user.full_name} from"
                         else:
@@ -511,7 +515,7 @@ def _events_attendees(
     conn: Connection, events: list[Event]
 ) -> tuple[dict[int, list[Attendee]], dict[int, User]]:
     # TODO inner join!
-    attendees_db = attendees(conn)
+    attendees_db = attendees_repo(conn)
     users_db = users_repo(conn)
     event_attendees: dict[int, list[Attendee]] = {}
     event_members: dict[int, User] = {}
@@ -537,8 +541,8 @@ def _add_user_to_event(
 ) -> None | Attendee:
     # Lock here as we need to check the waiting list
     with connection(db_name, locked=True) as conn:
-        attendees_repo = attendees(conn)
-        event_attendees = attendees_repo.list_where(event_id=event.id)
+        attendees_db = attendees_repo(conn)
+        event_attendees = attendees_db.list_where(event_id=event.id)
         if user_id in [a.user_id for a in event_attendees]:
             logger.warning(
                 "Attempt to add already existing user %s to event %s, ignoring...",
@@ -553,7 +557,7 @@ def _add_user_to_event(
                 is_waiting_list=event.is_full(event_attendees),
             )
 
-            attendees_repo.insert(attendee)
+            attendees_db.insert(attendee)
 
             # Now log the event
             if current_user.id == user_id:

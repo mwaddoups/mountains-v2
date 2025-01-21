@@ -5,12 +5,11 @@ import mistune
 from flask import Flask, Response, g, render_template, request, session
 from flask.logging import default_handler
 
-from mountains.db import connection
-from mountains.pages import latest_page, pages_repo
-from mountains.tokens import tokens as tokens_repo
-from mountains.users import users_repo
-
 from . import auth, platform
+from .db import connection
+from .models.pages import latest_page, pages_repo
+from .models.tokens import tokens_repo
+from .models.users import users_repo
 
 
 def create_app():

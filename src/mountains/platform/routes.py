@@ -17,10 +17,10 @@ from mountains import members
 from mountains.activity import activity_repo
 from mountains.db import connection
 from mountains.discord import DiscordAPI
-from mountains.events import events as events_repo
-from mountains.pages import Page, latest_page, pages_repo
-from mountains.tokens import tokens as tokens_repo
-from mountains.users import users_repo
+from mountains.models.events import events_repo
+from mountains.models.pages import Page, latest_page, pages_repo
+from mountains.models.tokens import tokens_repo
+from mountains.models.users import users_repo
 from mountains.utils import now_utc
 
 from .events import event_routes

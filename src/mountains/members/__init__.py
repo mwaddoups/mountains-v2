@@ -16,11 +16,9 @@ from werkzeug.security import generate_password_hash
 
 from mountains.db import app_conn
 from mountains.discord import DiscordAPI
+from mountains.models.events import attendees_repo, events_repo
+from mountains.models.users import User, upload_profile, users_repo
 from mountains.utils import str_to_bool
-
-from ..events import attendees as attendees_repo
-from ..events import events as events_repo
-from ..users import User, upload_profile, users_repo
 
 logger = logging.getLogger(__name__)
 

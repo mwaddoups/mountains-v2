@@ -27,7 +27,7 @@ class AuthToken:
         return self.expiry_utc > now_utc()
 
 
-def tokens(conn: sqlite3.Connection) -> Repository[AuthToken]:
+def tokens_repo(conn: sqlite3.Connection) -> Repository[AuthToken]:
     return Repository(
         conn=conn,
         table_name="tokens",

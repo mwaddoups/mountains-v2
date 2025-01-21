@@ -176,7 +176,7 @@ class Attendee:
     is_trip_paid: bool = False
 
 
-def events(conn: sqlite3.Connection) -> Repository[Event]:
+def events_repo(conn: sqlite3.Connection) -> Repository[Event]:
     return Repository(
         conn=conn,
         table_name="events",
@@ -203,7 +203,7 @@ def events(conn: sqlite3.Connection) -> Repository[Event]:
     )
 
 
-def attendees(conn: sqlite3.Connection) -> Repository[Attendee]:
+def attendees_repo(conn: sqlite3.Connection) -> Repository[Attendee]:
     return Repository(
         conn=conn,
         table_name="attendees",

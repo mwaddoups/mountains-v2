@@ -15,10 +15,8 @@ from flask import (
 )
 
 from mountains.db import connection
-from mountains.photos import Album, Photo, upload_photo
-from mountains.photos import albums as albums_repo
-from mountains.photos import photos as photos_repo
-from mountains.users import User, users_repo
+from mountains.models.photos import Album, Photo, albums_repo, photos_repo, upload_photo
+from mountains.models.users import User, users_repo
 from mountains.utils import req_method, str_to_bool
 
 logger = logging.getLogger(__name__)
