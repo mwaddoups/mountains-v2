@@ -1,7 +1,7 @@
 #members {
   --member-width: 160px;
   display: grid;
-  justify-content: space-between;
+  justify-content: space-around;
   gap: 1rem;
   grid-template-columns: repeat(auto-fill, var(--member-width));
   align-items: stretch;
@@ -24,6 +24,14 @@
     .badge {
       border-top-left-radius: 0;
       border-top-right-radius: 0;
+    }
+  }
+
+  > form {
+    display: contents;
+    input {
+      grid-column: 1 / -1;
+      justify-self: stretch;
     }
   }
 }

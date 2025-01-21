@@ -41,6 +41,7 @@ def member_routes(blueprint: Blueprint):
                 for u in members
                 if low_search in u.first_name.lower()
                 or low_search in u.last_name.lower()
+                or low_search in u.full_name.lower()
             ]
 
         members = sorted(members, key=_member_sort_key)

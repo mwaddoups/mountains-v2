@@ -9,6 +9,11 @@
   <form>
     <input type="search"
            name="search"
+           hx-get="{{ url_for('.members') }}"
+           hx-trigger="input changed delay:500ms, keyup[key=='Enter']"
+           hx-target="#members"
+           hx-select="#members"
+           hx-swap="outerHTML"
            placeholder="Enter name to search..."
            value="{{ search if search else '' }}" />
   </form>
@@ -34,12 +39,18 @@
     {% else %}
       <em>No users found!</em>
     {% endfor %}
+    {% if (members | length) > limit %}
+      <form>
+        <input type="hidden" name="limit" value="{{ limit * 5 }}" />
+        {# Infinite scroll #}
+        <input type="submit"
+               hx-get="{{ url_for('.members', limit=limit + 25) }}"
+               hx-target="#members"
+               hx-trigger="intersect once"
+               hx-select="#members"
+               hx-swap="outerHTML"
+               value="Show more (showing {{ limit }} / {{ members | length }})" />
+      </form>
+    {% endif %}
   </section>
-  {% if (members | length) > limit %}
-    <form>
-      <input type="hidden" name="limit" value="{{ limit * 10 }}" />
-      <input type="submit"
-             value="Show more (showing {{ limit }} / {{ members | length }})">
-    </form>
-  {% endif %}
 {% endblock platform %}
