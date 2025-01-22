@@ -92,6 +92,10 @@
   }
 
   body > main {
+    /* The main container is just a grid */
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
     min-height: 100vh;
   }
 
@@ -655,8 +659,6 @@
 
   .drop-shadow {
     border-radius: var(--standard-border-radius);
-    border: 1px solid var(--border);
-    background-color: var(--bg);
     filter: drop-shadow(1px 1px 2px var(--border));
   }
 
@@ -796,6 +798,18 @@
     margin: 0;
     aspect-ratio: 1;
     border-radius: var(--standard-border-radius);
+  }
+
+  .profile-picture-list {
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 32px);
+    gap: 0.1rem;
+
+    > li {
+      display: contents;
+    }
   }
 
   .event {

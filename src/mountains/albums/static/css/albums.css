@@ -1,12 +1,11 @@
 .album {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
-  width: 100%;
-  margin: 0 0 1rem 0;
   padding: 0.5rem;
   overflow: hidden;
+  background-color: white;
+  filter: var(--standard-drop-shadow);
 
   > hgroup {
     > h1,
@@ -15,22 +14,29 @@
     h4,
     h5,
     h6 {
-      margin: 0.125rem 0;
+      margin: 0;
     }
 
     min-width: max-content;
   }
 
   /* Sample images */
-  > div {
+  > .album-photos {
+    /* Go the right */
+    justify-self: end;
+
+    /* Flexbox layout which automatically shrinks and hides overflow */
     display: flex;
     align-items: center;
     gap: 0.125rem;
-    flex: none;
     overflow: hidden;
+
+    /* Images are fixed width and height, with no flex change */
     img {
-      flex: none;
       width: 5rem;
+      aspect-ratio: 1;
+      object-fit: cover;
+      flex: none;
       border-radius: var(--standard-border-radius);
     }
   }

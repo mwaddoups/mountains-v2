@@ -20,3 +20,8 @@
     </svg>
   {% endif %}
 {% endmacro %}
+{% macro profile_picture_list(users) %}
+  <ul class="profile-picture-list">
+    {% for user in users %}<li>{{ profile_picture(user, size = '32') }}</li>{% endfor %}
+  </ul>
+{% endmacro %}

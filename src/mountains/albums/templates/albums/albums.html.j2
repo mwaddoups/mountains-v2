@@ -1,35 +1,33 @@
-{% from "platform/macros/profile.html.j2" import profile_picture %}
+{% from "platform/macros/profile.html.j2" import profile_picture, profile_picture_list %}
 {% extends "albums/base.html.j2" %}
 {% block content %}
   {% if g.current_user.is_site_admin %}
     <a class="button admin w-full" href="{{ url_for('.add_album') }}">Create Album</a>
   {% endif %}
-  <section>
-    {% for album in albums %}
-      <a href="{{ url_for('.album', id=album.id) }}">
-        <article class="album drop-shadow">
-          <hgroup>
-            <h3>{{ album.name }}</h3>
-            {% if album.event_date %}
-              <small>{{ album.event_date.strftime("%A, %B %-d %Y") }}</small>
-            {% endif %}
-            <div>
-              {% for user in album_users[album.id] %}{{ profile_picture(user, '32') }}{% endfor %}
-            </div>
-          </hgroup>
-          <div>
-            {% for photo in album_photos[album.id][:5] %}
-              {# djlint:off #}
+  {% for album in albums %}
+    <a href="{{ url_for('.album', id=album.id) }}">
+      <article class="album">
+        <hgroup>
+          <h3>{{ album.name }}</h3>
+          {% if album.event_date %}
+            <small>{{ album.event_date.strftime("%A, %B %-d %Y") }}</small>
+          {% endif %}
+          {{ profile_picture_list(album_users[album.id]) }}
+        </hgroup>
+        <div class="album-photos">
+          {% for photo in album_photos[album.id][:5] %}
+            {# djlint:off #}
             <img src="{{ url_for('static', filename=photo.photo_path) }}" loading="lazy" />
-              {# djlint:on #}
-            {% endfor %}
-          </div>
-        </article>
-      </a>
-    {% endfor %}
-  </section>
+            {# djlint:on #}
+          {% endfor %}
+        </div>
+      </article>
+    </a>
+  {% endfor %}
   <form>
     <input type="hidden" name="num_shown" value="{{ num_shown * 5 }}" />
-    <input type="submit" value="Show more ({{ num_shown }} shown)" />
+    <input class="w-full"
+           type="submit"
+           value="Show more ({{ num_shown }} shown)" />
   </form>
 {% endblock content %}
