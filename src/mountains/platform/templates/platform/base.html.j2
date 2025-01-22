@@ -44,10 +44,11 @@
         </li>
         {% if g.current_user.is_site_admin %}
           <div class="admin">
-            {% call nav_link('platform.committee', 'Committee') %}
+            {% call nav_link('platform.committee.overview', 'Committee') %}
               <ul>
-                {{ nav_link('platform.committee', 'Overview') }}
-                {{ nav_link('platform.committee_pages', 'Pages') }}
+                {{ nav_link('platform.committee.overview', 'Overview') }}
+                {{ nav_link('platform.committee.treasurer', 'Treasurer') }}
+                {{ nav_link('platform.committee.page_editor', 'Pages') }}
               </ul>
             {% endcall %}
           {% endif %}
