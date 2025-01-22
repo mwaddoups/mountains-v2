@@ -104,6 +104,7 @@ def member_dormant(user_id: int):
 def treasurer():
     return render_template(
         "committee/treasurer.html.j2",
+        active_expiry=current_app.config["CMC_MEMBERSHIP_EXPIRY"],
     )
 
 

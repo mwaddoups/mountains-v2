@@ -31,6 +31,8 @@ def create_app():
         SESSION_COOKIE_SAMESITE="Lax",
     )
 
+    app.config.update(CMC_MEMBERSHIP_EXPIRY=datetime.date(2025, 3, 31))
+
     app.register_blueprint(platform.blueprint)
     app.register_blueprint(auth.blueprint)
 
