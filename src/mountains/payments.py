@@ -56,7 +56,7 @@ class MembershipPaymentMetadata:
             user_id=int(m["user_id"]),
             membership_expiry=datetime.datetime.strptime(
                 m["membership_expiry"], "%Y-%m-%d"
-            ),
+            ).date(),
             date_of_birth=m["date_of_birth"],
             address=m["address"],
             postcode=m["postcode"],
@@ -99,6 +99,7 @@ class StripeAPI:
             success_url=success_url,
             cancel_url=cancel_url,
             metadata=metadata.to_metadata(),
+            api_key=self.api_key,
         )
         if checkout_session.url is None:
             raise MountainsStripeError("Failed to create checkout session!")
@@ -143,9 +144,7 @@ class StripeAPI:
         # Sort descending so we get full price first
         return sorted(prices, key=lambda p: p.unit_amount, reverse=True)
 
-    def event_details(
-        self, request: Request
-    ) -> tuple[list[stripe.LineItem], dict[str, str] | None]:
+    def to_event(self, request: Request) -> stripe.Event:
         payload = request.get_data()
         sig_header = request.headers["Stripe-Signature"]
 
@@ -155,13 +154,18 @@ class StripeAPI:
             )
         except Exception as e:
             raise MountainsStripeError("Event payload construction failed!") from e
+        return event
 
+    def checkout_items_metadata(
+        self, event: stripe.Event
+    ) -> tuple[list[stripe.LineItem], dict[str, str] | None]:
         line_items = []
         metadata = None
         if event["type"] == "checkout.session.completed":
             session = stripe.checkout.Session.retrieve(
                 event["data"]["object"]["id"],
                 expand=["line_items"],
+                api_key=self.api_key,
             )
 
             if session.line_items is not None:

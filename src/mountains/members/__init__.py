@@ -77,7 +77,7 @@ def member(slug: str):
             ) is not None:
                 users_repo(conn).update(id=user.id, is_coordinator=is_coordinator)
 
-            return redirect(url_for(".member"))
+            return redirect(url_for(".member", slug=slug))
 
     with db_conn() as conn:
         user = users_repo(conn).get_or_404(slug=slug)

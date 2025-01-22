@@ -17,6 +17,9 @@ wheels/
 # Environment variables for testing / prod
 .env
 
+# Stripe CLI
+stripe
+
 # Images (for now)
 images/
 src/mountains/static/profile

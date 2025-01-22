@@ -42,7 +42,9 @@
           <small>Expiring: {{ membership_expiry }}</small>
           <select required name="price_id">
             {% for price in membership_prices %}
-              <option value="{{ price.id }}">{{ price.product.name }} {{ price.nickname }} [£{{ price.unit_amount / 100 }}]</option>
+              <option value="{{ price.id }}">
+                {{ price.product.name }} ({{ price.nickname }}) [£{{ "%.2f" | format(price.unit_amount / 100) }}]
+              </option>
             {% endfor %}
           </select>
         </label>

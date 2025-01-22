@@ -46,7 +46,10 @@ def unstructure_datetime(val: datetime.datetime) -> str:
 
 @register_structure_hook
 def structure_date(val, _) -> datetime.date:
-    return datetime.date.fromisoformat(val)
+    try:
+        return datetime.date.fromisoformat(val)
+    except Exception:
+        return datetime.datetime.fromisoformat(val).date()
 
 
 @register_unstructure_hook

@@ -85,15 +85,27 @@ def create_app():
         return render_template("page.html.j2", page=page)
 
     # This route is fixed and set in Stripe config
-    @app.route("/api/payments/handleorder")
+    @app.post("/api/payments/handleorder")
     def handle_stripe_order():
         """
         This is a webhook that is called by stripe to process orders.
+
+        It should always respond 200 OK to indicate receipt.
+
+        To test this in testing mode, run
+        ./stripe listen --forward-to localhost:5000/api/payments/handleorder
         """
         stripe_api = StripeAPI.from_app(current_app)
-        line_items, metadata = stripe_api.event_details(request)
 
-        # Handle some edge cases here - we still respond 200 OK to stripe
+        event = stripe_api.to_event(request)
+        if event.type != "checkout.session.completed":
+            logger.info("Ignoring event with type: %s", event.type)
+            return Response(status=200)
+
+        line_items, metadata = stripe_api.checkout_items_metadata(event)
+
+        # Handle some cases we don't expect here
+        # TODO: Email about these
         if metadata is None:
             logger.error("Received line items %r without metadata!", line_items)
             return Response(status=200)
