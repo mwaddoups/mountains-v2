@@ -1,8 +1,22 @@
 {% extends "committee/base.html.j2" %}
 {% block platform %}
-  <h1>Treasurer</h1>
+  <h1>Treasurer Overview</h1>
   <section>
-    <h1>Membership Payments</h1>
+    <h2>Unpaid Users</h2>
+    <p>This shows anyone who has signed up to an event with an attached price but hasn't paid yet.</p>
+    <dl>
+      {% for event in unpaid_events | sort(attribute='event_dt') %}
+        <dt>{{ event.title }} ({{ event.event_dt.strftime("%b %d, %Y") }})</dt>
+        {% for attendee in unpaid_attendees | selectattr("event_id", "equalto", event.id) %}
+          <dd>
+            {{ user_map[attendee.user_id].full_name }}
+          </dd>
+        {% endfor %}
+      {% endfor %}
+    </dl>
+  </section>
+  <section>
+    <h2>Membership Payments</h2>
     <p>
       Membership is managed via Stripe. When you create a new membership product (which should only happen once a year), you have to ensure that two things are present in the metadata for that product:
     </p>

@@ -1,7 +1,8 @@
 # Missing features we NEED
 
-[] Payments, inc paid buttons for events,
-[] Treasurer admin
+[x] Payments around membership
+[] Event payments
+[x] Treasurer admin
 [x] Dormant users
 [x] Dormant popup / dormant deactvation
 [x] Activity
@@ -26,6 +27,7 @@
 
 # Nice to have before done
 
+[] Recent payments for treasurer from stripe
 [] Event description previews
 [] Images for new pages
 [] Drafts

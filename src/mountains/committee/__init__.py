@@ -10,11 +10,12 @@ from flask import (
     request,
     url_for,
 )
+from stripe.api_resources import event
 
 from mountains.context import current_user, db_conn
 from mountains.discord import DiscordAPI
 from mountains.models.activity import activity_repo
-from mountains.models.events import events_repo
+from mountains.models.events import attendees_repo, events_repo
 from mountains.models.pages import Page, latest_page, pages_repo
 from mountains.models.users import users_repo
 from mountains.utils import now_utc
@@ -102,9 +103,32 @@ def member_dormant(user_id: int):
 
 @blueprint.route("/treasurer")
 def treasurer():
+    with db_conn() as conn:
+        # Get these for sharing data
+        user_map = {u.id: u for u in users_repo(conn).list()}
+        event_map = {e.id: e for e in events_repo(conn).list()}
+
+        # Get unpaid users
+        attendees = attendees_repo(conn).list_where(
+            is_trip_paid=False, is_waiting_list=False
+        )
+        unpaid_attendees = [
+            a
+            for a in attendees
+            if event_map[a.event_id].price_id is not None
+            and event_map[a.event_id].is_upcoming()
+        ]
+        unpaid_events = [
+            event_map[e_id] for e_id in set(a.event_id for a in unpaid_attendees)
+        ]
+
     return render_template(
         "committee/treasurer.html.j2",
         active_expiry=current_app.config["CMC_MEMBERSHIP_EXPIRY"],
+        user_map=user_map,
+        event_map=event_map,
+        unpaid_events=unpaid_events,
+        unpaid_attendees=unpaid_attendees,
     )
 
 

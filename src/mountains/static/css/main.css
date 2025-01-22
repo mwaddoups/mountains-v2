@@ -381,6 +381,17 @@
     text-align: center;
   }
 
+  dl {
+    > dt {
+      font-weight: bold;
+    }
+    > dd {
+      border-left: 1px solid var(--primary);
+      margin: 0;
+      padding-left: 1.5rem;
+    }
+  }
+
   /* Basic styling for dialogs */
   dialog {
     border: 0;

@@ -64,6 +64,7 @@ def create_app():
             page = latest_content(conn, "faqs")
         return render_template("page.html.j2", page=page)
 
+    # This route is fixed and set in Stripe config
     @app.route("/api/payments/handleorder")
     def handle_stripe_order():
         """
@@ -85,11 +86,11 @@ def create_app():
             return Response(status=200)
 
         with db_conn() as conn:
-            if metadata["payment_for"] == "event":
+            if metadata.get("payment_for") == "event":
                 # It's an event, lets set them as paid
                 event_payment = EventPaymentMetadata.from_metadata(metadata)
                 attendees_repo(conn).update(id=event_payment.attendee_id, is_paid=True)
-            elif metadata["payment_for"] == "membership":
+            elif metadata.get("payment_for") == "membership":
                 # It's a membership payment, lets set member and email the treasurer
                 payment = MembershipPaymentMetadata.from_metadata(metadata)
                 user_db = users_repo(conn)
