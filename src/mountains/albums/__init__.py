@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import datetime
 import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from flask import (
     Blueprint,
@@ -17,7 +20,10 @@ from flask import (
 from mountains.context import db_conn
 from mountains.models.photos import Album, Photo, albums_repo, photos_repo, upload_photo
 from mountains.models.users import User, users_repo
-from mountains.utils import req_method, str_to_bool
+from mountains.utils import str_to_bool
+
+if TYPE_CHECKING:
+    from sqlite3 import Connection
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +64,7 @@ def albums():
     )
 
 
-@blueprint.route("/photos/add", methods=["GET", "POST"])
+@blueprint.route("/add", methods=["GET", "POST"])
 def add_album():
     if request.method == "POST":
         if event_date_str := request.form["event_date"]:
@@ -79,17 +85,13 @@ def add_album():
         return render_template("albums/album.add.html.j2")
 
 
-@blueprint.route(
-    "/photos/<int:id>/<int:highlighted_id>", methods=["GET", "POST", "PUT"]
-)
-@blueprint.route("/photos/<int:id>", methods=["GET", "POST", "PUT"])
-def album(id: int, highlighted_id: int | None = None):
+@blueprint.route("/<int:id>", methods=["GET", "POST"])
+def album(id: int):
     with db_conn() as conn:
-        album = albums_repo(conn).get(id=id)
-        if album is None:
-            abort(404)
+        album = albums_repo(conn).get_or_404(id=id)
 
-    if req_method(request) == "POST" and highlighted_id is None:
+    if request.method == "POST":
+        # Photo Upload
         for file in request.files.getlist("photos"):
             if file.filename:
                 photo_path = upload_photo(
@@ -109,26 +111,14 @@ def album(id: int, highlighted_id: int | None = None):
 
         if request.headers.get("HX-Request"):
             response = make_response()
-            response.headers["HX-Location"] = url_for(
-                ".album", id=id, highlighted_id=highlighted_id
-            )
+            response.headers["HX-Location"] = url_for(".album", id=id)
             return response
-    elif req_method(request) == "PUT" and highlighted_id is not None:
-        starred = request.form.get("starred", type=str_to_bool, default=None)
-        if starred is not None:
-            with db_conn() as conn:
-                photos_repo(conn).update(id=highlighted_id, starred=starred)
 
     with db_conn() as conn:
         photos = sorted(
             photos_repo(conn).list_where(album_id=album.id),
             key=lambda p: p.created_at_utc,
         )
-
-        if highlighted_id:
-            highlighted_ix = [p.id for p in photos].index(highlighted_id)
-        else:
-            highlighted_ix = None
 
         user_map: dict[int, User] = {}
         for photo in photos:
@@ -137,23 +127,54 @@ def album(id: int, highlighted_id: int | None = None):
                 if user is not None:
                     user_map[photo.uploader_id] = user
 
-    if request.headers.get("HX-Target") == "highlighted":
-        if highlighted_id is not None:
-            return render_template(
-                "albums/album._highlighted.html.j2",
-                album=album,
-                photos=photos,
-                user_map=user_map,
-                highlighted_ix=highlighted_ix,
-            )
-        else:
-            # Empty response is fine, the dialog gets closed by htmx
-            return ""
+    return render_template(
+        "albums/album.html.j2",
+        album=album,
+        photos=photos,
+        user_map=user_map,
+    )
+
+
+@blueprint.route("/<int:album_id>/photos/<int:photo_id>", methods=["GET", "POST"])
+def album_photo(album_id: int, photo_id: int):
+    if request.method == "POST":
+        starred = request.form.get("starred", type=str_to_bool, default=None)
+        if starred is not None:
+            with db_conn() as conn:
+                photos_repo(conn).update(id=photo_id, starred=starred)
+
+        return redirect(url_for(".album_photo", album_id=album_id, photo_id=photo_id))
     else:
+        with db_conn() as conn:
+            album = albums_repo(conn).get_or_404(id=album_id)
+            photos = _get_sorted_photos(conn, album)
+
+            try:
+                photo_ix = [p.id for p in photos].index(photo_id)
+            except ValueError:
+                abort(404, "Photo not found.")
+
+            photo = photos[photo_ix]
+
+            prev_photo = None
+            if photo_ix != 0:
+                prev_photo = photos[photo_ix - 1]
+
+            next_photo = None
+            if (photo_ix + 1) != len(photos):
+                next_photo = photos[photo_ix + 1]
+
         return render_template(
-            "albums/album.html.j2",
+            "albums/album.photo.html.j2",
             album=album,
-            photos=photos,
-            user_map=user_map,
-            highlighted_ix=highlighted_ix,
+            prev_photo=prev_photo,
+            photo=photo,
+            next_photo=next_photo,
         )
+
+
+def _get_sorted_photos(conn: Connection, album: Album) -> list[Photo]:
+    return sorted(
+        photos_repo(conn).list_where(album_id=album.id),
+        key=lambda p: p.created_at_utc,
+    )

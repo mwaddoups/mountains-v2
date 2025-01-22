@@ -1,0 +1,34 @@
+{# hide duplicate attribute and image width/height/alt warnings #}
+{# djlint:off H006,H037,H013 #}
+<img src="{{ url_for('static', filename=photo.photo_path) }}" />
+{% if photo.uploaded_id %}<small>Taken by: {{ user_map[photo.uploaded_id].full_name }}</small>{% endif %}
+<div id="controls">
+  {% if prev_photo %}
+    <a class="button"
+       hx-boost="true"
+       href="{{ url_for('.album_photo', album_id=album.id, photo_id=prev_photo.id) }}">Previous</a>
+  {% else %}
+    <a class="button" aria-disabled="true">Previous</a>
+  {% endif %}
+  {% if g.current_user.is_site_admin %}
+    <form class="admin"
+          method="post"
+          hx-post="{{ url_for('.album_photo', album_id=album.id, photo_id=photo.id) }}">
+      {% if photo.starred %}
+        <input type="hidden" name="starred" value="False">
+        <button type="submit">Unstar Photo</button>
+      {% else %}
+        <input type="hidden" name="starred" value="True">
+        <button type="submit">Star Photo</button>
+      {% endif %}
+    </form>
+  {% endif %}
+  {% if next_photo %}
+    <a class="button"
+       hx-boost="true"
+       href="{{ url_for('.album_photo', album_id=album.id, photo_id=next_photo.id) }}">Next</a>
+  {% else %}
+    <a class="button" aria-disabled="true">Next</a>
+  {% endif %}
+</div>
+{# djlint: on#}

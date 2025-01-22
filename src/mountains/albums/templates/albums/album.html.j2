@@ -22,28 +22,10 @@
     </script>
   </details>
   <section id="gallery" hx-target="#highlighted">
-    <dialog id="highlighted">
-      {% if highlighted_ix != None %}
-        {% include "platform/album._highlighted.html.j2" %}
-      {% endif %}
-    </dialog>
-    <script>
-      // set to recall every htmx request
-      htmx.on('#gallery', 'htmx:afterSettle', function(evt) {
-        const dialog = document.getElementById('highlighted');
-        if (dialog.hasChildNodes() && (!dialog.open)) {
-          dialog.showModal();
-        } else if (dialog.open) {
-          dialog.close()
-        }
-      });
-    </script>
     {# hide duplicate attribute and image width/height/alt warnings #}
     {# djlint:off H006,H037,H013 #}
     {% for photo in photos %}
-      <a hx-boost="true"
-         hx-on::afterRequest="openDialog()"
-         href="{{ url_for('.album', id=album.id, highlighted_id=photo.id) }}">
+      <a href="{{ url_for('.album_photo', album_id=album.id, photo_id=photo.id) }}">
         <img height="160"
              width="300"
              src="{{ url_for('static', filename=photo.photo_path) }}"

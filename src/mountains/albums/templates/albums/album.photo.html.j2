@@ -1,0 +1,7 @@
+{% extends "albums/base.html.j2" %}
+{% block content %}
+  <dialog id="photo" _="init call me.showModal()">
+    <a hx-boost="true" href="{{ url_for('.album', id=album.id) }}">< return to album</a>
+    {% include "albums/album._photo.html.j2" %}
+  </dialog>
+{% endblock content %}
