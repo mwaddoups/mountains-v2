@@ -161,13 +161,6 @@ def create_app():
 
         return Response(status=200)
 
-    @app.after_request
-    def ensure_preload_cached(response: Response):
-        # We need to ensure that any preloaded links are valid for a few seconds
-        if request.headers.get("HX-Preloaded") == "true":
-            response.headers["Cache-Control"] = "private, max-age=5"
-        return response
-
     @app.before_request
     def current_user():
         # Ensure all requests have access to the current user, if logged in

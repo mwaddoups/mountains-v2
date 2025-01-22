@@ -15,10 +15,7 @@
           href="{{ url_for('static', filename='css/main.css') }}?v=1.0" />
     {% block stylesheets %}
     {% endblock stylesheets %}
-    <script src="https://unpkg.com/htmx.org@2.0.4"
-            integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
-            crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/htmx-ext-preload@2.1.0/preload.js"></script>
+    <script src="{{ url_for('static', filename='htmx.min.js') }}"></script>
   </head>
   <body hx-ext="preload">
     <header>

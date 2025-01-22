@@ -2,6 +2,7 @@
 
 [x] Payments around membership
 [] Event payments
+[] Local stripe testing
 [x] Treasurer admin
 [x] Dormant users
 [x] Dormant popup / dormant deactvation
@@ -17,7 +18,7 @@
 [] Front page content (sample photos, committee bios, footer)
 [] General styling / TODO checks
 [] Deployment testing for slow performance
-[] Serve HTMX locally
+[x] Serve HTMX locally
 
 # Code nice to haves
 
@@ -27,6 +28,7 @@
 
 # Nice to have before done
 
+[] HTMX preload
 [] Recent payments for treasurer from stripe
 [] Event description previews
 [] Images for new pages
