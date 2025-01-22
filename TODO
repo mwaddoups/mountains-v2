@@ -15,7 +15,9 @@
 [] HTMX event search
 [] HTMX attendee adder
 [] Permissions audit + mid-roles (coordinator vs. committee/admin)
-[] Front page content (sample photos, committee bios, footer)
+[x] Front page content - landing page
+[] Committee Bios
+[] Footer
 [] General styling / TODO checks
 [] Deployment testing for slow performance
 [x] Serve HTMX locally

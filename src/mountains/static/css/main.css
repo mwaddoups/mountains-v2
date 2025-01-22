@@ -91,6 +91,23 @@
     margin-bottom: 0.5rem;
   }
 
+  body > footer {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    gap: 1rem;
+
+    :first-child {
+      padding: 0 1rem;
+      border-right: 1px solid gray;
+    }
+
+    :not(:first-child) {
+      font-size: smaller;
+      color: var(--text-light);
+    }
+  }
+
   /* Headings */
   h1 {
     font-size: xx-large;

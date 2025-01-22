@@ -78,6 +78,12 @@ def create_app():
             page = latest_content(conn, "faqs")
         return render_template("page.html.j2", page=page)
 
+    @app.route("/privacy-policy")
+    def privacy_policy():
+        with db_conn() as conn:
+            page = latest_content(conn, "privacy-policy")
+        return render_template("page.html.j2", page=page)
+
     # This route is fixed and set in Stripe config
     @app.route("/api/payments/handleorder")
     def handle_stripe_order():
