@@ -14,7 +14,7 @@ from flask import (
     url_for,
 )
 
-from mountains.db import connection
+from mountains.context import db_conn
 from mountains.models.photos import Album, Photo, albums_repo, photos_repo, upload_photo
 from mountains.models.users import User, users_repo
 from mountains.utils import req_method, str_to_bool
@@ -26,8 +26,7 @@ def photo_routes(blueprint: Blueprint):
     @blueprint.route("/photos")
     def albums():
         num_shown = request.args.get("num_shown", type=int, default=10)
-        with connection(current_app.config["DB_NAME"]) as conn:
-            # TODO: Page / show all
+        with db_conn() as conn:
             albums = sorted(
                 albums_repo(conn).list(), key=lambda a: a.created_at_utc, reverse=True
             )[:num_shown]
@@ -63,7 +62,7 @@ def photo_routes(blueprint: Blueprint):
             else:
                 event_date = None
 
-            with connection(current_app.config["DB_NAME"], locked=True) as conn:
+            with db_conn(locked=True) as conn:
                 albums_db = albums_repo(conn)
                 album = Album(
                     id=albums_db.next_id(),
@@ -80,7 +79,7 @@ def photo_routes(blueprint: Blueprint):
     )
     @blueprint.route("/photos/<int:id>", methods=["GET", "POST", "PUT"])
     def album(id: int, highlighted_id: int | None = None):
-        with connection(current_app.config["DB_NAME"]) as conn:
+        with db_conn() as conn:
             album = albums_repo(conn).get(id=id)
             if album is None:
                 abort(404)
@@ -92,7 +91,7 @@ def photo_routes(blueprint: Blueprint):
                         file, Path(current_app.config["STATIC_FOLDER"])
                     )
 
-                    with connection(current_app.config["DB_NAME"], locked=True) as conn:
+                    with db_conn(locked=True) as conn:
                         photos_db = photos_repo(conn)
                         photo = Photo(
                             id=photos_db.next_id(),
@@ -112,10 +111,10 @@ def photo_routes(blueprint: Blueprint):
         elif req_method(request) == "PUT" and highlighted_id is not None:
             starred = request.form.get("starred", type=str_to_bool, default=None)
             if starred is not None:
-                with connection(current_app.config["DB_NAME"]) as conn:
+                with db_conn() as conn:
                     photos_repo(conn).update(id=highlighted_id, starred=starred)
 
-        with connection(current_app.config["DB_NAME"]) as conn:
+        with db_conn() as conn:
             photos = sorted(
                 photos_repo(conn).list_where(album_id=album.id),
                 key=lambda p: p.created_at_utc,

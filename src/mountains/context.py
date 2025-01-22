@@ -4,6 +4,7 @@ from contextlib import contextmanager
 from typing import TYPE_CHECKING
 
 from flask import current_app, g
+from werkzeug.local import LocalProxy
 
 from mountains.db import connection
 
@@ -23,5 +24,8 @@ def db_conn(locked: bool = False) -> Generator[Connection, None, None]:
         yield conn
 
 
-def current_user() -> User:
+def get_current_user() -> User:
     return g.current_user
+
+
+current_user: User = LocalProxy(get_current_user)  # type: ignore - technically LocalProxy[User] but this is more helpful

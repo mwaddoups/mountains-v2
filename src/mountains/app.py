@@ -8,7 +8,6 @@ from flask.logging import default_handler
 from mountains.context import db_conn
 
 from . import auth, platform
-from .db import connection
 from .models.pages import latest_content
 from .models.tokens import tokens_repo
 from .models.users import users_repo

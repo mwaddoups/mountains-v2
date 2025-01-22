@@ -6,7 +6,6 @@ from flask import (
     Blueprint,
     abort,
     current_app,
-    g,
     redirect,
     render_template,
     request,
@@ -14,7 +13,7 @@ from flask import (
 )
 from werkzeug.security import generate_password_hash
 
-from mountains.context import db_conn
+from mountains.context import current_user, db_conn
 from mountains.discord import DiscordAPI
 from mountains.models.events import attendees_repo, events_repo
 from mountains.models.users import User, upload_profile, users_repo
@@ -119,7 +118,7 @@ def member_discord(slug: str):
     if request.method == "POST":
         with db_conn() as conn:
             user = users_repo(conn).get_or_404(slug=slug)
-            if not g.current_user.is_authorised(user.id):
+            if not current_user.is_authorised(user.id):
                 abort(403)
 
             if "remove_id" in request.form:

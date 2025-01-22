@@ -7,8 +7,6 @@ from sqlite3 import Connection
 from flask import (
     Blueprint,
     abort,
-    current_app,
-    g,
     make_response,
     redirect,
     render_template,
@@ -16,7 +14,7 @@ from flask import (
     url_for,
 )
 
-from mountains.db import connection
+from mountains.context import current_user, db_conn
 from mountains.errors import MountainException
 from mountains.models.activity import Activity, activity_repo
 from mountains.models.events import (
@@ -50,7 +48,7 @@ def event_routes(blueprint: Blueprint):
         else:
             event_types = [t.value for t in EventType]
 
-        with connection(current_app.config["DB_NAME"]) as conn:
+        with db_conn() as conn:
             events = [
                 e
                 for e in events_repo(conn).list_where(is_deleted=False)
@@ -89,22 +87,22 @@ def event_routes(blueprint: Blueprint):
 
     @blueprint.route("/events/<id>", methods=["GET", "POST", "DELETE"])
     def event(id: int):
-        with connection(current_app.config["DB_NAME"]) as conn:
+        with db_conn() as conn:
             event = events_repo(conn).get(id=id)
             if event is None:
                 abort(404, f"Event {id} not found!")
 
         if request.method != "GET":
-            if not g.current_user.is_authorised():
+            if not current_user.is_authorised():
                 abort(403)
 
-            with connection(current_app.config["DB_NAME"]) as conn:
+            with db_conn() as conn:
                 if req_method(request) == "DELETE":
                     logger.info("Soft deleting event %s", event)
                     events_repo(conn).update(id=id, is_deleted=True)
                     activity_repo(conn).insert(
                         Activity(
-                            user_id=g.current_user.id,
+                            user_id=current_user.id,
                             event_id=event.id,
                             action="deleted event",
                         )
@@ -173,7 +171,7 @@ def event_routes(blueprint: Blueprint):
         end += datetime.timedelta(days=6 - end.weekday())
 
         # Get all events between both days
-        with connection(current_app.config["DB_NAME"]) as conn:
+        with db_conn() as conn:
             # TODO: Use WHERE in DB
             events = [
                 e
@@ -211,7 +209,7 @@ def event_routes(blueprint: Blueprint):
         method = req_method(request)
 
         if id is not None:
-            with connection(current_app.config["DB_NAME"]) as conn:
+            with db_conn() as conn:
                 event = events_repo(conn).get(id=id)
             if event is None:
                 abort(404)
@@ -220,11 +218,11 @@ def event_routes(blueprint: Blueprint):
 
         error: str | None = None
         if method != "GET":
-            if not g.current_user.is_authorised():
+            if not current_user.is_authorised():
                 abort(403)
 
             try:
-                with connection(current_app.config["DB_NAME"], locked=True) as conn:
+                with db_conn(locked=True) as conn:
                     events_db = events_repo(conn)
                     if method == "POST" and event is None:
                         event = Event.from_form(
@@ -247,7 +245,7 @@ def event_routes(blueprint: Blueprint):
                         abort(405)
                     activity_repo(conn).insert(
                         Activity(
-                            user_id=g.current_user.id, event_id=event.id, action=action
+                            user_id=current_user.id, event_id=event.id, action=action
                         )
                     )
 
@@ -267,7 +265,7 @@ def event_routes(blueprint: Blueprint):
 
             # For default, use a copy if passed as ?copy_from and the ID is found...
             if event is None and (copy_id := request.args.get("copy_from", type=int)):
-                with connection(current_app.config["DB_NAME"]) as conn:
+                with db_conn() as conn:
                     copy_event = events_repo(conn).get(id=copy_id)
 
                 if copy_event is not None:
@@ -301,7 +299,7 @@ def event_routes(blueprint: Blueprint):
                 }
                 event_type = EventType(template)
                 if event_type in template_names:
-                    with connection(current_app.config["DB_NAME"]) as conn:
+                    with db_conn() as conn:
                         event_form["description"] = latest_page(
                             template_names[event_type], pages_repo(conn)
                         ).markdown
@@ -329,13 +327,13 @@ def event_routes(blueprint: Blueprint):
 
     @blueprint.route("/events/<int:event_id>/addattendee", methods=["GET", "POST"])
     def event_attendee_add(event_id: int):
-        with connection(current_app.config["DB_NAME"]) as conn:
+        with db_conn() as conn:
             event = events_repo(conn).get(id=event_id)
             if event is None:
                 abort(404, f"Event {event_id} not found!")
 
         if request.method == "POST":
-            with connection(current_app.config["DB_NAME"]) as conn:
+            with db_conn() as conn:
                 user = users_repo(conn).get(id=request.form.get("user_id", type=int))
 
             if user is None:
@@ -343,23 +341,18 @@ def event_routes(blueprint: Blueprint):
                     "Could not find the user that you wanted to add!"
                 )
             else:
-                if not g.current_user.is_authorised(user.id):
+                if not current_user.is_authorised(user.id):
                     abort(403)
 
-                if event.is_open() or g.current_user.is_site_admin:
-                    _add_user_to_event(
-                        event,
-                        user.id,
-                        db_name=current_app.config["DB_NAME"],
-                        current_user=g.current_user,
-                    )
+                if event.is_open() or current_user.is_site_admin:
+                    _add_user_to_event(event, user.id)
                 else:
                     logger.error(
-                        "User %s tried to add self to closed event!", g.current_user
+                        "User %s tried to add self to closed event!", current_user
                     )
                 return redirect(url_for(".event", id=event.id, expanded=True))
         else:
-            with connection(current_app.config["DB_NAME"]) as conn:
+            with db_conn() as conn:
                 users = users_repo(conn).list()
 
             search = request.args.get("search", None)
@@ -376,16 +369,16 @@ def event_routes(blueprint: Blueprint):
 
     @blueprint.route("/events/<int:event_id>/attend/", methods=["POST"])
     def attend_event(event_id: int):
-        with connection(current_app.config["DB_NAME"]) as conn:
+        with db_conn() as conn:
             event = events_repo(conn).get(id=event_id)
             if event is None:
                 abort(404, f"Event {event_id} not found!")
 
-        user: User = g.current_user
+        user: User = current_user
         popups = {}
         # TODO: TRIAL EVENTS!
 
-        with connection(current_app.config["DB_NAME"]) as conn:
+        with db_conn() as conn:
             if user.discord_id is None:
                 popups["discord"] = latest_page(
                     name="discord-popup", repo=pages_repo(conn)
@@ -406,12 +399,7 @@ def event_routes(blueprint: Blueprint):
                 ).markdown
 
         if len(popups) == 0:
-            _add_user_to_event(
-                event,
-                user.id,
-                db_name=current_app.config["DB_NAME"],
-                current_user=g.current_user,
-            )
+            _add_user_to_event(event, user.id)
             return redirect(url_for(".event", id=event.id))
 
         if request.headers.get("HX-Request"):
@@ -436,10 +424,10 @@ def event_routes(blueprint: Blueprint):
         methods=["POST", "PUT", "DELETE"],
     )
     def attendee(event_id: int, user_id: int):
-        if not g.current_user.is_authorised(user_id):
+        if not current_user.is_authorised(user_id):
             abort(403)
 
-        with connection(current_app.config["DB_NAME"]) as conn:
+        with db_conn() as conn:
             event = events_repo(conn).get(id=event_id)
             if event is None:
                 abort(404, f"Event {event_id} not found!")
@@ -450,20 +438,13 @@ def event_routes(blueprint: Blueprint):
         method = req_method(request)
 
         if method == "POST":
-            if event.is_open() or g.current_user.is_site_admin:
-                _add_user_to_event(
-                    event,
-                    user.id,
-                    db_name=current_app.config["DB_NAME"],
-                    current_user=g.current_user,
-                )
+            if event.is_open() or current_user.is_site_admin:
+                _add_user_to_event(event, user.id)
             else:
-                logger.error(
-                    "User %s tried to add self to closed event!", g.current_user
-                )
+                logger.error("User %s tried to add self to closed event!", current_user)
 
         elif method in ("PUT", "DELETE"):
-            with connection(current_app.config["DB_NAME"]) as conn:
+            with db_conn() as conn:
                 attendees_db = attendees_repo(conn)
                 target_attendee = attendees_db.get(event_id=event.id, user_id=user_id)
                 if target_attendee is None:
@@ -483,9 +464,9 @@ def event_routes(blueprint: Blueprint):
                         )
                         if "is_waiting_list" in updates:
                             if updates["is_waiting_list"]:
-                                action = f"was moved by {g.current_user.full_name} to waiting list for"
+                                action = f"was moved by {current_user.full_name} to waiting list for"
                             else:
-                                action = f"was moved by {g.current_user.full_name} to attending for"
+                                action = f"was moved by {current_user.full_name} to attending for"
                             activity_repo(conn).insert(
                                 Activity(
                                     user_id=user_id,
@@ -495,13 +476,13 @@ def event_routes(blueprint: Blueprint):
                             )
                     elif method == "DELETE":
                         attendees_db.delete_where(event_id=event.id, user_id=user_id)
-                        if g.current_user.id != user_id:
+                        if current_user.id != user_id:
                             action = f"removed {user.full_name} from"
                         else:
                             action = "left"
                         activity_repo(conn).insert(
                             Activity(
-                                user_id=g.current_user.id,
+                                user_id=current_user.id,
                                 event_id=event_id,
                                 action=action,
                             )
@@ -536,11 +517,9 @@ def _events_attendees(
     return event_attendees, event_members
 
 
-def _add_user_to_event(
-    event: Event, user_id: int, *, db_name: str, current_user: User
-) -> None | Attendee:
+def _add_user_to_event(event: Event, user_id: int) -> None | Attendee:
     # Lock here as we need to check the waiting list
-    with connection(db_name, locked=True) as conn:
+    with db_conn(locked=True) as conn:
         attendees_db = attendees_repo(conn)
         event_attendees = attendees_db.list_where(event_id=event.id)
         if user_id in [a.user_id for a in event_attendees]:

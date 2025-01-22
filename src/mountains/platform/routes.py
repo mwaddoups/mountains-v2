@@ -5,7 +5,6 @@ from flask import (
     Blueprint,
     abort,
     current_app,
-    g,
     redirect,
     render_template,
     request,
@@ -14,7 +13,7 @@ from flask import (
 )
 
 from mountains import members
-from mountains.db import connection
+from mountains.context import current_user, db_conn
 from mountains.discord import DiscordAPI
 from mountains.models.activity import activity_repo
 from mountains.models.events import events_repo
@@ -35,7 +34,7 @@ def routes(blueprint: Blueprint):
         if (token_id := session.get("token_id")) is None:
             return redirect(url_for("auth.login"))
         else:
-            with connection(current_app.config["DB_NAME"]) as conn:
+            with db_conn() as conn:
                 token = tokens_repo(conn).get(id=token_id)
                 if token is None:
                     # Something weird happened
@@ -57,11 +56,11 @@ def routes(blueprint: Blueprint):
     @blueprint.route("/dormant", methods=["GET", "POST"])
     def dormant():
         if request.method == "POST":
-            with connection(current_app.config["DB_NAME"]) as conn:
-                users_repo(conn).update(id=g.current_user.id, is_dormant=False)
+            with db_conn() as conn:
+                users_repo(conn).update(id=current_user.id, is_dormant=False)
             return redirect(url_for(".home"))
         else:
-            with connection(current_app.config["DB_NAME"]) as conn:
+            with db_conn() as conn:
                 page = latest_page(
                     name="dormant-return", repo=pages_repo(conn)
                 ).markdown
@@ -77,7 +76,7 @@ def routes(blueprint: Blueprint):
             "running": "info-running",
         }
         if page is None:
-            with connection(current_app.config["DB_NAME"]) as conn:
+            with db_conn() as conn:
                 pages_db = pages_repo(conn)
                 bullet_pages = {
                     c: latest_page(f"bullet-{c}", pages_db).markdown
@@ -93,7 +92,7 @@ def routes(blueprint: Blueprint):
                 }
             return render_template("platform/home.html.j2", bullet_pages=bullet_pages)
         elif page in info_pages:
-            with connection(current_app.config["DB_NAME"]) as conn:
+            with db_conn() as conn:
                 page_text = latest_page(
                     name=info_pages[page], repo=pages_repo(conn)
                 ).markdown
@@ -103,13 +102,13 @@ def routes(blueprint: Blueprint):
 
     @blueprint.route("/join")
     def join():
-        with connection(current_app.config["DB_NAME"]) as conn:
+        with db_conn() as conn:
             page = latest_page(name="join-club", repo=pages_repo(conn))
         return render_template("platform/joinclub.html.j2", join_page=page.markdown)
 
     @blueprint.route("/committee")
     def committee():
-        if not g.current_user.is_authorised():
+        if not current_user.is_authorised():
             abort(403)
 
         num_activities = request.args.get("num_activities", type=int, default=50)
@@ -117,7 +116,7 @@ def routes(blueprint: Blueprint):
         discord = DiscordAPI.from_app(current_app)
         discord_names = {m.id: m.member_name for m in discord.fetch_all_members()}
 
-        with connection(current_app.config["DB_NAME"]) as conn:
+        with db_conn() as conn:
             # Get these for sharing data
             user_map = {u.id: u for u in users_repo(conn).list()}
             event_map = {e.id: e for e in events_repo(conn).list()}
@@ -163,7 +162,7 @@ def routes(blueprint: Blueprint):
 
     @blueprint.route("/committee/dormant/<int:user_id>", methods=["POST"])
     def committee_member_dormant(user_id: int):
-        with connection(current_app.config["DB_NAME"]) as conn:
+        with db_conn() as conn:
             users_db = users_repo(conn)
             user = users_db.get(id=user_id)
             if user is None:
@@ -178,13 +177,13 @@ def routes(blueprint: Blueprint):
         preview = None
         message = None
         if request.method == "POST":
-            if not g.current_user.is_site_admin:
+            if not current_user.is_site_admin:
                 abort(403)
 
             if "preview" in request.form:
                 preview = request.form
             else:
-                with connection(current_app.config["DB_NAME"]) as conn:
+                with db_conn() as conn:
                     pages_db = pages_repo(conn)
                     if "new" in request.form:
                         page = Page(
@@ -214,7 +213,7 @@ def routes(blueprint: Blueprint):
                         pages_db.update(_where={"name": old_name}, name=new_name)
                         message = f"Changed name from {old_name} -> {new_name}"
 
-        with connection(current_app.config["DB_NAME"]) as conn:
+        with db_conn() as conn:
             all_pages = pages_repo(conn).list()
             page_names = set(p.name for p in all_pages)
             pages = sorted(

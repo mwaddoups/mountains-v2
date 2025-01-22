@@ -16,6 +16,7 @@
 [] Front page content (sample photos, committee bios, footer)
 [] General styling / TODO checks
 [] Deployment testing for slow performance
+[] Serve HTMX locally
 
 # Code nice to haves
 

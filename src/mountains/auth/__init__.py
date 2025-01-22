@@ -13,7 +13,7 @@ from flask import (
 )
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from mountains.db import connection
+from mountains.context import db_conn
 from mountains.email import send_mail
 from mountains.errors import MountainException
 from mountains.models.tokens import AuthToken, tokens_repo
@@ -31,7 +31,7 @@ blueprint = Blueprint("auth", __name__, url_prefix="/auth", template_folder="tem
 def login():
     if request.method == "POST":
         form = request.form
-        with connection(current_app.config["DB_NAME"]) as conn:
+        with db_conn() as conn:
             user_db = users_repo(conn)
             token_db = tokens_repo(conn)
 
@@ -69,7 +69,7 @@ def login():
 def forgot_password():
     if request.method == "POST":
         email = request.form["email"]
-        with connection(current_app.config["DB_NAME"]) as conn:
+        with db_conn() as conn:
             user_db = users_repo(conn)
             if (user := user_db.get(email=email)) is not None:
                 logger.info("Resetting password for %s", user)
@@ -101,7 +101,7 @@ def forgot_password():
 
 @blueprint.route("/resetpassword", methods=["GET", "POST"])
 def reset_password():
-    with connection(current_app.config["DB_NAME"]) as conn:
+    with db_conn() as conn:
         token_id = request.args.get("token")
         token_db = tokens_repo(conn)
         if token_id is None or (token := token_db.get(id=token_id)) is None:
@@ -154,7 +154,7 @@ def _register_new_user(db_name: str, form: Mapping[str, str]):
     password_hash = generate_password_hash(form["password"])
 
     # Lock the DB so we can generate a new user ID and insert
-    with connection(db_name, locked=True) as conn:
+    with db_conn(locked=True) as conn:
         user_db = users_repo(conn)
         if user_db.get(email=form["email"]) is not None:
             raise MountainException(
