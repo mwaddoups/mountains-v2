@@ -545,11 +545,16 @@
     /* Hide sub-links for non-active nav */
     > ul > li {
       ul:not(:has([aria-selected="true"])) {
-        display: none;
+        height: 0;
+        visibility: hidden;
+        transform: scaleY(0);
       }
 
       &:hover ul:not(:has([aria-selected="true"])) {
-        display: flex;
+        height: auto;
+        visibility: visible;
+        transform: scaleY(1);
+        transition: all ease-in 0.2s;
       }
     }
 

@@ -159,14 +159,16 @@
     {{ event.description | markdown | safe }}
   </section>
   <section>
-    {% set evt_attendees = attendees[event.id] | sort(attribute='joined_at_utc') %}
-    {% set total = evt_attendees | length %}
+    {% set all_evt_attendees = attendees[event.id] | sort(attribute='joined_at_utc') %}
+    {% set evt_attendees = all_evt_attendees | selectattr('is_waiting_list', 'equalto', False) | list %}
+    {% set wait_attendees = all_evt_attendees | selectattr('is_waiting_list', 'equalto', True) | list %}
+    {% set total_att = evt_attendees | length %}
     {% set total_wait = evt_attendees | map(attribute='is_waiting_list') | sum %}
     <details class="attendees" {{ 'open' if expanded }}>
       <summary>
-        <span>Attendees ({{ total - total_wait }} total, {{ event.max_attendees if event.max_attendees and event.max_attendees > 0 else 'no' }} max)</span>
+        <span>Attendees ({{ total_att }} total, {{ event.max_attendees if event.max_attendees and event.max_attendees > 0 else 'no' }} max)</span>
         <div class="attendees-summary">
-          {% for attendee in evt_attendees if not attendee.is_waiting_list %}
+          {% for attendee in evt_attendees %}
             {{ profile_picture(members[attendee.user_id], '32') }}
           {% else %}
             <small>No attendees yet!</small>
@@ -174,7 +176,7 @@
         </div>
       </summary>
       <ul>
-        {% for attendee in evt_attendees if not attendee.is_waiting_list %}
+        {% for attendee in evt_attendees %}
           {{ attending_user(attendee, members[attendee.user_id]) }}
         {% else %}
           <li>No attendees yet!</li>
@@ -192,13 +194,11 @@
         <summary>
           <span>Waiting List ({{ total_wait }} total)</span>
           <div class="attendees-summary">
-            {% for attendee in evt_attendees if attendee.is_waiting_list %}
-              {{ profile_picture(members[attendee.user_id], '32') }}
-            {% endfor %}
+            {% for attendee in wait_attendees %}{{ profile_picture(members[attendee.user_id], '32') }}{% endfor %}
           </div>
         </summary>
         <ul>
-          {% for attendee in evt_attendees if attendee.is_waiting_list %}
+          {% for attendee in wait_attendees %}
             {{ attending_user(attendee, members[attendee.user_id]) }}
           {% else %}
             <li>No waiting list yet!</li>
@@ -207,19 +207,23 @@
       </details>
     {% endif %}
     {% if event.is_upcoming() %}
-      {% if g.current_user.id in (evt_attendees | map(attribute='user_id') | list) %}
+      {% if g.current_user.id in (all_evt_attendees | map(attribute='user_id') | list) %}
         <form method="post"
               hx-post="{{ url_for('platform.attendee', event_id=event.id, user_id=g.current_user.id) }}"
               action="{{ url_for('platform.attendee', event_id=event.id, user_id=g.current_user.id) }}">
           <input type="hidden" name="method" value="DELETE" />
-          <input type="submit" class="btn-cancel" value="Leave" />
+          {% if g.current_user.id in (evt_attendees | map(attribute='user_id') | list) %}
+            <input type="submit" class="btn-cancel" value="Leave" />
+          {% else %}
+            <input type="submit" class="btn-cancel" value="Leave Waiting List" />
+          {% endif %}
         </form>
       {% else %}
         <form method="post"
               hx-post="{{ url_for('platform.attend_event', event_id=event.id) }}"
               action="{{ url_for('platform.attend_event', event_id=event.id) }}">
           <input type="hidden" name="method" value="POST" />
-          {% if total_wait > 0 or (total > 0 and event.max_attendees and total >= event.max_attendees) %}
+          {% if total_wait > 0 or (total_att > 0 and event.max_attendees and total_att >= event.max_attendees) %}
             <input type="submit" value="Join Waiting List" />
           {% else %}
             {% if event.is_open() %}
@@ -231,6 +235,11 @@
           </form>
         {% endif %}
       {% endif %}
+    {% endif %}
+    {% if event.price_id %}
+      <form>
+        <input type="submit" value="Pay Now" />
+      </form>
     {% endif %}
   </section>
 </article>

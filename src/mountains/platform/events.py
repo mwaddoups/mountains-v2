@@ -7,6 +7,7 @@ from sqlite3 import Connection
 from flask import (
     Blueprint,
     abort,
+    current_app,
     make_response,
     redirect,
     render_template,
@@ -26,6 +27,7 @@ from mountains.models.events import (
 )
 from mountains.models.pages import latest_page, pages_repo
 from mountains.models.users import User, users_repo
+from mountains.payments import EventPaymentMetadata, StripeAPI
 from mountains.utils import now_utc, req_method, str_to_bool
 
 logger = logging.getLogger(__name__)
@@ -367,6 +369,34 @@ def event_routes(blueprint: Blueprint):
                 users=users,
             )
 
+    @blueprint.route("/events/pay/<int:attendee_id>", methods=["GET"])
+    def pay_event(attendee_id: int):
+        with db_conn() as conn:
+            attendee = attendees_repo(conn).get_or_404(id=attendee_id)
+            event = events_repo(conn).get_or_404(id=attendee.event_id)
+
+        if event.price_id is None:
+            # TODO: Flash message
+            return redirect(url_for(".event", id=event.id))
+        elif attendee.is_trip_paid:
+            # TODO: Flash message
+            return redirect(url_for(".event", id=event.id))
+        else:
+            stripe_api = StripeAPI.from_app(current_app)
+            metadata = EventPaymentMetadata(attendee_id=attendee_id)
+            checkout_url = stripe_api.create_checkout(
+                event.price_id,
+                success_url=url_for(
+                    ".event", id=event.id, pay_success=True, _external=True
+                ),
+                cancel_url=url_for(
+                    ".event", id=event.id, pay_cancel=True, _external=True
+                ),
+                metadata=metadata,
+            )
+
+            return redirect(checkout_url)
+
     @blueprint.route("/events/<int:event_id>/attend/", methods=["POST"])
     def attend_event(event_id: int):
         with db_conn() as conn:
@@ -393,6 +423,7 @@ def event_routes(blueprint: Blueprint):
                 popups["ice"] = latest_page(
                     name="ice-popup", repo=pages_repo(conn)
                 ).markdown
+
             if event.show_participation_ice:
                 popups["statement"] = latest_page(
                     name="participation-statement", repo=pages_repo(conn)
