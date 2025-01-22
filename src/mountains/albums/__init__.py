@@ -10,7 +10,6 @@ from flask import (
     abort,
     current_app,
     g,
-    make_response,
     redirect,
     render_template,
     request,
@@ -83,6 +82,7 @@ def album(id: int):
 
     if request.method == "POST":
         # Photo Upload
+        new_photos = []
         for file in request.files.getlist("photos"):
             if file.filename:
                 photo_path = upload_photo(
@@ -100,10 +100,16 @@ def album(id: int):
                     )
                     photos_db.insert(photo)
 
-        if request.headers.get("HX-Request"):
-            response = make_response()
-            response.headers["HX-Location"] = url_for(".album", id=id)
-            return response
+                new_photos.append(photo)
+
+        if request.headers.get("HX-Target") == "gallery":
+            return render_template(
+                "albums/album._gallery.html.j2",
+                album=album,
+                photos=new_photos,
+            )
+        else:
+            return redirect(url_for(".album", id=album.id))
 
     with db_conn() as conn:
         photos = sorted(

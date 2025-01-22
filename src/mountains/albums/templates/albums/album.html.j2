@@ -6,14 +6,16 @@
   <details>
     <summary>Upload Photos</summary>
     <form id="upload"
+          hx-on::after-request="this.reset()"
           method="post"
           enctype="multipart/form-data"
           action="{{ url_for('.album', id=album.id) }}"
           hx-post="{{ url_for('.album', id=album.id) }}"
-          hx-select="#upload">
+          hx-target="#gallery"
+          hx-swap="beforeend">
       <input type="file" name="photos" accept='image/*' multiple />
-      <input type="submit" value="Upload" />
       <progress id="progress" value="0" max="100"></progress>
+      <input type="submit" value="Upload" />
     </form>
     <script>
         htmx.on('#upload', 'htmx:xhr:progress', function(evt) {
@@ -21,16 +23,16 @@
         });
     </script>
   </details>
-  <section id="gallery" hx-target="#highlighted">
-    {# hide duplicate attribute and image width/height/alt warnings #}
-    {# djlint:off H006,H037,H013 #}
-    {% for photo in photos %}
-      <a href="{{ url_for('.album_photo', album_id=album.id, photo_id=photo.id) }}">
-        <img height="160"
-             width="300"
-             src="{{ url_for('static', filename=photo.photo_path) }}"
-             loading="lazy" />
-      </a>
-    {% endfor %}
+  <dialog id="photo">
+    <a _=" on click call #photo.close()"
+       hx-push-url="true"
+       hx-swap="none"
+       hx-get="{{ url_for('.album', id=album.id) }}">< return to album</a>
+    <div id="highlighted-photo"
+         hx-target="this"
+         _="on htmx:afterSettle call #photo.showModal()"></div>
+  </dialog>
+  <section id="gallery">
+    {% include "albums/album._gallery.html.j2" %}
   </section>
 {% endblock content %}

@@ -1,0 +1,12 @@
+{# hide duplicate attribute and image width/height/alt warnings #}
+{# djlint:off H006,H037,H013 #}
+{% for photo in photos %}
+  <a hx-target="#highlighted-photo"
+     hx-boost="true"
+     href="{{ url_for('.album_photo', album_id=album.id, photo_id=photo.id) }}">
+    <img height="160"
+         width="300"
+         src="{{ url_for('static', filename=photo.photo_path) }}"
+         loading="lazy" />
+  </a>
+{% endfor %}
