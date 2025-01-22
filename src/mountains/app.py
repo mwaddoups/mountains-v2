@@ -1,13 +1,21 @@
 import datetime
 import logging
+import textwrap
 
 import mistune
-from flask import Flask, Response, g, render_template, request, session
+from flask import Flask, Response, current_app, g, render_template, request, session
 from flask.logging import default_handler
 
-from mountains.context import db_conn
+from mountains.context import db_conn, send_mail
+from mountains.discord import DiscordAPI
+from mountains.payments import (
+    EventPaymentMetadata,
+    MembershipPaymentMetadata,
+    StripeAPI,
+)
 
 from . import auth, platform
+from .models.events import attendees_repo
 from .models.pages import latest_content
 from .models.tokens import tokens_repo
 from .models.users import users_repo
@@ -55,6 +63,102 @@ def create_app():
         with db_conn() as conn:
             page = latest_content(conn, "faqs")
         return render_template("page.html.j2", page=page)
+
+    @app.route("/api/payments/handleorder")
+    def handle_stripe_order():
+        """
+        This is a webhook that is called by stripe to process orders.
+        """
+        stripe_api = StripeAPI.from_app(current_app)
+        line_items, metadata = stripe_api.event_details(request)
+
+        # Handle some edge cases here - we still respond 200 OK to stripe
+        if metadata is None:
+            logger.error("Received line items %r without metadata!", line_items)
+            return Response(status=200)
+        elif len(line_items) != 1:
+            logger.error(
+                "Received an attempt to pay for more than one item! Items: %r, metadata: %r",
+                line_items,
+                metadata,
+            )
+            return Response(status=200)
+
+        with db_conn() as conn:
+            if metadata["payment_for"] == "event":
+                # It's an event, lets set them as paid
+                event_payment = EventPaymentMetadata.from_metadata(metadata)
+                attendees_repo(conn).update(id=event_payment.attendee_id, is_paid=True)
+            elif metadata["payment_for"] == "membership":
+                # It's a membership payment, lets set member and email the treasurer
+                payment = MembershipPaymentMetadata.from_metadata(metadata)
+                user_db = users_repo(conn)
+
+                user = user_db.get_or_404(id=payment.user_id)
+                user_db.update(
+                    id=user.id,
+                    membership_expiry=payment.membership_expiry,
+                )
+
+                if user.membership_expiry is None and user.discord_id is not None:
+                    # They were previously not a member, lets set it on Discord.
+                    DiscordAPI.from_app(current_app).set_member_role(user.discord_id)
+
+                # And send the emails
+                send_mail(
+                    to=[user.email],
+                    subject="Thank you for joining!",
+                    msg_markdown="\n\n".join([
+                        "# Thank you for joining!",
+                        "Your membership on the website should now be confirmed.",
+                        "Your membership should shortly be set up on Discord, and the treasurer will register you for Mountaineering Scotland as soon as they are able. \n\n"
+                        "If you have any issues, message on Discord or contact treasurer@clydemc.org ."
+                        "Thank you!",
+                    ]),
+                )
+                send_mail(
+                    to=["treasurer@clydemc.org"],
+                    subject=f"New paid member - {user.full_name}!",
+                    msg_markdown=textwrap.dedent(f"""
+                        # {user.full_name} has joined the club!
+
+                        See their details below (for adding to MS):
+                        - Full Name: {user.full_name}
+                        - Email: {user.email}
+                        - Date of Birth: {payment.date_of_birth}
+                        - Address: {payment.address}
+                        - Postcode: {payment.postcode}
+                        - Mobile: {payment.mobile_number}
+                        - MS Number: {payment.ms_number if payment.ms_number else "<None provided>"}
+                        """),
+                )
+            else:
+                # Send error email!
+                send_mail(
+                    to=["treasurer@clydemc.org", "admin@clydemc.org"],
+                    subject="Unknown payment!",
+                    msg_markdown=textwrap.dedent(f"""
+                        # Unknown payment from Stripe!
+
+                        We received an unknown payment that we could not map to an existing event or membership. 
+                        
+                        Check Stripe for more details - see raw details below:
+
+                        ## Line Items
+
+                        ```
+                        {line_items:!r}
+                        ```
+
+                        ## Metadata
+
+                        ```
+                        {metadata:!r}
+                        ```
+                        """),
+                )
+
+        return Response(status=200)
 
     @app.after_request
     def ensure_preload_cached(response: Response):

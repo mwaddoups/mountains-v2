@@ -7,6 +7,7 @@ from flask import current_app, g
 from werkzeug.local import LocalProxy
 
 from mountains.db import connection
+from mountains.email import send_mail_api
 
 if TYPE_CHECKING:
     from sqlite3 import Connection
@@ -29,3 +30,16 @@ def get_current_user() -> User:
 
 
 current_user: User = LocalProxy(get_current_user)  # type: ignore - technically LocalProxy[User] but this is more helpful
+
+
+def send_mail(*, to: list[str], subject: str, msg_markdown: str) -> None:
+    """
+    Helper for sending mail in the app context
+    """
+    return send_mail_api(
+        to=to,
+        subject=subject,
+        msg_markdown=msg_markdown,
+        debug=current_app.debug,
+        api_key=current_app.config["MAILGUN_API_KEY"],
+    )

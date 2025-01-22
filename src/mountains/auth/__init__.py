@@ -13,8 +13,7 @@ from flask import (
 )
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from mountains.context import db_conn
-from mountains.email import send_mail
+from mountains.context import db_conn, send_mail
 from mountains.errors import MountainException
 from mountains.models.tokens import AuthToken, tokens_repo
 from mountains.models.users import User, users_repo
@@ -91,8 +90,6 @@ def forgot_password():
                     to=[user.email],
                     subject="Password reset for CMC",
                     msg_markdown=f"Reset your password: {reset_url}",
-                    debug=current_app.debug,
-                    api_key=current_app.config["MAILGUN_API_KEY"],
                 )
         return render_template("auth/forgotpassword.html.j2", was_reset=True)
     else:

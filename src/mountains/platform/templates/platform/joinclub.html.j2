@@ -1,51 +1,69 @@
 {% extends "platform/base.html.j2" %}
 {% block platform %}
+  {% if join_success %}
+    <section role="status">
+      <p>Thanks for joining the club! Your discord permissions and membership status should be updated shortly.</p>
+      <p>
+        If it hasn't taken affect in the next few hours, or with any other questions, contact the treasurer at treasurer@clydemc.org.
+      </p>
+    </section>
+  {% elif join_cancel %}
+    <p role="alert">
+      Your membership purchase was cancelled. If this was intentional, you can submit the form again to make payment and join when you like.
+      If payment has been taken and you don't have membership, check with the treasurer (treasurer@clydemc.org) to get your membership confirmed manually.
+    </p>
+  {% endif %}
   <section>
     {{ join_page | markdown | safe }}
   </section>
   <section>
     <h2>Become a Member</h2>
-    <form method="post">
-      <label>
-        Date of Birth
-        <input type="date" name="dob" required />
-      </label>
-      <label>
-        Address
-        <small>(Mountaineering Scotland need this)</small>
-        <input type="text" name="address" required />
-      </label>
-      <label>
-        Postcode
-        <input type="text" name="postcode" required />
-      </label>
-      <label>
-        Mobile Number
-        <input type="text" name="mobile_number" required />
-      </label>
-      <label>
-        Membership Type
-        <small>Expiring: {{ membership_expiry }}</small>
-        <select required name="membership_price">
-          {% for price in membership_prices %}
-            <option value="{{ price.id }}">{{ price.product.name }} {{ price.nickname }} [£{{ price.unit_amount / 100 }}]</option>
-          {% endfor %}
-        </select>
-      </label>
-      <label>
-        If you are already a MS member, what is your membership number?
-        <small>(Not needed for renewals!)</small>
-        <input type="text" name="ms_number" />
-      </label>
-      <label>
-        I agree to pay all membership dues to Clyde Mountaineering Club
-        <input type="checkbox" required />
-      </label>
-      <label>
-        I consent to my personal information being passed to Mountaineering Scotland in order to set up my membership
-        <input type="checkbox" required />
-      </label>
-      <input type="submit" value="Submit">
-    </form>
+    {% if g.current_user.discord_id %}
+      <form method="post">
+        <label>
+          Date of Birth
+          <input type="date" name="date_of_birth" required />
+        </label>
+        <label>
+          Address
+          <small>(Mountaineering Scotland need this)</small>
+          <input type="text" name="address" required />
+        </label>
+        <label>
+          Postcode
+          <input type="text" name="postcode" required />
+        </label>
+        <label>
+          Mobile Number
+          <input type="text" name="mobile_number" required />
+        </label>
+        <label>
+          Membership Type
+          <small>Expiring: {{ membership_expiry }}</small>
+          <select required name="price_id">
+            {% for price in membership_prices %}
+              <option value="{{ price.id }}">{{ price.product.name }} {{ price.nickname }} [£{{ price.unit_amount / 100 }}]</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>
+          If you are already a MS member, what is your membership number?
+          <small>(Not needed for renewals!)</small>
+          <input type="text" name="ms_number" />
+        </label>
+        <label>
+          I agree to pay all membership dues to Clyde Mountaineering Club, and I consent to
+          my personal information being passed to Mountaineering Scotland in order to set up my membership
+          <input type="checkbox" required />
+        </label>
+        <input type="submit" value="Proceed to Payment">
+      </form>
+    {% else %}
+      <p>
+        Your account doesn't have a Discord username associated with it yet! You need to join Discord in order to join the club.
+      </p>
+      <a class="button"
+         href="{{ url_for('platform.members.member_discord', slug=g.current_user.slug) }}">Set Discord Username</a>
+    {% endif %}
   </section>
 {% endblock platform %}

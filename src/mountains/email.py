@@ -1,4 +1,5 @@
 import logging
+import textwrap
 
 import mistune
 import requests
@@ -7,9 +8,11 @@ from requests.auth import HTTPBasicAuth
 logger = logging.getLogger(__name__)
 
 
-def send_mail(
+def send_mail_api(
     *, to: list[str], subject: str, msg_markdown: str, api_key: str, debug: bool = True
 ) -> None:
+    # Remove any shared indentation, allowing raw string passing
+    msg_markdown = textwrap.dedent(msg_markdown)
     if debug:
         print("DEBUG EMAIL", subject, msg_markdown)
         return
