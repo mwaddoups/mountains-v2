@@ -1,8 +1,8 @@
 # Missing features we NEED
 
 [x] Payments around membership
-[] Event payments
-[] Local stripe testing
+[x] Event payments
+[x] Local stripe testing
 [x] Treasurer admin
 [x] Dormant users
 [x] Dormant popup / dormant deactvation
@@ -19,6 +19,7 @@
 [] Committee Bios
 [x] Footer
 [] General styling / TODO checks
+[] Deployment setup + testing
 [] Deployment testing for slow performance
 [x] Serve HTMX locally
 

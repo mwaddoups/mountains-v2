@@ -1,0 +1,90 @@
+.album {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  margin: 0 0 1rem 0;
+  padding: 0.5rem;
+  overflow: hidden;
+
+  > hgroup {
+    > h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      margin: 0.125rem 0;
+    }
+
+    min-width: max-content;
+  }
+
+  /* Sample images */
+  > div {
+    display: flex;
+    align-items: center;
+    gap: 0.125rem;
+    flex: none;
+    overflow: hidden;
+    img {
+      flex: none;
+      width: 5rem;
+      border-radius: var(--standard-border-radius);
+    }
+  }
+}
+
+#gallery {
+  display: flex;
+  width: 100%;
+  align-items: stretch;
+  justify-content: stretch;
+  flex-wrap: wrap;
+  margin: 1rem auto;
+
+  > a:has(> img) {
+    display: block;
+    flex: 1 1 auto;
+    height: 160px;
+
+    > img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    &:hover {
+      cursor: pointer;
+      opacity: 70%;
+    }
+  }
+
+  #highlighted {
+    height: 90vh;
+    width: 90vw;
+  }
+
+  #highlighted > div {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+
+    > #controls {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    img {
+      height: 75vh;
+      max-width: 100%;
+      object-fit: contain;
+      flex: none;
+    }
+  }
+}

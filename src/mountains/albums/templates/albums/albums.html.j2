@@ -1,13 +1,12 @@
 {% from "platform/macros/profile.html.j2" import profile_picture %}
-{% extends "platform/base.html.j2" %}
+{% extends "albums/base.html.j2" %}
 {% block platform %}
   {% if g.current_user.is_site_admin %}
-    <a class="button admin w-full"
-       href="{{ url_for('platform.add_album') }}">Create Album</a>
+    <a class="button admin w-full" href="{{ url_for('.add_album') }}">Create Album</a>
   {% endif %}
   <section>
     {% for album in albums %}
-      <a href="{{ url_for('platform.album', id=album.id) }}">
+      <a href="{{ url_for('.album', id=album.id) }}">
         <article class="album drop-shadow">
           <hgroup>
             <h3>{{ album.name }}</h3>

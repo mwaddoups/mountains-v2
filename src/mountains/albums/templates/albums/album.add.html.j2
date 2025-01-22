@@ -1,6 +1,6 @@
-{% extends "platform/base.html.j2" %}
+{% extends "albums/base.html.j2" %}
 {% block platform %}
-  <a href="{{ url_for('platform.albums') }}">< return to Albums</a>
+  <a href="{{ url_for('.albums') }}">< return to Albums</a>
   <h1>New Album</h1>
   <form method="post">
     <label>

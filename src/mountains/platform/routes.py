@@ -11,7 +11,7 @@ from flask import (
     url_for,
 )
 
-from mountains import committee, members
+from mountains import albums, committee, members
 from mountains.context import current_user, db_conn
 from mountains.models.pages import latest_content
 from mountains.models.tokens import tokens_repo
@@ -19,7 +19,6 @@ from mountains.models.users import users_repo
 from mountains.payments import MembershipPaymentMetadata, StripeAPI
 
 from .events import event_routes
-from .photos import photo_routes
 
 logger = logging.getLogger(__name__)
 
@@ -129,7 +128,6 @@ def routes(blueprint: Blueprint):
 
     blueprint.register_blueprint(members.blueprint, url_prefix="/members")
     blueprint.register_blueprint(committee.blueprint, url_prefix="/committee")
+    blueprint.register_blueprint(albums.blueprint, url_prefix="/albums")
 
     event_routes(blueprint)
-
-    photo_routes(blueprint)
