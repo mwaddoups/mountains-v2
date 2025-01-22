@@ -18,14 +18,19 @@ class MountainsStripeError(MountainException):
 
 @define
 class EventPaymentMetadata:
-    attendee_id: int
+    user_id: int
+    event_id: int
 
     def to_metadata(self) -> dict[str, str]:
-        return {"payment_for": "event", "attendee_id": str(self.attendee_id)}
+        return {
+            "payment_for": "event",
+            "user_id": str(self.user_id),
+            "event_id": str(self.event_id),
+        }
 
     @classmethod
     def from_metadata(cls, m: dict[str, str]):
-        return cls(attendee_id=int(m["attendee_id"]))
+        return cls(user_id=int(m["user_id"]), event_id=int(m["event_id"]))
 
 
 @define

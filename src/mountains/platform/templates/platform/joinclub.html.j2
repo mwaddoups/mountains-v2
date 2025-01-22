@@ -17,7 +17,7 @@
     {{ join_page | markdown | safe }}
   </section>
   <section>
-    <h2>Become a Member</h2>
+    <h2>Become a Member (Expiring {{ membership_expiry.strftime("%b %-d, %Y") }})</h2>
     {% if g.current_user.discord_id %}
       <form method="post">
         <label>
@@ -39,7 +39,6 @@
         </label>
         <label>
           Membership Type
-          <small>Expiring: {{ membership_expiry }}</small>
           <select required name="price_id">
             {% for price in membership_prices %}
               <option value="{{ price.id }}">

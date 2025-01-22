@@ -94,6 +94,15 @@ def create_app():
 
         To test this in testing mode, run
         ./stripe listen --forward-to localhost:5000/api/payments/handleorder
+
+        On a normal order, we receive
+        - payment_intent.created
+        - payment_intent.succeeded
+        - charge.updated
+        - charge.succeeded
+        - checkout.session.completed
+
+        We only handle checkout.session.completed and use the metadata we passed earlier.
         """
         stripe_api = StripeAPI.from_app(current_app)
 
@@ -121,7 +130,12 @@ def create_app():
             if metadata.get("payment_for") == "event":
                 # It's an event, lets set them as paid
                 event_payment = EventPaymentMetadata.from_metadata(metadata)
-                attendees_repo(conn).update(id=event_payment.attendee_id, is_paid=True)
+                attendees_repo(conn).update(
+                    _where=dict(
+                        user_id=event_payment.user_id, event_id=event_payment.event_id
+                    ),
+                    is_trip_paid=True,
+                )
             elif metadata.get("payment_for") == "membership":
                 # It's a membership payment, lets set member and email the treasurer
                 payment = MembershipPaymentMetadata.from_metadata(metadata)

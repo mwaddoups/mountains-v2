@@ -106,6 +106,8 @@
     {% endif %}
   </li>
 {% endmacro %}
+{% if request.args.pay_success %}<p role="status">Payment successful! Thank you :)</p>{% endif %}
+{% if request.args.pay_cancel %}<p role="alert">Payment was cancelled!</p>{% endif %}
 {% if is_dialog %}<a href="{{ url_for('.events', _anchor=event.slug) }}">< Return to Events</a>{% endif %}
 <article id="{{ event.slug }}"
          hx-target="this"
@@ -206,14 +208,21 @@
         </ul>
       </details>
     {% endif %}
+    {% set current_attendee = all_evt_attendees | selectattr('user_id', 'equalto', g.current_user.id) | first %}
     {% if event.is_upcoming() %}
-      {% if g.current_user.id in (all_evt_attendees | map(attribute='user_id') | list) %}
+      {% if current_attendee %}
         <form method="post"
               hx-post="{{ url_for('platform.attendee', event_id=event.id, user_id=g.current_user.id) }}"
               action="{{ url_for('platform.attendee', event_id=event.id, user_id=g.current_user.id) }}">
           <input type="hidden" name="method" value="DELETE" />
-          {% if g.current_user.id in (evt_attendees | map(attribute='user_id') | list) %}
+          {% if not current_attendee.is_waiting_list %}
             <input type="submit" class="btn-cancel" value="Leave" />
+            {% if not current_attendee.is_trip_paid %}
+              <a href="{{ url_for('.pay_event', user_id=current_attendee.user_id, event_id=current_attendee.event_id) }}"
+                 class="button">Pay Now</a>
+            {% else %}
+              <button disabled>You've paid!</button>
+            {% endif %}
           {% else %}
             <input type="submit" class="btn-cancel" value="Leave Waiting List" />
           {% endif %}
@@ -236,10 +245,6 @@
         {% endif %}
       {% endif %}
     {% endif %}
-    {% if event.price_id %}
-      <form>
-        <input type="submit" value="Pay Now" />
-      </form>
-    {% endif %}
+    {% if event.price_id and current_attendee and not current_attendee.is_waiting_list %}{% endif %}
   </section>
 </article>

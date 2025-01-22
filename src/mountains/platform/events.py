@@ -369,11 +369,13 @@ def event_routes(blueprint: Blueprint):
                 users=users,
             )
 
-    @blueprint.route("/events/pay/<int:attendee_id>", methods=["GET"])
-    def pay_event(attendee_id: int):
+    @blueprint.route("/events/<int:event_id>/pay/<int:user_id>", methods=["GET"])
+    def pay_event(event_id: int, user_id: int):
         with db_conn() as conn:
-            attendee = attendees_repo(conn).get_or_404(id=attendee_id)
-            event = events_repo(conn).get_or_404(id=attendee.event_id)
+            attendee = attendees_repo(conn).get_or_404(
+                user_id=user_id, event_id=event_id
+            )
+            event = events_repo(conn).get_or_404(id=event_id)
 
         if event.price_id is None:
             # TODO: Flash message
@@ -383,7 +385,7 @@ def event_routes(blueprint: Blueprint):
             return redirect(url_for(".event", id=event.id))
         else:
             stripe_api = StripeAPI.from_app(current_app)
-            metadata = EventPaymentMetadata(attendee_id=attendee_id)
+            metadata = EventPaymentMetadata(user_id=user_id, event_id=event_id)
             checkout_url = stripe_api.create_checkout(
                 event.price_id,
                 success_url=url_for(

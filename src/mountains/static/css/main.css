@@ -239,6 +239,8 @@
 
   /* Disabled */
   input[aria-disabled="true"],
+  button:disabled,
+  .button[aria-disabled="true"],
   input:disabled,
   input[disabled] {
     pointer-events: none;
