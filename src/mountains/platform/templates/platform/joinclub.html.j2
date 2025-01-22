@@ -1,5 +1,5 @@
 {% extends "platform/base.html.j2" %}
-{% block platform %}
+{% block content %}
   {% if join_success %}
     <section role="status">
       <p>Thanks for joining the club! Your discord permissions and membership status should be updated shortly.</p>
@@ -67,4 +67,4 @@
          href="{{ url_for('platform.members.member_discord', slug=g.current_user.slug) }}">Set Discord Username</a>
     {% endif %}
   </section>
-{% endblock platform %}
+{% endblock content %}

@@ -1,5 +1,5 @@
 {% extends "base.html.j2" %}
-{% macro nav_link(endpoint, name, class="") -%}
+{% macro nav_link(endpoint, name, class="") %}
   {% set target_url = url_for(endpoint, **kwargs) %}
   <li class="{{ class }}">
     {% set is_selected = request.path == target_url %}
@@ -7,58 +7,52 @@
        aria-selected="{{ 'true' if is_selected else 'false' }}">{{ name }}</a>
     {% if caller %}{{ caller() }}{% endif %}
   </li>
-{%- endmacro %}
-{% block content %}
-  <aside>
-    <nav id="sidebar-nav" data-expanded="false">
-      <ul preload>
-        {% call nav_link('platform.home', 'Club Info') %}
+{% endmacro %}
+{% block sidebar %}
+  <nav id="sidebar-nav" data-expanded="false">
+    <ul preload>
+      {% call nav_link('platform.home', 'Club Info') %}
+        <ul>
+          {{ nav_link('platform.home', 'Overview') }}
+          {{ nav_link('platform.home', 'Day Walks', page='day-walks') }}
+          {{ nav_link('platform.home', 'Hut Trips', page='hut-weekends') }}
+          {{ nav_link('platform.home', 'Climbing', page='climbing') }}
+          {{ nav_link('platform.home', 'Trail Running', page='running') }}
+        </ul>
+      {% endcall %}
+      {% call nav_link('platform.events', 'Events') %}
+        <ul>
+          {{ nav_link('platform.events', 'Upcoming') }}
+          {{ nav_link('platform.events_calendar', 'Calendar') }}
+        </ul>
+      {% endcall %}
+      {{ nav_link('platform.members.members', 'Members') }}
+      {{ nav_link('platform.albums.albums', 'Photos') }}
+      {{ nav_link('platform.join', 'Join the Club') }}
+      <li>
+        <a href="https://discord.gg/98K3CafRxk">Discord</a>
+      </li>
+      <li>
+        <a href="https://www.tshirtstudio.com/marketplace/clyde-mountaineering-club">Club Merch</a>
+      </li>
+      {% if g.current_user.is_site_admin %}
+        {% call nav_link('platform.committee.overview', 'Committee', class="admin") %}
           <ul>
-            {{ nav_link('platform.home', 'Overview') }}
-            {{ nav_link('platform.home', 'Day Walks', page='day-walks') }}
-            {{ nav_link('platform.home', 'Hut Trips', page='hut-weekends') }}
-            {{ nav_link('platform.home', 'Climbing', page='climbing') }}
-            {{ nav_link('platform.home', 'Trail Running', page='running') }}
+            {{ nav_link('platform.committee.overview', 'Overview') }}
+            {{ nav_link('platform.committee.treasurer', 'Treasurer') }}
+            {{ nav_link('platform.committee.page_editor', 'Pages') }}
           </ul>
         {% endcall %}
-        {% call nav_link('platform.events', 'Events') %}
-          <ul>
-            {{ nav_link('platform.events', 'Upcoming') }}
-            {{ nav_link('platform.events_calendar', 'Calendar') }}
-          </ul>
-        {% endcall %}
-        {{ nav_link('platform.members.members', 'Members') }}
-        {{ nav_link('platform.albums.albums', 'Photos') }}
-        {{ nav_link('platform.join', 'Join the Club') }}
-        <li>
-          <a href="https://discord.gg/98K3CafRxk">Discord</a>
-        </li>
-        <li>
-          <a href="https://www.tshirtstudio.com/marketplace/clyde-mountaineering-club">Club Merch</a>
-        </li>
-        {% if g.current_user.is_site_admin %}
-          {% call nav_link('platform.committee.overview', 'Committee', class="admin") %}
-            <ul>
-              {{ nav_link('platform.committee.overview', 'Overview') }}
-              {{ nav_link('platform.committee.treasurer', 'Treasurer') }}
-              {{ nav_link('platform.committee.page_editor', 'Pages') }}
-            </ul>
-          {% endcall %}
-        {% endif %}
-      </ul>
-      <button id="sidebar-hamburger"
-              onclick="document.getElementById('sidebar-nav').dataset.expanded = document.getElementById('sidebar-nav').dataset.expanded === 'true' ? 'false' : 'true' ">
-        {# BI - List #}
-        <svg xmlns="http://www.w3.org/2000/svg"
-             fill="currentColor"
-             viewBox="0 0 16 16">
-          <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5" />
-        </svg>
-      </button>
-    </nav>
-  </aside>
-  <main>
-    {% block platform %}
-    {% endblock platform %}
-  </main>
-{% endblock content %}
+      {% endif %}
+    </ul>
+    <button id="sidebar-hamburger"
+            onclick="document.getElementById('sidebar-nav').dataset.expanded = document.getElementById('sidebar-nav').dataset.expanded === 'true' ? 'false' : 'true' ">
+      {# BI - List #}
+      <svg xmlns="http://www.w3.org/2000/svg"
+           fill="currentColor"
+           viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5" />
+      </svg>
+    </button>
+  </nav>
+{% endblock sidebar %}

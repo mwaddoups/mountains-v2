@@ -3,7 +3,7 @@
   <link rel="stylesheet"
         href="{{ url_for('static', filename='css/info.css') }}?v=1.0" />
 {% endblock stylesheets %}
-{% block platform %}
+{% block content %}
   <header>
     <img src="{{ url_for('static', filename='logo_256.png') }}"
          width="183"
@@ -131,4 +131,4 @@
     <a href="https://docs.google.com/forms/d/e/1FAIpQLScz6Fn6l1XVN-G2VEz6e9mJG-_EqftuFrs_CmZbs6UtEYqw6A/viewform?usp=sf_link"
        class="button">Give Feedback</a>
   </section>
-{% endblock platform %}
+{% endblock content %}

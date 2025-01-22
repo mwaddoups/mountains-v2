@@ -1,5 +1,5 @@
 {% extends "platform/base.html.j2" %}
-{% block platform %}
+{% block content %}
   <a href="{{ url_for('platform.events') }}">< return to Events</a>
   {% if editing %}
     <h1>Editing {{ editing.title }}</h1>
@@ -121,4 +121,4 @@
     </label>
     <input type="submit" value="Submit" />
   </form>
-{% endblock platform %}
+{% endblock content %}

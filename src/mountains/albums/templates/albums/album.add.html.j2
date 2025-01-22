@@ -1,5 +1,5 @@
 {% extends "albums/base.html.j2" %}
-{% block platform %}
+{% block content %}
   <a href="{{ url_for('.albums') }}">< return to Albums</a>
   <h1>New Album</h1>
   <form method="post">
@@ -14,4 +14,4 @@
     </label>
     <input type="submit" value="Submit" />
   </form>
-{% endblock platform %}
+{% endblock content %}

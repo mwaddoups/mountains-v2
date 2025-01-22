@@ -1,6 +1,6 @@
 {% extends "base.html.j2" %}
 {% block content %}
-  <main id="landing">
+  <div id="landing">
     {# djlint: off #}
     <img src="{{ url_for('static', filename='cmc_landing.jpg') }}" />
     {# djlint: on #}
@@ -34,5 +34,5 @@
         {% endfor %}
       </div>
     </section>
-  </main>
+  </div>
 {% endblock content %}

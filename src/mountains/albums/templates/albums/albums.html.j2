@@ -1,6 +1,6 @@
 {% from "platform/macros/profile.html.j2" import profile_picture %}
 {% extends "albums/base.html.j2" %}
-{% block platform %}
+{% block content %}
   {% if g.current_user.is_site_admin %}
     <a class="button admin w-full" href="{{ url_for('.add_album') }}">Create Album</a>
   {% endif %}
@@ -32,4 +32,4 @@
     <input type="hidden" name="num_shown" value="{{ num_shown * 5 }}" />
     <input type="submit" value="Show more ({{ num_shown }} shown)" />
   </form>
-{% endblock platform %}
+{% endblock content %}

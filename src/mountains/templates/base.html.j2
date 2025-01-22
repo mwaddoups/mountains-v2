@@ -61,8 +61,14 @@
         </aside>
       </nav>
     </header>
-    {% block content %}
-    {% endblock content %}
+    <aside>
+      {% block sidebar %}
+      {% endblock sidebar %}
+    </aside>
+    <main>
+      {% block content %}
+      {% endblock content %}
+    </main>
     <footer>
       <h3>Clyde Mountaineering Club</h3>
       <a href="{{ url_for('privacy_policy') }}">Privacy Policy</a>

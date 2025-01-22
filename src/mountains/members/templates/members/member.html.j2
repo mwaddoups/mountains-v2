@@ -1,7 +1,7 @@
 {% from "platform/macros/profile.html.j2" import profile_picture %}
 {% from "platform/macros/theme.html.j2" import badge %}
 {% extends "members/base.html.j2" %}
-{% block platform %}
+{% block content %}
   <div id="member-profile">
     <header>
       {{ profile_picture(user, "256") }}
@@ -100,4 +100,4 @@
       {% endif %}
     </section>
   </div>
-{% endblock platform %}
+{% endblock content %}

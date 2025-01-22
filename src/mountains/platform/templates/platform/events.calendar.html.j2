@@ -7,7 +7,7 @@
     <span>{{ event.title }}</span>
   </div>
 {% endmacro %}
-{% block platform %}
+{% block content %}
   <div class="calendar-controls">
     <a href="{{ url_for('.events_calendar', year=prev_month_dt.year, month=prev_month_dt.month) }}">< {{ prev_month_dt.strftime("%B %Y") }}</a>
     <h3>{{ month_dt.strftime("%B %Y") }}</h3>
@@ -51,4 +51,4 @@
       </tr>
     </tbody>
   </table>
-{% endblock platform %}
+{% endblock content %}

@@ -1,5 +1,5 @@
 {% extends "committee/base.html.j2" %}
-{% block platform %}
+{% block content %}
   <h1>Page Editor</h1>
   {% if message %}<p role="alert">{{ message }}</p>{% endif %}
   <p>You can edit any of the text on club pages below.</p>
@@ -66,4 +66,4 @@
       <input type="submit" value="Change Name" name="update_name">
     </form>
   </details>
-{% endblock platform %}
+{% endblock content %}

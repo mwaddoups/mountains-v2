@@ -1,5 +1,5 @@
 {% extends "members/base.html.j2" %}
-{% block platform %}
+{% block content %}
   <a href="{{ url_for('.member', slug=user.slug) }}">< Return to profile</a>
   <h1>Editing {{ user.full_name }}</h1>
   {% if message %}<strong role="alert">{{ message }}</strong>{% endif %}
@@ -58,4 +58,4 @@
     </label>
     <input type="submit" value="Change Password" />
   </form>
-{% endblock platform %}
+{% endblock content %}

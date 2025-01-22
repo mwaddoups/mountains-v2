@@ -91,6 +91,10 @@
     margin-bottom: 0.5rem;
   }
 
+  body > main {
+    min-height: 100vh;
+  }
+
   body > footer {
     display: flex;
     align-items: center;
