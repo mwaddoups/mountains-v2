@@ -1,18 +1,12 @@
 {% extends "base.html.j2" %}
-{% macro nav_link(endpoint, name) -%}
-  {% set url = url_for(endpoint, **kwargs) %}
-  {% if request.endpoint.startswith(endpoint) %}
-    <li>
-      {% set is_selected = url == url_for(request.endpoint, **request.view_args) %}
-      <a href="{{ url }}"
-         aria-selected="{{ 'true' if is_selected else 'false' }}">{{ name }}</a>
-      {% if caller %}{{ caller() }}{% endif %}
-    </li>
-  {% else %}
-    <li>
-      <a href="{{ url }}">{{ name }}</a>
-    </li>
-  {% endif %}
+{% macro nav_link(endpoint, name, class="") -%}
+  {% set target_url = url_for(endpoint, **kwargs) %}
+  <li class="{{ class }}">
+    {% set is_selected = request.path == target_url %}
+    <a href="{{ target_url }}"
+       aria-selected="{{ 'true' if is_selected else 'false' }}">{{ name }}</a>
+    {% if caller %}{{ caller() }}{% endif %}
+  </li>
 {%- endmacro %}
 {% block content %}
   <aside>
@@ -43,16 +37,14 @@
           <a href="https://www.tshirtstudio.com/marketplace/clyde-mountaineering-club">Club Merch</a>
         </li>
         {% if g.current_user.is_site_admin %}
-          <div class="admin">
-            {% call nav_link('platform.committee.overview', 'Committee') %}
-              <ul>
-                {{ nav_link('platform.committee.overview', 'Overview') }}
-                {{ nav_link('platform.committee.treasurer', 'Treasurer') }}
-                {{ nav_link('platform.committee.page_editor', 'Pages') }}
-              </ul>
-            {% endcall %}
-          {% endif %}
-        </div>
+          {% call nav_link('platform.committee.overview', 'Committee', class="admin") %}
+            <ul>
+              {{ nav_link('platform.committee.overview', 'Overview') }}
+              {{ nav_link('platform.committee.treasurer', 'Treasurer') }}
+              {{ nav_link('platform.committee.page_editor', 'Pages') }}
+            </ul>
+          {% endcall %}
+        {% endif %}
       </ul>
       <button id="sidebar-hamburger"
               onclick="document.getElementById('sidebar-nav').dataset.expanded = document.getElementById('sidebar-nav').dataset.expanded === 'true' ? 'false' : 'true' ">

@@ -525,8 +525,19 @@
       display: none;
     }
 
+    /* Hide sub-links for non-active nav */
+    > ul > li {
+      ul:not(:has([aria-selected="true"])) {
+        display: none;
+      }
+
+      &:hover ul:not(:has([aria-selected="true"])) {
+        display: flex;
+      }
+    }
+
     /* Style active links for final layer only */
-    ul:not(:has(ul)) :is(a, a:visited)[aria-selected="true"] {
+    [aria-selected="true"]:not(:has([aria-selected="true"])) {
       text-decoration: underline;
     }
   }
