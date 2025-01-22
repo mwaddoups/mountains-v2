@@ -1,7 +1,7 @@
 {% extends "albums/base.html.j2" %}
 {% block content %}
   <header>
-    <a href="{{ url_for('.albums') }}">< Back to Photos</a>
+    <a href="{{ url_for('.albums') }}">Photos</a> > {{ album.name }}
   </header>
   <details>
     <summary>Upload Photos</summary>

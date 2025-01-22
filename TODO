@@ -31,6 +31,8 @@
 
 # Nice to have before done
 
+[] Image infinite scroll
+[] Breadcrumbs
 [] HTMX preload
 [] Recent payments for treasurer from stripe
 [] Event description previews

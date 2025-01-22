@@ -41,19 +41,10 @@ def albums():
         )[:num_shown]
         album_photos: dict[int, list[Photo]] = {}
         album_users: dict[int, list[User]] = {}
-        user_map: dict[int, User] = {}
         for album in albums:
             album_photos[album.id] = photos_repo(conn).list_where(album_id=album.id)
-            contributors: set[int] = set()
-            for photo in album_photos[album.id]:
-                if photo.uploader_id not in user_map:
-                    u = users_repo(conn).get(id=photo.uploader_id)
-                    if u is not None:
-                        user_map[photo.uploader_id] = u
-
-                if photo.uploader_id in user_map:
-                    contributors.add(photo.uploader_id)
-            album_users[album.id] = [user_map[u_id] for u_id in contributors]
+            contributors = set(p.uploader_id for p in album_photos[album.id])
+            album_users[album.id] = users_repo(conn).get_all(id=contributors)
 
     return render_template(
         "albums/albums.html.j2",
@@ -120,12 +111,8 @@ def album(id: int):
             key=lambda p: p.created_at_utc,
         )
 
-        user_map: dict[int, User] = {}
-        for photo in photos:
-            if photo.uploader_id not in user_map:
-                user = users_repo(conn).get(id=photo.uploader_id)
-                if user is not None:
-                    user_map[photo.uploader_id] = user
+        users = users_repo(conn).get_all(id=set(p.uploader_id for p in photos))
+        user_map = {u.id: u for u in users}
 
     return render_template(
         "albums/album.html.j2",
@@ -155,6 +142,7 @@ def album_photo(album_id: int, photo_id: int):
                 abort(404, "Photo not found.")
 
             photo = photos[photo_ix]
+            uploader = users_repo(conn).get(id=photo.uploader_id)
 
             prev_photo = None
             if photo_ix != 0:
@@ -164,13 +152,24 @@ def album_photo(album_id: int, photo_id: int):
             if (photo_ix + 1) != len(photos):
                 next_photo = photos[photo_ix + 1]
 
-        return render_template(
-            "albums/album.photo.html.j2",
-            album=album,
-            prev_photo=prev_photo,
-            photo=photo,
-            next_photo=next_photo,
-        )
+        if request.headers.get("HX-Target") == "highlighted-photo":
+            return render_template(
+                "albums/album._photo.html.j2",
+                album=album,
+                uploader=uploader,
+                prev_photo=prev_photo,
+                photo=photo,
+                next_photo=next_photo,
+            )
+        else:
+            return render_template(
+                "albums/album.photo.html.j2",
+                album=album,
+                uploader=uploader,
+                prev_photo=prev_photo,
+                photo=photo,
+                next_photo=next_photo,
+            )
 
 
 def _get_sorted_photos(conn: Connection, album: Album) -> list[Photo]:

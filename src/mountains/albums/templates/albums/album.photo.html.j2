@@ -2,6 +2,6 @@
 {% block content %}
   <dialog id="photo" _="init call me.showModal()">
     <a hx-boost="true" href="{{ url_for('.album', id=album.id) }}">< return to album</a>
-    {% include "albums/album._photo.html.j2" %}
+    <div id="highlighted-photo" hx-target="this">{% include "albums/album._photo.html.j2" %}</div>
   </dialog>
 {% endblock content %}

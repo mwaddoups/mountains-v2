@@ -1,4 +1,5 @@
 import datetime
+import itertools
 import sqlite3
 import typing
 from contextlib import contextmanager
@@ -134,6 +135,18 @@ class Repository[T]:
             return None
         else:
             return structure(dict(row), self.storage_cls)
+
+    def get_all(self, **kwargs) -> list[T]:
+        cur = self._try_execute(
+            f"""
+            SELECT {",".join(self._field_names)} FROM {self.table_name}
+            WHERE {" AND ".join([f"{k} IN ({', '.join(['?' for v in vals])})" for k, vals in kwargs.items()])}
+            """,
+            tuple(itertools.chain.from_iterable(v for v in kwargs.values())),
+        )
+        print(cur)
+        rows = cur.fetchall()
+        return [structure(dict(row), self.storage_cls) for row in rows]
 
     def get_or_404(self, **kwargs) -> T:
         instance = self.get(**kwargs)

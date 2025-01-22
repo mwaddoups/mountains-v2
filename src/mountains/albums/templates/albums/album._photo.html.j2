@@ -1,7 +1,7 @@
 {# hide duplicate attribute and image width/height/alt warnings #}
 {# djlint:off H006,H037,H013 #}
 <img src="{{ url_for('static', filename=photo.photo_path) }}" />
-{% if photo.uploaded_id %}<small>Taken by: {{ user_map[photo.uploaded_id].full_name }}</small>{% endif %}
+<small>Taken by: {{ uploader.full_name }}</small>
 <div id="controls">
   {% if prev_photo %}
     <a class="button"
