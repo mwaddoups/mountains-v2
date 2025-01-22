@@ -1,0 +1,38 @@
+{% extends "base.html.j2" %}
+{% block content %}
+  <main id="landing">
+    {# djlint: off #}
+    <img src="{{ url_for('static', filename='cmc_landing.jpg') }}" />
+    {# djlint: on #}
+    <section>
+      {{ page | markdown | safe }}
+    </section>
+    <section>
+      <h1>Upcoming Events</h1>
+      <div id="upcoming-events">
+        {% for event in upcoming_events %}
+          <article class="card upcoming-event">
+            <div class="event-date">
+              <span>{{ event.event_dt.strftime("%A") }}</span>
+              <span>{{ event.event_dt.strftime("%-d") }}</span>
+              <span>{{ event.event_dt.strftime("%b %Y") }}</span>
+            </div>
+            <h3>{{ event.title }}</h3>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+    <section>
+      <h1>Recent Photos</h1>
+      <div id="recent-photos">
+        {% for photo in recent_photos %}
+          <img src="{{ url_for('static', filename=photo.photo_path) }}"
+               loading="lazy"
+               height="90"
+               width="150"
+               alt="recent photo" />
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+{% endblock content %}

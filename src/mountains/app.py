@@ -15,8 +15,9 @@ from mountains.payments import (
 )
 
 from . import auth, platform
-from .models.events import attendees_repo
+from .models.events import attendees_repo, events_repo
 from .models.pages import latest_content
+from .models.photos import photos_repo
 from .models.tokens import tokens_repo
 from .models.users import users_repo
 
@@ -56,7 +57,20 @@ def create_app():
     def index():
         with db_conn() as conn:
             page = latest_content(conn, "front-page")
-        return render_template("page.html.j2", page=page)
+            upcoming_events = [e for e in events_repo(conn).list() if e.is_upcoming()]
+            upcoming_events = sorted(upcoming_events, key=lambda e: e.event_dt)[:6]
+
+            recent_photos = [p for p in photos_repo(conn).list_where(starred=True)]
+            recent_photos = sorted(
+                recent_photos, key=lambda p: p.created_at_utc, reverse=True
+            )[:24]
+
+        return render_template(
+            "landing.html.j2",
+            page=page,
+            upcoming_events=upcoming_events,
+            recent_photos=recent_photos,
+        )
 
     @app.route("/faqs")
     def faqs():
