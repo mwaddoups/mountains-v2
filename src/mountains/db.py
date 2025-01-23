@@ -33,6 +33,7 @@ def connection(
         conn.execute("COMMIT")
     else:
         yield conn
+    conn.close()
 
 
 @register_structure_hook

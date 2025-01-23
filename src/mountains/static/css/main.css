@@ -813,9 +813,16 @@
     }
   }
 
+  #event-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: center;
+    justify-items: stretch;
+    gap: 0.5rem;
+  }
+
   .event {
     padding: 1em;
-    margin: 2em 0 2em 0;
 
     &.event-past {
       opacity: 50%;

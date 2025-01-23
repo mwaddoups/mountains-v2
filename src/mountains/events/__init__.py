@@ -36,15 +36,11 @@ blueprint = Blueprint("events", __name__, template_folder="templates")
 
 
 @blueprint.route("/upcoming")
-def events():
+@blueprint.route("/")
+@blueprint.route("/<int:event_id>")
+def events(event_id: int | None = None):
     search = request.args.get("search")
-    if start_dt_str := request.args.get("start_dt"):
-        start_dt = datetime.date.fromisoformat(start_dt_str)
-    elif "start_dt" in request.args:
-        # Intentionally empty
-        start_dt = None
-    else:
-        start_dt = now_utc().date()
+    limit = request.args.get("limit", type=int, default=5)
 
     if "event_type" in request.args:
         event_types = request.args.getlist(
@@ -54,37 +50,38 @@ def events():
         event_types = [t for t in EventType]
 
     with db_conn() as conn:
+        # TODO: Eventually page this (e.g. at least <x> more )
         events = _get_sorted_filtered_events(
-            conn, event_types=event_types, search=search, start_dt=start_dt
+            conn,
+            event_types=event_types,
+            search=search,
         )
 
         event_attendees, event_members = _events_attendees(conn, events)
 
-        return render_template(
-            "events/events.html.j2",
-            events=events,
-            event_type_set=EventType,
-            attendees=event_attendees,
-            members=event_members,
-            start_dt=start_dt,
-            search=search,
-            event_types=event_types,
-        )
+    return render_template(
+        "events/events.html.j2",
+        target_event_id=event_id,
+        events=events,
+        event_type_set=EventType,
+        attendees=event_attendees,
+        members=event_members,
+        search=search,
+        limit=limit,
+        event_types=event_types,
+    )
 
 
-@blueprint.route("/<id>", methods=["GET", "POST", "DELETE"])
+@blueprint.route("/<id>", methods=["DELETE"])
 def event(id: int):
-    with db_conn() as conn:
-        event = events_repo(conn).get(id=id)
-        if event is None:
-            abort(404, f"Event {id} not found!")
-
     if request.method != "GET":
         if not current_user.is_authorised():
             abort(403)
 
         with db_conn() as conn:
             if req_method(request) == "DELETE":
+                events_db = events_repo(conn)
+                event = events_db.get_or_404(id=id)
                 logger.info("Soft deleting event %s", event)
                 events_repo(conn).update(id=id, is_deleted=True)
                 activity_repo(conn).insert(
@@ -94,41 +91,8 @@ def event(id: int):
                         action="deleted event",
                     )
                 )
-                return redirect(url_for(".events"))
 
-    event_attendees, event_members = _events_attendees(conn, [event])
-
-    if request.headers.get("HX-Target") == "selectedEvent":
-        # This request also needs the is_dialog part, since its acting
-        # more like a link to events/<id>
-        return render_template(
-            "events/_event.html.j2",
-            is_dialog=True,
-            event=event,
-            attendees=event_attendees,
-            members=event_members,
-        )
-    elif request.headers.get("HX-Target") == event.slug:
-        # This can skip is_dialog, and should not update the URL as its acting like
-        # a refresh
-        response = make_response(
-            render_template(
-                "events/_event.html.j2",
-                is_dialog=False,
-                event=event,
-                attendees=event_attendees,
-                members=event_members,
-            )
-        )
-        response.headers["HX-Replace-Url"] = "false"
-        return response
-    else:
-        return render_template(
-            "events/event.html.j2",
-            event=event,
-            attendees=event_attendees,
-            members=event_members,
-        )
+    return redirect(url_for(".events", event_id=id))
 
 
 @blueprint.route("/calendar")
@@ -502,7 +466,6 @@ def _get_sorted_filtered_events(
     conn,
     event_types: list[EventType],
     search: str | None,
-    start_dt: datetime.date | None,
 ) -> list[Event]:
     events = [
         e
@@ -512,9 +475,6 @@ def _get_sorted_filtered_events(
 
     if search:
         events = [e for e in events if search.lower() in e.title.lower()]
-
-    if start_dt is not None:
-        events = [e for e in events if e.is_upcoming_on(start_dt)]
 
     # Sort all future events in ascending, then all past in descending
     today = now_utc().date()
