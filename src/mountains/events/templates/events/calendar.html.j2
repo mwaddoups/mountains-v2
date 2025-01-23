@@ -1,5 +1,5 @@
-{% from "platform/macros/profile.html.j2" import profile_picture %}
-{% from "platform/macros/theme.html.j2" import badge, color_class %}
+{% from "macros/profile.html.j2" import profile_picture %}
+{% from "macros/theme.html.j2" import badge, color_class %}
 {% extends "platform/base.html.j2" %}
 {% macro calendar_event(event, time_str) %}
   <div class="calendar-event {{ color_class(event.event_type.name) }}">

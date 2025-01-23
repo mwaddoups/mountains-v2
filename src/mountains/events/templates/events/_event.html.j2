@@ -1,5 +1,5 @@
-{% from "platform/macros/theme.html.j2" import badge %}
-{% from "platform/macros/profile.html.j2" import profile_picture %}
+{% from "macros/theme.html.j2" import badge %}
+{% from "macros/profile.html.j2" import profile_picture %}
 {% if request.args.pay_success %}<p role="status">Payment successful! Thank you :)</p>{% endif %}
 {% if request.args.pay_cancel %}<p role="alert">Payment was cancelled!</p>{% endif %}
 {% if is_dialog %}<a href="{{ url_for('.events', _anchor=event.slug) }}">< Return to Events</a>{% endif %}

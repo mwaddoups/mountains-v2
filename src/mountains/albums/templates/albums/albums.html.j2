@@ -1,4 +1,4 @@
-{% from "platform/macros/profile.html.j2" import profile_picture, profile_picture_list %}
+{% from "macros/profile.html.j2" import profile_picture, profile_picture_list %}
 {% extends "albums/base.html.j2" %}
 {% block content %}
   {% if g.current_user.is_site_admin %}
