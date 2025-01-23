@@ -36,7 +36,7 @@ blueprint = Blueprint("events", __name__, template_folder="templates")
 
 
 @blueprint.route("/upcoming")
-def events(id: int | None = None):
+def events():
     search = request.args.get("search")
     if start_dt_str := request.args.get("start_dt"):
         start_dt = datetime.date.fromisoformat(start_dt_str)
@@ -47,32 +47,15 @@ def events(id: int | None = None):
         start_dt = now_utc().date()
 
     if "event_type" in request.args:
-        event_types = request.args.getlist("event_type", type=int)
+        event_types = request.args.getlist(
+            "event_type", type=lambda x: EventType(int(x))
+        )
     else:
-        event_types = [t.value for t in EventType]
+        event_types = [t for t in EventType]
 
     with db_conn() as conn:
-        events = [
-            e
-            for e in events_repo(conn).list_where(is_deleted=False)
-            if e.event_type.value in event_types
-        ]
-
-        if search:
-            events = [e for e in events if search.lower() in e.title.lower()]
-
-        if start_dt is not None:
-            events = [e for e in events if e.is_upcoming_on(start_dt)]
-
-        # Sort all future events in ascending, then all past in descending
-        today = now_utc().date()
-        events = sorted(
-            [e for e in events if e.is_upcoming_on(today)],
-            key=lambda e: e.event_dt,
-        ) + sorted(
-            [e for e in events if not e.is_upcoming_on(today)],
-            reverse=True,
-            key=lambda e: e.event_dt,
+        events = _get_sorted_filtered_events(
+            conn, event_types=event_types, search=search, start_dt=start_dt
         )
 
         event_attendees, event_members = _events_attendees(conn, events)
@@ -113,7 +96,6 @@ def event(id: int):
                 )
                 return redirect(url_for(".events"))
 
-    expanded = request.args.get("expanded", type=str_to_bool, default=False)
     event_attendees, event_members = _events_attendees(conn, [event])
 
     if request.headers.get("HX-Target") == "selectedEvent":
@@ -125,7 +107,6 @@ def event(id: int):
             event=event,
             attendees=event_attendees,
             members=event_members,
-            expanded=expanded,
         )
     elif request.headers.get("HX-Target") == event.slug:
         # This can skip is_dialog, and should not update the URL as its acting like
@@ -137,7 +118,6 @@ def event(id: int):
                 event=event,
                 attendees=event_attendees,
                 members=event_members,
-                expanded=expanded,
             )
         )
         response.headers["HX-Replace-Url"] = "false"
@@ -148,7 +128,6 @@ def event(id: int):
             event=event,
             attendees=event_attendees,
             members=event_members,
-            expanded=expanded,
         )
 
 
@@ -347,7 +326,7 @@ def event_attendee_add(event_id: int):
                 _add_user_to_event(event, user.id)
             else:
                 logger.error("User %s tried to add self to closed event!", current_user)
-            return redirect(url_for(".event", id=event.id, expanded=True))
+            return redirect(url_for(".event", id=event.id))
     else:
         with db_conn() as conn:
             users = users_repo(conn).list()
@@ -516,7 +495,39 @@ def attendee(event_id: int, user_id: int):
                     )
             # TODO: Audit!
 
-    return redirect(url_for(".event", id=event.id, expanded=True))
+    return redirect(url_for(".event", id=event.id))
+
+
+def _get_sorted_filtered_events(
+    conn,
+    event_types: list[EventType],
+    search: str | None,
+    start_dt: datetime.date | None,
+) -> list[Event]:
+    events = [
+        e
+        for e in events_repo(conn).list_where(is_deleted=False)
+        if e.event_type in event_types
+    ]
+
+    if search:
+        events = [e for e in events if search.lower() in e.title.lower()]
+
+    if start_dt is not None:
+        events = [e for e in events if e.is_upcoming_on(start_dt)]
+
+    # Sort all future events in ascending, then all past in descending
+    today = now_utc().date()
+    events = sorted(
+        [e for e in events if e.is_upcoming_on(today)],
+        key=lambda e: e.event_dt,
+    ) + sorted(
+        [e for e in events if not e.is_upcoming_on(today)],
+        reverse=True,
+        key=lambda e: e.event_dt,
+    )
+
+    return events
 
 
 def _events_attendees(
