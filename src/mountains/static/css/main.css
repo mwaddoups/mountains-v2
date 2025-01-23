@@ -895,7 +895,9 @@
 
     .event-description {
       margin-bottom: 1em;
+    }
 
+    &:not(:only-of-type) .event-description {
       /* This is set low, but max-height is controlled by javascript */
       cursor: pointer;
       max-height: 15em;

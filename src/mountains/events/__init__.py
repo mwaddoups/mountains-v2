@@ -493,7 +493,7 @@ def attendee(event_id: int, user_id: int):
                     )
             # TODO: Audit!
 
-    return redirect(url_for(".event", id=event.id))
+    return redirect(url_for(".events", event_id=event.id))
 
 
 def _get_sorted_filtered_events(
