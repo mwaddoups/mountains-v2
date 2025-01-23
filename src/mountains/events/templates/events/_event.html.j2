@@ -85,7 +85,6 @@
       {% else %}
         <form method="post"
               action="{{ url_for('.attend_event', event_id=event.id) }}">
-          <input type="hidden" name="method" value="POST" />
           {% if total_wait > 0 or (total_att > 0 and event.max_attendees and total_att >= event.max_attendees) %}
             <input type="submit" value="Join Waiting List" />
           {% else %}

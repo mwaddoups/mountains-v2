@@ -44,7 +44,7 @@
       Event Type
       <select name="event_type" required>
         {% for event_type in event_types %}
-          {% if form and form.event_type == event_type %}
+          {% if form and form.event_type == (event_type.value | string) %}
             <option value="{{ event_type.value }}" selected>{{ event_type.name | replace('_', ' ') | lower | title }}</option>
           {% else %}
             <option value="{{ event_type.value }}">{{ event_type.name | replace('_', ' ') | lower | title }}</option>

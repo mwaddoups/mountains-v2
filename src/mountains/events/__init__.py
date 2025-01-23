@@ -364,12 +364,10 @@ def pay_event(event_id: int, user_id: int):
         return redirect(checkout_url)
 
 
-@blueprint.route("/<int:event_id>/attend/", methods=["POST"])
+@blueprint.route("/<int:event_id>/attend/", methods=["GET", "POST"])
 def attend_event(event_id: int):
     with db_conn() as conn:
-        event = events_repo(conn).get(id=event_id)
-        if event is None:
-            abort(404, f"Event {event_id} not found!")
+        event = events_repo(conn).get_or_404(id=event_id)
 
     user: User = current_user
     popups = {}
@@ -396,26 +394,24 @@ def attend_event(event_id: int):
                 name="participation-statement", repo=pages_repo(conn)
             ).markdown
 
-    if len(popups) == 0:
-        _add_user_to_event(event, user.id)
-        return redirect(url_for(".event", id=event.id))
-
-    if request.headers.get("HX-Request"):
-        response = make_response(
-            render_template(
+    if request.method == "POST":
+        if len(popups) == 0:
+            _add_user_to_event(event, user.id)
+            return redirect(url_for(".event", id=event.id))
+        else:
+            return redirect(url_for(".attend_event", event_id=event.id))
+    else:
+        if request.headers.get("HX-Target") == event.slug:
+            return render_template(
                 "events/_attend.html.j2",
                 event=event,
                 popups=popups,
                 user=user,
             )
-        )
-        response.headers["HX-Retarget"] = "#selectedEvent"
-        response.headers["HX-Reswap"] = "innerHTML"
-        return response
-    else:
-        return render_template(
-            "events/attend.html.j2", event=event, popups=popups, user=user
-        )
+        else:
+            return render_template(
+                "events/attend.html.j2", event=event, popups=popups, user=user
+            )
 
 
 @blueprint.route(
