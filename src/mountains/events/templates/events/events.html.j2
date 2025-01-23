@@ -1,0 +1,76 @@
+{% from "platform/macros/theme.html.j2" import color_class %}
+{% extends "platform/base.html.j2" %}
+{% block content %}
+  <form>
+    <details>
+      <summary>Event Filters</summary>
+      <label>
+        Start Date
+        <small>(clear to show all events)</small>
+        <input type="date"
+               name="start_dt"
+               value="{{ start_dt.isoformat() if start_dt else '' }}" />
+      </label>
+      <label>
+        Event Types
+        <fieldset>
+          {% for event_type in event_type_set %}
+            <label class="event-filter color-{{ color_class(event_type.name) }}">
+              {{ event_type.name | replace('_', ' ') | lower | title }}
+              {% if event_type.value in event_types %}
+                <input type="checkbox"
+                       name="event_type"
+                       value="{{ event_type.value }}"
+                       checked />
+              {% else %}
+                <input type="checkbox" name="event_type" value="{{ event_type.value }}" />
+              {% endif %}
+            </label>
+          {% endfor %}
+        </fieldset>
+      </label>
+      <input type="submit" value="Update" \>
+    </details>
+  </form>
+  <form>
+    <input type="search"
+           name="search"
+           placeholder="Search for an event..."
+           value="{{ search if search else '' }}" />
+  </form>
+  {% if g.current_user.is_site_admin %}
+    <form class="admin flex" action="{{ url_for('.edit_event') }}">
+      <label for="event_template">Event Template</label>
+      <select name="template" id="event_template">
+        {% for event_type in event_type_set %}
+          <option value="{{ event_type.value }}">{{ event_type.name | replace('_', ' ') | lower | title }}</option>
+        {% endfor %}
+        <option value="">No Template</option>
+      </select>
+      <input type="submit" value="Add new event" />
+    </form>
+  {% endif %}
+  <section>
+    <dialog id="selectedEvent"></dialog>
+    <script>
+      // set to recall every htmx request
+      htmx.on('#selectedEvent', 'htmx:afterSettle', function(evt) {
+        const dialog = document.getElementById('selectedEvent');
+        console.log(dialog)
+        if (dialog.innerHTML) {
+          if (!dialog.open) {
+            dialog.showModal();
+          }
+        } else if (dialog.open) {
+          dialog.close()
+        }
+      });
+    </script>
+    {% set is_dialog = False %}
+    {# These are in ascending order for future, followed by descending for past #}
+    {% for event in events %}
+      {% if not event.is_upcoming() and loop.changed(event.is_upcoming()) %}<h1>Past Events</h1>{% endif %}
+      {% include "events/_event.html.j2" %}
+    {% endfor %}
+  </section>
+{% endblock content %}

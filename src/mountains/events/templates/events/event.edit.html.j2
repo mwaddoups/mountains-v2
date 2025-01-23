@@ -1,6 +1,6 @@
 {% extends "platform/base.html.j2" %}
 {% block content %}
-  <a href="{{ url_for('platform.events') }}">< return to Events</a>
+  <a href="{{ url_for('.events') }}">< return to Events</a>
   {% if editing %}
     <h1>Editing {{ editing.title }}</h1>
   {% else %}

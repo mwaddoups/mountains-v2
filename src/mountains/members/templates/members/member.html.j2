@@ -84,7 +84,7 @@
         <ul>
           {% for event in attended[:num_attended] %}
             <li>
-              <a href="{{ url_for('platform.event', id=event.id) }}">{{ event.title }}</a>
+              <a href="{{ url_for('platform.events.event', id=event.id) }}">{{ event.title }}</a>
               <span>{{ event.event_dt.strftime("%A, %b %-d %Y") }}</span>
             </li>
           {% endfor %}

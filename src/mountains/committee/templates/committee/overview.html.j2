@@ -62,7 +62,7 @@
           <span>{{ act.dt.strftime("%d %b %H:%M") }}</span>
           <b>{{ user.full_name }}</b>
           {{ act.action }}
-          <a href="{{ url_for('platform.event', id=event.id) }}">{{ event.title }} ({{ event.event_dt.strftime("%b %d") }})</a>
+          <a href="{{ url_for('platform.events.event', id=event.id) }}">{{ event.title }} ({{ event.event_dt.strftime("%b %d") }})</a>
         </li>
       {% endfor %}
     </ol>

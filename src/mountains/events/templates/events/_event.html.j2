@@ -2,7 +2,7 @@
 {% from "platform/macros/profile.html.j2" import profile_picture %}
 {% macro attending_user(att_user, user) %}
   <li class="flex flex-gap-small">
-    <a href="{{ url_for('.members.member', slug=user.slug) }}"
+    <a href="{{ url_for('platform.members.member', slug=user.slug) }}"
        class="flex flex-gap-small">
       {{ profile_picture(user, '32') }}
       {% if user.is_committee %}
@@ -36,8 +36,8 @@
         <small>({{ user.mobile }})</small>
         <small>ICE: {{ user.in_case_emergency }}</small>
         <form method="post"
-              hx-post="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}"
-              action="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
+              hx-post="{{ url_for('.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}"
+              action="{{ url_for('.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
           <input type="hidden" name="method" value="PUT" />
           <input type="hidden"
                  name="is_waiting_list"
@@ -67,8 +67,8 @@
           </button>
         </form>
         <form method="post"
-              hx-post="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}"
-              action="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
+              hx-post="{{ url_for('.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}"
+              action="{{ url_for('.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
           <input type="hidden" name="method" value="PUT" />
           <input type="hidden"
                  name="is_trip_paid"
@@ -88,8 +88,8 @@
           </button>
         </form>
         <form method="post"
-              hx-post="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}"
-              action="{{ url_for('platform.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
+              hx-post="{{ url_for('.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}"
+              action="{{ url_for('.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
           <input type="hidden" name="method" value="DELETE" />
           <button type="submit" data-tooltip="Remove User">
             {# BI - X Square Fill #}
@@ -125,7 +125,7 @@
           <a hx-target="#selectedEvent"
              hx-swap="innerHTML"
              hx-boost="true"
-             href="{{ url_for('platform.event', id=event.id) }}">{{ event.title }}</a>
+             href="{{ url_for('.event', id=event.id) }}">{{ event.title }}</a>
         </h1>
       </span>
       {{ badge(event.event_type.name) }}
@@ -142,11 +142,10 @@
       <details class="admin">
         <summary>Admin</summary>
         <article class="admin-panel">
+          <a class="button" href="{{ url_for('.edit_event', id=event.id) }}">Edit event</a>
           <a class="button"
-             href="{{ url_for('platform.edit_event', id=event.id) }}">Edit event</a>
-          <a class="button"
-             href="{{ url_for('platform.edit_event', copy_from=event.id) }}">Copy event</a>
-          <form method="post" action="{{ url_for('platform.event', id=event.id) }}">
+             href="{{ url_for('.edit_event', copy_from=event.id) }}">Copy event</a>
+          <form method="post" action="{{ url_for('.event', id=event.id) }}">
             <input type="hidden" name="method" value="DELETE" />
             <input type="submit" value="Delete event" />
           </form>
@@ -165,7 +164,7 @@
     {% set evt_attendees = all_evt_attendees | selectattr('is_waiting_list', 'equalto', False) | list %}
     {% set wait_attendees = all_evt_attendees | selectattr('is_waiting_list', 'equalto', True) | list %}
     {% set total_att = evt_attendees | length %}
-    {% set total_wait = evt_attendees | map(attribute='is_waiting_list') | sum %}
+    {% set total_wait = wait_attendees | length %}
     <details class="attendees" {{ 'open' if expanded }}>
       <summary>
         <span>Attendees ({{ total_att }} total, {{ event.max_attendees if event.max_attendees and event.max_attendees > 0 else 'no' }} max)</span>
@@ -185,7 +184,7 @@
         {% endfor %}
         {% if g.current_user.is_site_admin %}
           <form class="admin"
-                action="{{ url_for('platform.event_attendee_add', event_id=event.id) }}">
+                action="{{ url_for('.event_attendee_add', event_id=event.id) }}">
             <input type="search" name="search" placeholder="Add a new attendee..." />
           </form>
         {% endif %}
@@ -212,16 +211,18 @@
     {% if event.is_upcoming() %}
       {% if current_attendee %}
         <form method="post"
-              hx-post="{{ url_for('platform.attendee', event_id=event.id, user_id=g.current_user.id) }}"
-              action="{{ url_for('platform.attendee', event_id=event.id, user_id=g.current_user.id) }}">
+              hx-post="{{ url_for('.attendee', event_id=event.id, user_id=g.current_user.id) }}"
+              action="{{ url_for('.attendee', event_id=event.id, user_id=g.current_user.id) }}">
           <input type="hidden" name="method" value="DELETE" />
           {% if not current_attendee.is_waiting_list %}
             <input type="submit" class="btn-cancel" value="Leave" />
-            {% if not current_attendee.is_trip_paid %}
-              <a href="{{ url_for('.pay_event', user_id=current_attendee.user_id, event_id=current_attendee.event_id) }}"
-                 class="button">Pay Now</a>
-            {% else %}
-              <button disabled>You've paid!</button>
+            {% if event.price_id %}
+              {% if not current_attendee.is_trip_paid %}
+                <a href="{{ url_for('.pay_event', user_id=current_attendee.user_id, event_id=current_attendee.event_id) }}"
+                   class="button">Pay Now</a>
+              {% else %}
+                <button disabled>You've paid!</button>
+              {% endif %}
             {% endif %}
           {% else %}
             <input type="submit" class="btn-cancel" value="Leave Waiting List" />
@@ -229,8 +230,8 @@
         </form>
       {% else %}
         <form method="post"
-              hx-post="{{ url_for('platform.attend_event', event_id=event.id) }}"
-              action="{{ url_for('platform.attend_event', event_id=event.id) }}">
+              hx-post="{{ url_for('.attend_event', event_id=event.id) }}"
+              action="{{ url_for('.attend_event', event_id=event.id) }}">
           <input type="hidden" name="method" value="POST" />
           {% if total_wait > 0 or (total_att > 0 and event.max_attendees and total_att >= event.max_attendees) %}
             <input type="submit" value="Join Waiting List" />

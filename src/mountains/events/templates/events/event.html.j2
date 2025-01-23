@@ -2,7 +2,7 @@
 {% block content %}
   <dialog id="selectedEvent" autofocus>
     {% set is_dialog = True %}
-    {% include "platform/_event.html.j2" %}
+    {% include "events/_event.html.j2" %}
   </dialog>
   <script>document.getElementById('selectedEvent').showModal()</script>
 {% endblock content %}
