@@ -73,16 +73,32 @@ def events(event_id: int | None = None):
             members=event_members,
         )
     else:
-        return render_template(
-            "events/events.html.j2",
-            events=events,
-            event_type_set=EventType,
-            attendees=event_attendees,
-            members=event_members,
-            search=search,
-            limit=limit,
-            event_types=event_types,
-        )
+        if request.headers.get("HX-Target") == "show-more-events":
+            # Infinite scroll
+            after_id = int(request.args["after"])
+            after_ix = [e.id for e in events].index(after_id)
+            return render_template(
+                "events/_event.list.html.j2",
+                events=events,
+                event_type_set=EventType,
+                attendees=event_attendees,
+                members=event_members,
+                search=search,
+                offset=after_ix + 1,
+                limit=limit,
+                event_types=event_types,
+            )
+        else:
+            return render_template(
+                "events/events.html.j2",
+                events=events,
+                event_type_set=EventType,
+                attendees=event_attendees,
+                members=event_members,
+                search=search,
+                limit=limit,
+                event_types=event_types,
+            )
 
 
 @blueprint.route("/<id>", methods=["DELETE"])

@@ -1,9 +1,11 @@
 {% from "macros/theme.html.j2" import color_class %}
 {% extends "platform/base.html.j2" %}
 {% block content %}
-  <span><a href="{{ url_for('.events', _anchor=event.slug) }}">Events</a> > {{ event.title }}</span>
+  <span><a hx-boost="true" href="{{ url_for('.events') }}">Events</a> > {{ event.title }}</span>
   <section id="event-list">
     {% include "events/_event.html.j2" %}
-    <a class="button" href="{{ url_for('.events', _anchor=event.slug) }}">Show All Events</a>
+    <a class="button"
+       hx-boost="true"
+       href="{{ url_for('.events', _anchor=event.slug) }}">Show All Events</a>
   </section>
 {% endblock content %}

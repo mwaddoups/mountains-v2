@@ -38,7 +38,7 @@
     {% if (members | length) > limit %}
       <form>
         <input type="hidden" name="limit" value="{{ limit * 5 }}" />
-        {# Infinite scroll #}
+        {# Infinite scroll  - TODO: Dont reget all of them! #}
         <input type="submit"
                hx-get="{{ url_for('.members', limit=limit + 25) }}"
                hx-target="#members"

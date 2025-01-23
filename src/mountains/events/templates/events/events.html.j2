@@ -1,16 +1,9 @@
 {% from "macros/theme.html.j2" import color_class %}
 {% extends "platform/base.html.j2" %}
 {% block content %}
-  <form>
+  <form hx-target="#event-list" hx-select="#event-list" hx-swap="outerHTML">
     <details>
       <summary>Event Filters</summary>
-      <label>
-        Start Date
-        <small>(clear to show all events)</small>
-        <input type="date"
-               name="start_dt"
-               value="{{ start_dt.isoformat() if start_dt else '' }}" />
-      </label>
       <label>
         Event Types
         <fieldset>
@@ -32,9 +25,13 @@
       <input type="submit" value="Update" \>
     </details>
   </form>
-  <form>
+  <form hx-get="{{ url_for('.events') }}"
+        hx-target="#event-list"
+        hx-select="#event-list"
+        hx-swap="outerHTML">
     <input type="search"
            name="search"
+           hx-trigger="input changed delay:500ms, keyup[key=='Enter']"
            placeholder="Search for an event..."
            value="{{ search if search else '' }}" />
   </form>
@@ -51,25 +48,6 @@
     </form>
   {% endif %}
   <section id="event-list">
-    {% if target_event_id %}
-      {# Item view - show one event #}
-      {% for event in events %}
-        {% if event.id == target_event_id %}
-          {% include "events/_event.html.j2" %}
-          <a class="button" href="{{ url_for('.events', _anchor=event.slug) }}">Show All Events</a>
-        {% endif %}
-      {% endfor %}
-    {% else %}
-      {# List view - show all events #}
-      {# These are in ascending order for future, followed by descending for past #}
-      {% for event in events[:limit] %}
-        {% if not event.is_upcoming() and loop.changed(event.is_upcoming()) %}<h1>Past Events</h1>{% endif %}
-        {% include "events/_event.html.j2" %}
-        {% if loop.last and loop.index0 != (events | length) %}
-          <a class="button"
-             href="{{ url_for('.events', limit=limit+10, _anchor=event.slug) }}">Show More</a>
-        {% endif %}
-      {% endfor %}
-    {% endif %}
+    {% include "events/_event.list.html.j2" %}
   </section>
 {% endblock content %}

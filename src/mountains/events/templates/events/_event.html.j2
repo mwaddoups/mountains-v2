@@ -14,7 +14,7 @@
     <div>
       <span class="flex">
         <h1>
-          <a href="{{ url_for('.event', id=event.id) }}">{{ event.title }}</a>
+          <a hx-boost="true" href="{{ url_for('.event', id=event.id) }}">{{ event.title }}</a>
         </h1>
       </span>
       {{ badge(event.event_type.name) }}
