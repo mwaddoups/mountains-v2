@@ -65,13 +65,22 @@ def events(event_id: int | None = None):
         event_attendees, event_members = _events_attendees(conn, events)
 
     if event is not None:
-        return render_template(
-            "events/event.html.j2",
-            event=event,
-            events=events,
-            attendees=event_attendees,
-            members=event_members,
-        )
+        if request.headers.get("HX-Target") == event.slug:
+            return render_template(
+                "events/_event.html.j2",
+                event=event,
+                events=events,
+                attendees=event_attendees,
+                members=event_members,
+            )
+        else:
+            return render_template(
+                "events/event.html.j2",
+                event=event,
+                events=events,
+                attendees=event_attendees,
+                members=event_members,
+            )
     else:
         if request.headers.get("HX-Target") == "show-more-events":
             # Infinite scroll

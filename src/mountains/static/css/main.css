@@ -634,6 +634,30 @@
 }
 
 @layer components {
+  /* Animations */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes fade-out {
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes slide-from-right {
+    from {
+      transform: translateX(90px);
+    }
+  }
+
+  @keyframes slide-to-left {
+    to {
+      transform: translateX(-90px);
+    }
+  }
   /* Utility classes */
   .flex {
     display: flex;
@@ -826,6 +850,16 @@
 
     &.event-past {
       opacity: 50%;
+    }
+
+    /* Slide in and out on HTMX changes */
+    &.htmx-swapping {
+      animation: 180ms cubic-bezier(0.4, 0, 1, 1) both fade-out,
+        500ms cubic-bezier(0.4, 0, 0.2, 1) both slide-to-left;
+    }
+    &.htmx-settling {
+      animation: 180ms cubic-bezier(0.4, 0, 1, 1) both fade-in,
+        500ms cubic-bezier(0.4, 0, 0.2, 1) both slide-from-right;
     }
 
     header {

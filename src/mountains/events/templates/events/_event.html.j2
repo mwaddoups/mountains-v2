@@ -1,10 +1,12 @@
 {% from "macros/theme.html.j2" import badge %}
 {% from "macros/profile.html.j2" import profile_picture %}
-{% if request.args.pay_success %}<p role="status">Payment successful! Thank you :)</p>{% endif %}
-{% if request.args.pay_cancel %}<p role="alert">Payment was cancelled!</p>{% endif %}
-{% if is_dialog %}<a href="{{ url_for('.events', _anchor=event.slug) }}">< Return to Events</a>{% endif %}
 <article id="{{ event.slug }}"
+         hx-target="this"
+         hx-indicator="this"
+         hx-swap="outerHTML show:top swap:0.5s settle:0.5s"
          class="event card{{ ' event-past' if not event.is_upcoming() }}">
+  {% if request.args.pay_success %}<p role="status">Payment successful! Thank you :)</p>{% endif %}
+  {% if request.args.pay_cancel %}<p role="alert">Payment was cancelled!</p>{% endif %}
   <header class="flex">
     <div class="event-date">
       <span>{{ event.event_dt.strftime("%A") }}</span>
@@ -14,7 +16,7 @@
     <div>
       <span class="flex">
         <h1>
-          <a hx-boost="true" href="{{ url_for('.event', id=event.id) }}">{{ event.title }}</a>
+          <a hx-disable="true" href="{{ url_for('.event', id=event.id) }}">{{ event.title }}</a>
         </h1>
       </span>
       {{ badge(event.event_type.name) }}
@@ -66,6 +68,7 @@
     {% if event.is_upcoming() %}
       {% if current_attendee %}
         <form method="post"
+              hx-post="{{ url_for('.attendee', event_id=event.id, user_id=g.current_user.id) }}"
               action="{{ url_for('.attendee', event_id=event.id, user_id=g.current_user.id) }}">
           <input type="hidden" name="method" value="DELETE" />
           {% if not current_attendee.is_waiting_list %}
@@ -84,6 +87,7 @@
         </form>
       {% else %}
         <form method="post"
+              hx-post="{{ url_for('.attend_event', event_id=event.id) }}"
               action="{{ url_for('.attend_event', event_id=event.id) }}">
           {% if total_wait > 0 or (total_att > 0 and event.max_attendees and total_att >= event.max_attendees) %}
             <input type="submit" value="Join Waiting List" />
