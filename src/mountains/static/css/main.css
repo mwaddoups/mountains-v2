@@ -570,7 +570,7 @@
     }
 
     /* Style active links for final layer only */
-    [aria-selected="true"]:not(:has([aria-selected="true"])) {
+    [aria-selected="true"]:not(:has(ul)) {
       text-decoration: underline;
     }
   }

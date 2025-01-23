@@ -50,6 +50,11 @@ def events(event_id: int | None = None):
         event_types = [t for t in EventType]
 
     with db_conn() as conn:
+        if event_id is not None:
+            event = events_repo(conn).get_or_404(id=event_id)
+        else:
+            event = None
+
         # TODO: Eventually page this (e.g. at least <x> more )
         events = _get_sorted_filtered_events(
             conn,
@@ -59,17 +64,25 @@ def events(event_id: int | None = None):
 
         event_attendees, event_members = _events_attendees(conn, events)
 
-    return render_template(
-        "events/events.html.j2",
-        target_event_id=event_id,
-        events=events,
-        event_type_set=EventType,
-        attendees=event_attendees,
-        members=event_members,
-        search=search,
-        limit=limit,
-        event_types=event_types,
-    )
+    if event is not None:
+        return render_template(
+            "events/event.html.j2",
+            event=event,
+            events=events,
+            attendees=event_attendees,
+            members=event_members,
+        )
+    else:
+        return render_template(
+            "events/events.html.j2",
+            events=events,
+            event_type_set=EventType,
+            attendees=event_attendees,
+            members=event_members,
+            search=search,
+            limit=limit,
+            event_types=event_types,
+        )
 
 
 @blueprint.route("/<id>", methods=["DELETE"])

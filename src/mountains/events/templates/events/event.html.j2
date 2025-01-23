@@ -1,8 +1,9 @@
+{% from "macros/theme.html.j2" import color_class %}
 {% extends "platform/base.html.j2" %}
 {% block content %}
-  <dialog id="selectedEvent" autofocus>
-    {% set is_dialog = True %}
+  <span><a href="{{ url_for('.events', _anchor=event.slug) }}">Events</a> > {{ event.title }}</span>
+  <section id="event-list">
     {% include "events/_event.html.j2" %}
-  </dialog>
-  <script>document.getElementById('selectedEvent').showModal()</script>
+    <a class="button" href="{{ url_for('.events', _anchor=event.slug) }}">Show All Events</a>
+  </section>
 {% endblock content %}

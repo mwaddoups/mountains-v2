@@ -3,7 +3,12 @@
 {% macro nav_link(endpoint, name, class="") %}
   {% set target_url = url_for(endpoint, **kwargs) %}
   <li class="{{ class }}">
-    {% set is_selected = request.path == target_url %}
+    {% if caller %}
+      {# Top level should show as selected #}
+      {% set is_selected = request.path.startswith(target_url) %}
+    {% else %}
+      {% set is_selected = request.path == target_url %}
+    {% endif %}
     <a href="{{ target_url }}"
        aria-selected="{{ 'true' if is_selected else 'false' }}">{{ name }}</a>
     {% if caller %}{{ caller() }}{% endif %}
