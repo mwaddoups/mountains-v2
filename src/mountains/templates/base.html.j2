@@ -1,3 +1,4 @@
+{% from "macros/bi.html.j2" import bi_list %}
 {% from "macros/profile.html.j2" import profile_picture %}
 <!DOCTYPE html>
 <html lang="en">
@@ -28,12 +29,7 @@
             </a>
             <button id="nav-hamburger"
                     onclick="document.getElementById('main-nav').dataset.expanded = document.getElementById('main-nav').dataset.expanded === 'true' ? 'false' : 'true' ">
-              {# BI - List #}
-              <svg xmlns="http://www.w3.org/2000/svg"
-                   fill="currentColor"
-                   viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5" />
-              </svg>
+              {{ bi_list() }}
             </button>
           </li>
           <li>
