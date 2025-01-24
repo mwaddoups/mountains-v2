@@ -21,7 +21,7 @@
         <small>ICE: {{ user.in_case_emergency }}</small>
         <form method="post"
               hx-post="{{ url_for('.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}"
-              hx-swap="outerHTML swap:0.5s settle:0.5s"
+              hx-swap="outerHTML settle:0.5s"
               hx-target="closest .event-all-attendees"
               hx-select=".event-all-attendees"
               action="{{ url_for('.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
@@ -50,7 +50,7 @@
         </form>
         <form method="post"
               hx-post="{{ url_for('.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}"
-              hx-swap="outerHTML swap:0.5s settle:0.5s"
+              hx-swap="outerHTML settle:0.5s"
               hx-target="closest .event-all-attendees"
               hx-select=".event-all-attendees"
               action="{{ url_for('.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
@@ -93,7 +93,7 @@
                  name="search"
                  placeholder="Add a new attendee..."
                  hx-target="next .attendee-adder"
-                 hx-swap="innerHTML settle:0.18s swap:0.18s"
+                 hx-swap="innerHTML settle:0.18s"
                  hx-get="{{ url_for('.event_attendee_add', event_id=event.id) }}"
                  hx-trigger="input changed delay:500ms, keyup[key=='Enter']" />
           <ul class="attendee-adder">

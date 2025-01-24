@@ -17,6 +17,7 @@
 [x] Event popup stages
 [] Trial membership popup
 [] Form styling for clearer labels
+[] HTMX boost main links
 [x] Front page content - landing page
 [] Committee Bios
 [x] Footer
@@ -55,7 +56,3 @@
 [] Just-in-time repeating events
 [] is_deleted for attending users (to preseve payment)
 [] Upcoming signups section
-
-# Open questions
-
-1. Enforcing payment after attending (automatic redirect)?

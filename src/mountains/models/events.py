@@ -56,13 +56,13 @@ class Event:
     price_id: str | None
 
     def is_full(self, attendees: list[Attendee]) -> bool:
-        if self.max_attendees is None or self.max_attendees == 0:
-            return False
-
         if any(a.is_waiting_list for a in attendees):
             return True
 
-        return len(attendees) >= self.max_attendees
+        if self.max_attendees is None or self.max_attendees == 0:
+            return False
+        else:
+            return len(attendees) >= self.max_attendees
 
     def is_upcoming_on(self, dt: datetime.date) -> bool:
         return self.event_dt.date() >= dt or (

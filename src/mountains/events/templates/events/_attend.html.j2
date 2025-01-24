@@ -1,7 +1,6 @@
 <article id="{{ event.slug }}"
          hx-target="this"
-         hx-indicator="this"
-         hx-swap="outerHTML show:top swap:0.5s settle:0.5s"
+         hx-swap="outerHTML show:top settle:0.5s"
          class="event card">
   <form method="post"
         hx-post="{{ url_for('.attendee', event_id=event.id, user_id=g.current_user.id) }}"

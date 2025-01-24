@@ -3,7 +3,7 @@
 {% block content %}
   <form hx-target="#event-list"
         hx-select="#event-list"
-        hx-swap="outerHTML swap:0.2s settle:0.2s"
+        hx-swap="outerHTML settle:0.2s"
         hx-get="{{ url_for('.events') }}"
         hx-trigger="change">
     <div>
