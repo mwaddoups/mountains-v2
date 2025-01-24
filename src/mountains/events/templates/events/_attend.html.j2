@@ -7,44 +7,37 @@
         action="{{ url_for('.attendee', event_id=event.id, user_id=g.current_user.id) }}">
     <input type="hidden" name="method" value="POST" />
     {% if "discord" in popups %}
-      <section>
-        {{ popups['discord'] | markdown | safe }}
-        <a href="{{ url_for('platform.members.member_discord', slug=user.slug) }}"
-           class="button">Set Discord Username</a>
-      </section>
+      {{ popups['discord'] | markdown | safe }}
+      <a href="{{ url_for('platform.members.member_discord', slug=user.slug) }}"
+         class="button">Set Discord Username</a>
     {% elif "members_only" in popups %}
-      <section>
-        {{ popups['members_only'] | markdown | safe }}
-        <a href="{{ url_for('platform.join') }}" class="button">Joining Information</a>
-      </section>
+      {{ popups['members_only'] | markdown | safe }}
+      <a href="{{ url_for('platform.join') }}" class="button">Joining Information</a>
     {% else %}
       {% if "ice" in popups %}
-        <section>
-          {{ popups['ice'] | markdown | safe }}
-          <label>
-            Emergency Contact
-            <input type="text"
-                   name="in_case_emergency"
-                   value="{{ user.in_case_emergency }}"
-                   required />
-          </label>
-          <label>
-            Mobile Number
-            <input type="text" name="mobile" value="{{ user.mobile }}" required />
-          </label>
-        </section>
+        {{ popups['ice'] | markdown | safe }}
+        <label>
+          Emergency Contact
+          <input type="text"
+                 name="in_case_emergency"
+                 value="{{ user.in_case_emergency }}"
+                 required />
+        </label>
+        <label>
+          Mobile Number
+          <input type="text" name="mobile" value="{{ user.mobile }}" required />
+        </label>
       {% endif %}
       {% if "statement" in popups %}
-        <section>
-          {{ popups['statement'] | markdown | safe }}
-          <label>
-            Do you understand the participation statement and our equipment expectations?
-            <input type="checkbox" name="participation" required />
-          </label>
-        </section>
+        {{ popups['statement'] | markdown | safe }}
+        <label>
+          Do you understand the participation statement and our equipment expectations?
+          <input type="checkbox" name="participation" required />
+        </label>
       {% endif %}
       <input type="submit" value="Attend Event">
       <a hx-get="{{ url_for('.events', event_id=event.id) }}"
+         class="button btn-cancel"
          href="{{ url_for('.events', event_id=event.id) }}">Cancel</a>
     {% endif %}
   </form>
