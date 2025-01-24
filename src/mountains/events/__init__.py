@@ -24,7 +24,7 @@ from mountains.models.events import (
     attendees_repo,
     events_repo,
 )
-from mountains.models.pages import latest_page, pages_repo
+from mountains.models.pages import latest_content, latest_page, pages_repo
 from mountains.models.users import User, users_repo
 from mountains.payments import EventPaymentMetadata, StripeAPI
 from mountains.utils import now_utc, req_method, str_to_bool
@@ -368,58 +368,37 @@ def pay_event(event_id: int, user_id: int):
         return redirect(checkout_url)
 
 
-@blueprint.route("/<int:event_id>/attend/", methods=["GET", "POST"])
+@blueprint.route("/<int:event_id>/attend/")
 def attend_event(event_id: int):
     with db_conn() as conn:
         event = events_repo(conn).get_or_404(id=event_id)
 
     user: User = current_user
-    popups = {}
+
+    pages = {
+        "discord": "discord-popup",
+        "members_only": "members-only-popup",
+        "ice": "ice-popup",
+        "statement": "participation-statement",
+    }
     # TODO: TRIAL EVENTS!
 
     with db_conn() as conn:
-        if user.discord_id is None:
-            popups["discord"] = latest_page(
-                name="discord-popup", repo=pages_repo(conn)
-            ).markdown
+        popups = {
+            name: latest_content(conn, pages[name]) for name in event.popups_for(user)
+        }
 
-        if not user.is_member and event.is_members_only:
-            popups["members_only"] = latest_page(
-                name="members-only-popup", repo=pages_repo(conn)
-            ).markdown
-
-        if event.show_participation_ice or len(user.in_case_emergency) == 0:
-            popups["ice"] = latest_page(
-                name="ice-popup", repo=pages_repo(conn)
-            ).markdown
-
-        if event.show_participation_ice:
-            popups["statement"] = latest_page(
-                name="participation-statement", repo=pages_repo(conn)
-            ).markdown
-
-    if request.method == "POST":
-        if len(popups) == 0:
-            if event.is_open() or current_user.is_site_admin:
-                _add_user_to_event(event, user.id)
-            else:
-                # TODO: Message
-                pass
-            return redirect(url_for(".event", id=event.id))
-        else:
-            return redirect(url_for(".attend_event", event_id=event.id))
+    if request.headers.get("HX-Target") == event.slug:
+        return render_template(
+            "events/_attend.html.j2",
+            event=event,
+            popups=popups,
+            user=user,
+        )
     else:
-        if request.headers.get("HX-Target") == event.slug:
-            return render_template(
-                "events/_attend.html.j2",
-                event=event,
-                popups=popups,
-                user=user,
-            )
-        else:
-            return render_template(
-                "events/attend.html.j2", event=event, popups=popups, user=user
-            )
+        return render_template(
+            "events/attend.html.j2", event=event, popups=popups, user=user
+        )
 
 
 @blueprint.route(

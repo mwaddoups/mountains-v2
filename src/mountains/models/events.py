@@ -10,6 +10,7 @@ from attrs import Factory, define
 
 from mountains.db import Repository
 from mountains.errors import MountainException
+from mountains.models.users import User
 from mountains.utils import now_utc, readable_id
 
 if TYPE_CHECKING:
@@ -85,6 +86,22 @@ class Event:
             return self.signup_open_dt < datetime.datetime.now(
                 tz=zoneinfo.ZoneInfo("Europe/London")
             ).replace(tzinfo=None)
+
+    def popups_for(self, user: User) -> list[str]:
+        popups = []
+        if user.discord_id is None:
+            popups.append("discord")
+
+        if not user.is_member and self.is_members_only:
+            popups.append("members_only")
+
+        if self.show_participation_ice or len(user.in_case_emergency) == 0:
+            popups.append("ice")
+
+        if self.show_participation_ice:
+            popups.append("statement")
+
+        return popups
 
     @classmethod
     def from_form(
