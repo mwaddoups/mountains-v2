@@ -103,6 +103,15 @@ class Event:
 
         return popups
 
+    def needs_payment_from(self, attendee: Attendee) -> bool:
+        if not self.price_id:
+            return False
+        else:
+            if attendee.is_waiting_list:
+                return False
+            else:
+                return not attendee.is_trip_paid
+
     @classmethod
     def from_form(
         cls,

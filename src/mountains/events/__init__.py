@@ -341,21 +341,24 @@ def event_attendee_add(event_id: int):
         )
 
 
-@blueprint.route("/<int:event_id>/pay/<int:user_id>", methods=["GET"])
-def pay_event(event_id: int, user_id: int):
+@blueprint.route("/<int:event_id>/pay", methods=["GET", "POST"])
+def pay_event(event_id: int):
     with db_conn() as conn:
-        attendee = attendees_repo(conn).get_or_404(user_id=user_id, event_id=event_id)
+        attendee = attendees_repo(conn).get_or_404(
+            user_id=current_user.id, event_id=event_id
+        )
         event = events_repo(conn).get_or_404(id=event_id)
 
     if event.price_id is None:
         # TODO: Flash message
         return redirect(url_for(".event", id=event.id))
-    elif attendee.is_trip_paid:
+    elif attendee.is_trip_paid or attendee.is_waiting_list:
         # TODO: Flash message
         return redirect(url_for(".event", id=event.id))
-    else:
+
+    if request.method == "POST":
         stripe_api = StripeAPI.from_app(current_app)
-        metadata = EventPaymentMetadata(user_id=user_id, event_id=event_id)
+        metadata = EventPaymentMetadata(user_id=current_user.id, event_id=event_id)
         checkout_url = stripe_api.create_checkout(
             event.price_id,
             success_url=url_for(
@@ -366,6 +369,11 @@ def pay_event(event_id: int, user_id: int):
         )
 
         return redirect(checkout_url)
+    else:
+        if request.headers.get("HX-Target") == event.slug:
+            return render_template("events/_pay.html.j2", event=event)
+        else:
+            return render_template("events/pay.html.j2", event=event)
 
 
 @blueprint.route("/<int:event_id>/attend/")
@@ -406,8 +414,7 @@ def attend_event(event_id: int):
     methods=["POST", "PUT", "DELETE"],
 )
 def attendee(event_id: int, user_id: int):
-    if not current_user.is_authorised(user_id):
-        abort(403)
+    current_user.check_authorised(user_id)
 
     with db_conn() as conn:
         event = events_repo(conn).get_or_404(id=event_id)
@@ -417,9 +424,20 @@ def attendee(event_id: int, user_id: int):
 
     if method == "POST":
         if event.is_open() or current_user.is_site_admin:
-            _add_user_to_event(event, user.id)
+            attendee = _add_user_to_event(event, user.id)
+            if attendee is None:
+                # TODO: Message
+                return redirect(url_for(".events", event_id=event.id))
+
+            if user.id == current_user.id and event.needs_payment_from(attendee):
+                # They need to pay - redirect straightaway
+                return redirect(url_for(".pay_event", event_id=event.id))
+            else:
+                return redirect(url_for(".events", event_id=event.id))
         else:
             logger.error("User %s tried to add %s to closed event!", current_user, user)
+            # TODO: Message
+            return redirect(url_for(".events", event_id=event.id))
     elif method == "PUT":
         with db_conn() as conn:
             attendees_db = attendees_repo(conn)
@@ -457,6 +475,7 @@ def attendee(event_id: int, user_id: int):
                         attendee=attendee,
                         user=user,
                     )
+        return redirect(url_for(".events", event_id=event.id))
     elif method == "DELETE":
         with db_conn() as conn:
             attendees_db = attendees_repo(conn)
@@ -474,7 +493,9 @@ def attendee(event_id: int, user_id: int):
                 )
             )
 
-    return redirect(url_for(".events", event_id=event.id))
+        return redirect(url_for(".events", event_id=event.id))
+    else:
+        abort(405)
 
 
 def _get_sorted_filtered_events(

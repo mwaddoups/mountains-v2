@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from attrs import Factory, define, field
+from flask import abort
 from PIL import Image
 
 from mountains.db import Repository
@@ -73,6 +74,10 @@ class User:
 
     def is_authorised(self, user_id: int | None = None) -> bool:
         return self.is_site_admin or self.id == user_id
+
+    def check_authorised(self, user_id: int | None = None) -> None:
+        if not self.is_authorised(user_id):
+            abort(403)
 
     def is_inactive_on(self, dt_utc: datetime.datetime, threshold_days: int) -> bool:
         if self.is_member:

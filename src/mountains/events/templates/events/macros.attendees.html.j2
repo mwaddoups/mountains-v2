@@ -82,7 +82,9 @@
       {% for attendee in attendees %}
         {{ attending_user(attendee, user_map[attendee.user_id]) }}
       {% else %}
-        <li>No attendees yet!</li>
+        <li>
+          <small>No attendees yet!</small>
+        </li>
       {% endfor %}
       {% if g.current_user.is_site_admin %}
         <form class="admin"

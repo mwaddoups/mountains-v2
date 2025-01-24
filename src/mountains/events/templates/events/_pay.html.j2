@@ -1,0 +1,21 @@
+<article id="{{ event.slug }}"
+         hx-target="this"
+         hx-indicator="this"
+         hx-swap="outerHTML show:top swap:0.5s settle:0.5s"
+         class="event card">
+  <p role="status">You have signed up and have a place on the event!</p>
+  <h1>Trip Payment</h1>
+  <p>
+    The trip requires payment to confirm your place.
+    Please pay for the trip immediately if you are able as it will reduce the burden for our organisers.
+  </p>
+  <form method="post" action="{{ url_for('.pay_event', event_id=event.id) }}">
+    <input type="submit" value="Pay Now" />
+  </form>
+  <p>
+    If you are unable to pay until later on, there is a payment link on the event - but
+    please only use this if you have to.
+  </p>
+  <a href="{{ url_for('.event', id=event.id) }}"
+     hx-get="{{ url_for('.event', id=event.id) }}">Pay in the next few days...</a>
+</article>
