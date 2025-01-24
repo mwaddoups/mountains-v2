@@ -70,7 +70,7 @@ def events(event_id: int | None = None):
                 "events/_event.html.j2",
                 event=event,
                 events=events,
-                attendees=event_attendees,
+                attendees=event_attendees[event.id],
                 members=event_members,
             )
         else:
@@ -78,7 +78,7 @@ def events(event_id: int | None = None):
                 "events/event.html.j2",
                 event=event,
                 events=events,
-                attendees=event_attendees,
+                attendees=event_attendees[event.id],
                 members=event_members,
             )
     else:
@@ -306,50 +306,39 @@ def edit_event(id: int | None = None):
         )
 
 
-@blueprint.route("/<int:event_id>/addattendee", methods=["GET", "POST"])
+@blueprint.route("/<int:event_id>/addattendee")
 def event_attendee_add(event_id: int):
     with db_conn() as conn:
-        event = events_repo(conn).get(id=event_id)
-        if event is None:
-            abort(404, f"Event {event_id} not found!")
+        if not current_user.is_authorised():
+            abort(403)
+        event = events_repo(conn).get_or_404(id=event_id)
+        current_attending = set(
+            a.user_id for a in attendees_repo(conn).list_where(event_id=event.id)
+        )
+        users = users_repo(conn).list()
 
-    if request.method == "POST":
-        with db_conn() as conn:
-            user = users_repo(conn).get(id=request.form.get("user_id", type=int))
-
-        if user is None:
-            raise MountainException("Could not find the user that you wanted to add!")
-        else:
-            if not current_user.is_authorised(user.id):
-                abort(403)
-
-            if event.is_open() or current_user.is_site_admin:
-                _add_user_to_event(event, user.id)
-            else:
-                logger.error("User %s tried to add self to closed event!", current_user)
-            return redirect(url_for(".event", id=event.id))
+    search = request.args.get("search", None)
+    if search:
+        users = [
+            u
+            for u in users
+            if search.lower() in u.full_name.lower() and u.id not in current_attending
+        ]
     else:
-        with db_conn() as conn:
-            users = users_repo(conn).list()
+        users = []
 
-        search = request.args.get("search", None)
-        if search:
-            users = [u for u in users if search.lower() in u.full_name.lower()]
-        else:
-            users = []
-
-        if request.headers.get("HX-Request"):
-            return render_template(
-                "events/admin._addattend.html.j2",
-                event=event,
-                users=users,
-            )
-        else:
-            return render_template(
-                "events/admin.addattend.html.j2",
-                event=event,
-                users=users,
-            )
+    if request.headers.get("HX-Request"):
+        return render_template(
+            "events/admin._addattend.html.j2",
+            event=event,
+            users=users,
+        )
+    else:
+        return render_template(
+            "events/admin.addattend.html.j2",
+            event=event,
+            users=users,
+        )
 
 
 @blueprint.route("/<int:event_id>/pay/<int:user_id>", methods=["GET"])
@@ -451,7 +440,7 @@ def attendee(event_id: int, user_id: int):
         if event.is_open() or current_user.is_site_admin:
             _add_user_to_event(event, user.id)
         else:
-            logger.error("User %s tried to add self to closed event!", current_user)
+            logger.error("User %s tried to add %s to closed event!", current_user, user)
     elif method == "PUT":
         with db_conn() as conn:
             attendees_db = attendees_repo(conn)

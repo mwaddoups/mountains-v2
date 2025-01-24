@@ -1,4 +1,4 @@
-{% from "macros/theme.html.j2" import badge %}
+{% from "macros/theme.html.j2" import badge, color_class %}
 {% from "macros/profile.html.j2" import profile_picture %}
 <article id="{{ event.slug }}"
          hx-target="this"
@@ -48,7 +48,7 @@
     {% endif %}
   </header>
   {# Tiny bit of javascript to handle expansion of the description #}
-  <section class="event-description"
+  <section class="event-description {{ color_class(event.event_type.name) }}"
            data-expanded="false"
            onclick="this.dataset.expanded = (this.dataset.expanded === 'false' ? 'true' : 'false') ">
     {{ event.description | markdown | safe }}

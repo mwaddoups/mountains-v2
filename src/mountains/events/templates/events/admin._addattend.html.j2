@@ -4,10 +4,9 @@
     {{ profile_picture(user, '32') }}
     {{ user.full_name }}
     <form method="post"
-          hx-post="{{ url_for('.event_attendee_add', event_id=event.id) }}"
-          action="{{ url_for('.event_attendee_add', event_id=event.id) }}">
+          hx-post="{{ url_for('.attendee', event_id=event.id, user_id=user.id) }}"
+          action="{{ url_for('.attendee', event_id=event.id, user_id=user.id) }}">
       <input type="hidden" name="method" value="POST" />
-      <input type="hidden" name="user_id" value="{{ user.id }}" />
       <input type="submit" value="Add attendee" />
     </form>
   </li>

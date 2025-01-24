@@ -17,10 +17,13 @@
     {% if att_user.is_trip_paid %}<span class="trip-paid">{{ bi_cash_coin() }}</span>{% endif %}
     {% if g.current_user.is_site_admin %}
       <span class="admin">
-        <small>({{ user.mobile }})</small>
+        <small>({{ user.mobile if user.mobile else 'No mobile!' }})</small>
         <small>ICE: {{ user.in_case_emergency }}</small>
         <form method="post"
               hx-post="{{ url_for('.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}"
+              hx-swap="outerHTML swap:0.5s settle:0.5s"
+              hx-target="closest .event-all-attendees"
+              hx-select=".event-all-attendees"
               action="{{ url_for('.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
           <input type="hidden" name="method" value="PUT" />
           <input type="hidden"
@@ -47,6 +50,9 @@
         </form>
         <form method="post"
               hx-post="{{ url_for('.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}"
+              hx-swap="outerHTML swap:0.5s settle:0.5s"
+              hx-target="closest .event-all-attendees"
+              hx-select=".event-all-attendees"
               action="{{ url_for('.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
           <input type="hidden" name="method" value="DELETE" />
           <button type="submit" data-tooltip="Remove User">{{ bi_x_square_fill() }}</button>
