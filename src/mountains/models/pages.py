@@ -33,8 +33,6 @@ def pages_repo(conn: Connection) -> Repository[Page]:
         storage_cls=Page,
     )
 
-    repo.create_table()
-
     return repo
 
 

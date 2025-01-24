@@ -132,7 +132,7 @@ with (
             else None,
             show_participation_ice=bool(ev["show_popup"]),
             is_members_only=bool(ev["members_only"]),
-            is_locked=bool(ev["signup_open"]),
+            is_locked=not bool(ev["signup_open"]),
             price_id=ev["price_id"],
             is_draft=False,
             is_deleted=bool(ev["is_deleted"]),

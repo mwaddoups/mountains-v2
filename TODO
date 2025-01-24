@@ -13,9 +13,10 @@
 [x] Email
 [x] Members only popup
 [x] HTMX event search
-[] HTMX attendee adder
-[] Event popup stages
+[x] HTMX attendee adder
+[x] Event popup stages
 [] Trial membership popup
+[] Form styling for clearer labels
 [x] Front page content - landing page
 [] Committee Bios
 [x] Footer

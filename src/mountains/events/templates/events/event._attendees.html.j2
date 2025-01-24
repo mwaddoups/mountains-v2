@@ -30,14 +30,16 @@
     </form>
   {% else %}
     {% macro attend_button(event) %}
-      {% if event.is_full(attendees) %}
-        <input type="submit" value="Join Waiting List" />
-      {% elif event.is_open() %}
-        {% if event.is_open() %}
-          <input type="submit" value="Attend" />
+      {% if not event.is_open() %}
+        {% set open_str = event.signup_open_dt.strftime('%b %-d, %Y %H:%M') %}
+        <input type="button" disabled value="Signup opens at {{ open_str }}" />
+      {% elif event.is_locked %}
+        <input type="button" disabled value="Signup LOCKED!" />
+      {% else %}
+        {% if event.is_full(attendees) %}
+          <input type="submit" value="Join Waiting List" />
         {% else %}
-          {% set open_str = event.signup_open_dt.strftime('%b %-d, %Y %H:%M') %}
-          <input type="button" disabled value="Signup opens at {{ open_str }}" />
+          <input type="submit" value="Attend" />
         {% endif %}
       {% endif %}
     {% endmacro %}

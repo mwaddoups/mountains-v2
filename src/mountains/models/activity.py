@@ -33,6 +33,4 @@ def activity_repo(conn: Connection) -> Repository[Activity]:
         storage_cls=Activity,
     )
 
-    repo.create_table()
-
     return repo
