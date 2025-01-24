@@ -60,11 +60,11 @@
     {% set total_att = evt_attendees | length %}
     {% set total_wait = wait_attendees | length %}
     {% with attendees = evt_attendees, user_map=members, event=event, is_waiting_list=False %}
-      {% include "events/_attendees.html.j2" %}
+      {% include "events/event._attendees.html.j2" %}
     {% endwith %}
     {% if total_wait > 0 %}
       {% with attendees = wait_attendees, user_map=members, event=event, is_waiting_list=True %}
-        {% include "events/_attendees.html.j2" %}
+        {% include "events/event._attendees.html.j2" %}
       {% endwith %}
     {% endif %}
     {% set current_attendee = all_evt_attendees | selectattr('user_id', 'equalto', g.current_user.id) | first %}

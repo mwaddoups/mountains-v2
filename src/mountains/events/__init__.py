@@ -8,7 +8,6 @@ from flask import (
     Blueprint,
     abort,
     current_app,
-    make_response,
     redirect,
     render_template,
     request,
@@ -411,7 +410,11 @@ def attend_event(event_id: int):
 
     if request.method == "POST":
         if len(popups) == 0:
-            _add_user_to_event(event, user.id)
+            if event.is_open() or current_user.is_site_admin:
+                _add_user_to_event(event, user.id)
+            else:
+                # TODO: Message
+                pass
             return redirect(url_for(".event", id=event.id))
         else:
             return redirect(url_for(".attend_event", event_id=event.id))
@@ -438,12 +441,8 @@ def attendee(event_id: int, user_id: int):
         abort(403)
 
     with db_conn() as conn:
-        event = events_repo(conn).get(id=event_id)
-        if event is None:
-            abort(404, f"Event {event_id} not found!")
-        user = users_repo(conn).get(id=user_id)
-        if user is None:
-            abort(404, f"User {user_id} not found!")
+        event = events_repo(conn).get_or_404(id=event_id)
+        user = users_repo(conn).get_or_404(id=user_id)
 
     method = req_method(request)
 

@@ -1,0 +1,3 @@
+{% from 'events/macros.attendees.html.j2' import attendee_list %}
+{% from 'macros/bi.html.j2' import bi_cash_coin, bi_layer_backward, bi_layer_forward, bi_x_square_fill %}
+{{ attendee_list(attendees, event, user_map, is_waiting_list) }}
