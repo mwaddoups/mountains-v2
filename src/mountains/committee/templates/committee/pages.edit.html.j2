@@ -19,8 +19,10 @@
           <textarea name="markdown">{{ preview.markdown if preview and preview.name == page.name else page.markdown }}</textarea>
         </label>
         {% if preview and preview.name == page.name %}
-          <label>Preview</label>
-          <input type="submit" class="btn-secondary" value="Update" name="preview">
+          <input type="submit"
+                 class="btn-secondary"
+                 value="Update Preview"
+                 name="preview">
           <div class="markdown-preview">{{ preview.markdown | markdown | safe }}</div>
         {% else %}
           <input type="submit" class="btn-secondary" value="Preview" name="preview">
