@@ -41,7 +41,7 @@ def events(event_id: int | None = None):
     search = request.args.get("search")
     limit = request.args.get("limit", type=int, default=5)
 
-    if "event_type" in request.args:
+    if "filters_enabled" in request.args and "event_type" in request.args:
         event_types = request.args.getlist(
             "event_type", type=lambda x: EventType(int(x))
         )
@@ -278,6 +278,7 @@ def edit_event(id: int | None = None):
                 EventType.SOCIAL: "template-social",
             }
             event_type = EventType(template)
+            event_form["event_type"] = str(event_type.value)
             if event_type in template_names:
                 with db_conn() as conn:
                     event_form["description"] = latest_page(

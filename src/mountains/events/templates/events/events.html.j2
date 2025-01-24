@@ -1,29 +1,37 @@
 {% from "macros/theme.html.j2" import color_class %}
 {% extends "platform/base.html.j2" %}
 {% block content %}
-  <form hx-target="#event-list" hx-select="#event-list" hx-swap="outerHTML">
-    <details>
-      <summary>Event Filters</summary>
-      <label>
-        Event Types
-        <fieldset>
-          {% for event_type in event_type_set %}
-            <label class="event-filter color-{{ color_class(event_type.name) }}">
-              {{ event_type.name | replace('_', ' ') | lower | title }}
-              {% if event_type in event_types %}
-                <input type="checkbox"
-                       name="event_type"
-                       value="{{ event_type.value }}"
-                       checked />
-              {% else %}
-                <input type="checkbox" name="event_type" value="{{ event_type.value }}" />
-              {% endif %}
-            </label>
-          {% endfor %}
-        </fieldset>
-      </label>
-      <input type="submit" value="Update" \>
-    </details>
+  <form hx-target="#event-list"
+        hx-select="#event-list"
+        hx-swap="outerHTML swap:0.2s settle:0.2s"
+        hx-get="{{ url_for('.events') }}"
+        hx-trigger="change">
+    <div>
+      <input id="event-filters-enabled"
+             type="checkbox"
+             name="filters_enabled"
+             checked />
+      <label for="event-filters-enabled">Event Filters</label>
+    </div>
+    <label id="event-filters-list">
+      Event Types
+      <fieldset>
+        {% for event_type in event_type_set %}
+          <label class="event-filter color-{{ color_class(event_type.name) }}">
+            {{ event_type.name | replace('_', ' ') | lower | title }}
+            {% if event_type in event_types %}
+              <input type="checkbox"
+                     name="event_type"
+                     value="{{ event_type.value }}"
+                     checked />
+            {% else %}
+              <input type="checkbox" name="event_type" value="{{ event_type.value }}" />
+            {% endif %}
+          </label>
+        {% endfor %}
+      </fieldset>
+    </label>
+    <input type="submit" value="Update" \>
   </form>
   <form hx-get="{{ url_for('.events') }}"
         hx-target="#event-list"
@@ -31,6 +39,7 @@
         hx-swap="outerHTML">
     <input type="search"
            name="search"
+           hx-get="{{ url_for('.events') }}"
            hx-trigger="input changed delay:500ms, keyup[key=='Enter']"
            placeholder="Search for an event..."
            value="{{ search if search else '' }}" />

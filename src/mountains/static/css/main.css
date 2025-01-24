@@ -847,6 +847,30 @@
     align-items: center;
     justify-items: stretch;
     gap: 0.5rem;
+
+    &.htmx-swapping {
+      animation: 180ms cubic-bezier(0.4, 0, 1, 1) both fade-out;
+    }
+    &.htmx-settling {
+      animation: 180ms cubic-bezier(0.4, 0, 1, 1) both fade-in;
+    }
+  }
+
+  form:has(#event-filters-list) {
+    > * {
+      display: none;
+    }
+
+    > div:has(> #event-filters-enabled) {
+      display: flex;
+      gap: 0.25rem;
+      align-items: center;
+    }
+
+    &:has(#event-filters-enabled:checked) > :is(label, input) {
+      display: block;
+      animation: 180ms cubic-bezier(0.4, 0, 1, 1) both fade-in;
+    }
   }
 
   .event {
