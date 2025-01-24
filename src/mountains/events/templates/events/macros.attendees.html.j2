@@ -53,6 +53,7 @@
               hx-swap="outerHTML settle:0.5s"
               hx-target="closest .event-all-attendees"
               hx-select=".event-all-attendees"
+              hx-confirm="Are you sure you want to remove {{ user.full_name }}?"
               action="{{ url_for('.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
           <input type="hidden" name="method" value="DELETE" />
           <button type="submit" data-tooltip="Remove User">{{ bi_x_square_fill() }}</button>

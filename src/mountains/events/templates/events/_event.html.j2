@@ -37,6 +37,7 @@
              href="{{ url_for('.edit_event', copy_from=event.id) }}">Copy event</a>
           <form method="post"
                 hx-post="{{ url_for('.event', id=event.id) }}"
+                hx-confirm="Are you sure you want to delete {{ event.title }}?"
                 hx-swap="delete settle:0.5s"
                 action="{{ url_for('.event', id=event.id) }}">
             <input type="hidden" name="method" value="DELETE" />

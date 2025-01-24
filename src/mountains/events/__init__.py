@@ -530,7 +530,6 @@ def _get_sorted_filtered_events(
 def _events_attendees(
     conn: Connection, events: list[Event]
 ) -> tuple[dict[int, list[Attendee]], dict[int, User]]:
-    # TODO inner join!
     attendees_db = attendees_repo(conn)
     users_db = users_repo(conn)
     event_attendees: dict[int, list[Attendee]] = {}
