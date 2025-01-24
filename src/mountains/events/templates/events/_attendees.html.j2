@@ -80,7 +80,16 @@
       {% if g.current_user.is_site_admin %}
         <form class="admin"
               action="{{ url_for('.event_attendee_add', event_id=event.id) }}">
-          <input type="search" name="search" placeholder="Add a new attendee..." />
+          <input type="search"
+                 name="search"
+                 placeholder="Add a new attendee..."
+                 hx-target="next .attendee-adder"
+                 hx-swap="innerHTML settle:0.18s swap:0.18s"
+                 hx-get="{{ url_for('.event_attendee_add', event_id=event.id) }}"
+                 hx-trigger="input changed delay:500ms, keyup[key=='Enter']" />
+          <ul class="attendee-adder">
+            {# To be HX-populated #}
+          </ul>
         </form>
       {% endif %}
     </ul>

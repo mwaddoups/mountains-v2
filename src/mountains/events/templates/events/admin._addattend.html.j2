@@ -1,0 +1,17 @@
+{% from "macros/profile.html.j2" import profile_picture %}
+{% for user in users[:10] %}
+  <li>
+    {{ profile_picture(user, '32') }}
+    {{ user.full_name }}
+    <form method="post"
+          hx-post="{{ url_for('.event_attendee_add', event_id=event.id) }}"
+          action="{{ url_for('.event_attendee_add', event_id=event.id) }}">
+      <input type="hidden" name="method" value="POST" />
+      <input type="hidden" name="user_id" value="{{ user.id }}" />
+      <input type="submit" value="Add attendee" />
+    </form>
+  </li>
+{% else %}
+  <li>No attendees found!</li>
+{% endfor %}
+{% if (users | length) > 10 %}<li>and {{ (users | length) - 10 }} more...</li>{% endif %}

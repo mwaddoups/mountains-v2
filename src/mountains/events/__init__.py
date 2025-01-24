@@ -110,27 +110,27 @@ def events(event_id: int | None = None):
             )
 
 
-@blueprint.route("/<id>", methods=["DELETE"])
+@blueprint.route("/<id>", methods=["POST"])
 def event(id: int):
-    if request.method != "GET":
-        if not current_user.is_authorised():
-            abort(403)
+    if not current_user.is_authorised():
+        abort(403)
 
+    if request.form["method"] == "DELETE":
         with db_conn() as conn:
-            if req_method(request) == "DELETE":
-                events_db = events_repo(conn)
-                event = events_db.get_or_404(id=id)
-                logger.info("Soft deleting event %s", event)
-                events_repo(conn).update(id=id, is_deleted=True)
-                activity_repo(conn).insert(
-                    Activity(
-                        user_id=current_user.id,
-                        event_id=event.id,
-                        action="deleted event",
-                    )
+            events_db = events_repo(conn)
+            event = events_db.get_or_404(id=id)
+            logger.info("Soft deleting event %s", event)
+            events_repo(conn).update(id=id, is_deleted=True)
+            activity_repo(conn).insert(
+                Activity(
+                    user_id=current_user.id,
+                    event_id=event.id,
+                    action="deleted event",
                 )
+            )
 
-    return redirect(url_for(".events", event_id=id))
+    # TODO: Message / noti
+    return redirect(url_for(".events"))
 
 
 @blueprint.route("/calendar")
@@ -267,7 +267,6 @@ def edit_event(id: int | None = None):
             and not event_form
             and (template := request.args.get("template", type=int))
         ):
-            print("here")
             template_names = {
                 EventType.SUMMER_DAY_WALK: "template-summer-day-walk",
                 EventType.SUMMER_WEEKEND: "template-summer-weekend",
@@ -339,11 +338,18 @@ def event_attendee_add(event_id: int):
         else:
             users = []
 
-        return render_template(
-            "events/admin.addattend.html.j2",
-            event=event,
-            users=users,
-        )
+        if request.headers.get("HX-Request"):
+            return render_template(
+                "events/admin._addattend.html.j2",
+                event=event,
+                users=users,
+            )
+        else:
+            return render_template(
+                "events/admin.addattend.html.j2",
+                event=event,
+                users=users,
+            )
 
 
 @blueprint.route("/<int:event_id>/pay/<int:user_id>", methods=["GET"])

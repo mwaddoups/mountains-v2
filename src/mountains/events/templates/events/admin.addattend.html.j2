@@ -1,18 +1,7 @@
 {% extends "platform/base.html.j2" %}
 {% block content %}
-  <dialog open>
-    <header>
-      Adding attendee for {{ event.title }}
-    </header>
-    {% for user in users %}
-      <form method="post">
-        <input type="hidden" name="method" value="POST" />
-        <input type="hidden" name="user_id" value="{{ user.id }}" />
-        <label>
-          <span class="flex flex-gap-small">{{ profile_picture(user, '32') }} {{ user.full_name }}</span>
-          <input type="submit" value="Add attendee" />
-        </label>
-      </form>
-    {% endfor %}
-  </dialog>
+  <h1>Adding attendee for {{ event.title }}</h1>
+  <ul class="attendee-adder">
+    {% include "events/admin._addattend.html.j2" %}
+  </ul>
 {% endblock content %}

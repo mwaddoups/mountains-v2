@@ -36,7 +36,10 @@
           <a class="button" href="{{ url_for('.edit_event', id=event.id) }}">Edit event</a>
           <a class="button"
              href="{{ url_for('.edit_event', copy_from=event.id) }}">Copy event</a>
-          <form method="post" action="{{ url_for('.event', id=event.id) }}">
+          <form method="post"
+                hx-post="{{ url_for('.event', id=event.id) }}"
+                hx-swap="delete swap:0.5s settle:0.5s"
+                action="{{ url_for('.event', id=event.id) }}">
             <input type="hidden" name="method" value="DELETE" />
             <input type="submit" value="Delete event" />
           </form>
@@ -102,6 +105,5 @@
         {% endif %}
       {% endif %}
     {% endif %}
-    {% if event.price_id and current_attendee and not current_attendee.is_waiting_list %}{% endif %}
   </section>
 </article>
