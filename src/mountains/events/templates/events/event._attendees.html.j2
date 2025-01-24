@@ -1,3 +1,9 @@
 {% from 'events/macros.attendees.html.j2' import attendee_list %}
 {% from 'macros/bi.html.j2' import bi_cash_coin, bi_layer_backward, bi_layer_forward, bi_x_square_fill %}
-{{ attendee_list(attendees, event, user_map, is_waiting_list) }}
+{% set all_evt_attendees = attendees | sort(attribute='joined_at_utc') %}
+{% set evt_attendees = all_evt_attendees | selectattr('is_waiting_list', 'equalto', False) | list %}
+{% set wait_attendees = all_evt_attendees | selectattr('is_waiting_list', 'equalto', True) | list %}
+{{ attendee_list(evt_attendees, event, members, is_waiting_list=False) }}
+{% if (wait_attendees | length) > 0 %}
+  {{ attendee_list(wait_attendees, event, members, is_waiting_list=True) }}
+{% endif %}

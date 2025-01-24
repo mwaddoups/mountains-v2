@@ -53,57 +53,45 @@
            onclick="this.dataset.expanded = (this.dataset.expanded === 'false' ? 'true' : 'false') ">
     {{ event.description | markdown | safe }}
   </section>
-  <section>
-    {% set all_evt_attendees = attendees[event.id] | sort(attribute='joined_at_utc') %}
-    {% set evt_attendees = all_evt_attendees | selectattr('is_waiting_list', 'equalto', False) | list %}
-    {% set wait_attendees = all_evt_attendees | selectattr('is_waiting_list', 'equalto', True) | list %}
-    {% set total_att = evt_attendees | length %}
-    {% set total_wait = wait_attendees | length %}
-    {% with attendees = evt_attendees, user_map=members, event=event, is_waiting_list=False %}
-      {% include "events/event._attendees.html.j2" %}
-    {% endwith %}
-    {% if total_wait > 0 %}
-      {% with attendees = wait_attendees, user_map=members, event=event, is_waiting_list=True %}
-        {% include "events/event._attendees.html.j2" %}
-      {% endwith %}
-    {% endif %}
-    {% set current_attendee = all_evt_attendees | selectattr('user_id', 'equalto', g.current_user.id) | first %}
-    {% if event.is_upcoming() %}
-      {% if current_attendee %}
-        <form method="post"
-              hx-post="{{ url_for('.attendee', event_id=event.id, user_id=g.current_user.id) }}"
-              action="{{ url_for('.attendee', event_id=event.id, user_id=g.current_user.id) }}">
-          <input type="hidden" name="method" value="DELETE" />
-          {% if not current_attendee.is_waiting_list %}
-            <input type="submit" class="btn-cancel" value="Leave" />
-            {% if event.price_id %}
-              {% if not current_attendee.is_trip_paid %}
-                <a href="{{ url_for('.pay_event', user_id=current_attendee.user_id, event_id=current_attendee.event_id) }}"
-                   class="button">Pay Now</a>
-              {% else %}
-                <button disabled>You've paid!</button>
-              {% endif %}
+  <section class="event-all-attendees">
+    {% include "events/event._attendees.html.j2" %}
+  </section>
+  {% set current_attendee = attendees | selectattr('user_id', 'equalto', g.current_user.id) | first %}
+  {% if event.is_upcoming() %}
+    {% if current_attendee %}
+      <form method="post"
+            hx-post="{{ url_for('.attendee', event_id=event.id, user_id=g.current_user.id) }}"
+            action="{{ url_for('.attendee', event_id=event.id, user_id=g.current_user.id) }}">
+        <input type="hidden" name="method" value="DELETE" />
+        {% if not current_attendee.is_waiting_list %}
+          <input type="submit" class="btn-cancel" value="Leave" />
+          {% if event.price_id %}
+            {% if not current_attendee.is_trip_paid %}
+              <a href="{{ url_for('.pay_event', user_id=current_attendee.user_id, event_id=current_attendee.event_id) }}"
+                 class="button">Pay Now</a>
+            {% else %}
+              <button disabled>You've paid!</button>
             {% endif %}
+          {% endif %}
+        {% else %}
+          <input type="submit" class="btn-cancel" value="Leave Waiting List" />
+        {% endif %}
+      </form>
+    {% else %}
+      <form method="post"
+            hx-post="{{ url_for('.attend_event', event_id=event.id) }}"
+            action="{{ url_for('.attend_event', event_id=event.id) }}">
+        {% if event.is_full(attendees) %}
+          <input type="submit" value="Join Waiting List" />
+        {% else %}
+          {% if event.is_open() %}
+            <input type="submit" value="Attend" />
           {% else %}
-            <input type="submit" class="btn-cancel" value="Leave Waiting List" />
+            {% set open_str = event.signup_open_dt.strftime('%b %-d, %Y %H:%M') %}
+            <input type="button" disabled value="Signup opens at {{ open_str }}" />
           {% endif %}
         </form>
-      {% else %}
-        <form method="post"
-              hx-post="{{ url_for('.attend_event', event_id=event.id) }}"
-              action="{{ url_for('.attend_event', event_id=event.id) }}">
-          {% if total_wait > 0 or (total_att > 0 and event.max_attendees and total_att >= event.max_attendees) %}
-            <input type="submit" value="Join Waiting List" />
-          {% else %}
-            {% if event.is_open() %}
-              <input type="submit" value="Attend" />
-            {% else %}
-              {% set open_str = event.signup_open_dt.strftime('%b %-d, %Y %H:%M') %}
-              <input type="button" disabled value="Signup opens at {{ open_str }}" />
-            {% endif %}
-          </form>
-        {% endif %}
       {% endif %}
     {% endif %}
-  </section>
+  {% endif %}
 </article>

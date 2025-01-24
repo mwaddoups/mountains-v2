@@ -4,7 +4,9 @@
 {% endif %}
 {% for event in events[offset:offset+limit] %}
   {% if not event.is_upcoming() and events[offset + loop.index0 - 1].is_upcoming() %}<h1>Past Events</h1>{% endif %}
-  {% include "events/_event.html.j2" %}
+  {% with attendees = event_attendees[event.id], members=members %}
+    {% include "events/_event.html.j2" %}
+  {% endwith %}
   {% if loop.last and loop.index0 != (events | length) %}
     <a class="button"
        id="show-more-events"

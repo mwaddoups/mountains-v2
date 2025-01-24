@@ -901,6 +901,7 @@
       margin-bottom: 1em;
     }
 
+    /* If it's being displayed as part of a list, collapse the description */
     &:not(:only-of-type) .event-description {
       /* This is set low, but max-height is controlled by javascript */
       cursor: pointer;
@@ -945,12 +946,26 @@
       display: none;
     }
 
-    a {
-      align-self: flex-start;
-    }
+    .attending-user {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
 
-    .attendee-name {
-      color: var(--cmc-highlight);
+      .trip-paid {
+        svg {
+          color: green;
+          width: 1em;
+          height: 1em;
+        }
+      }
+
+      .attendee-name {
+        color: var(--cmc-highlight);
+        font-size: 0.875rem;
+      }
+      .admin {
+        display: contents;
+      }
     }
   }
 
@@ -975,17 +990,6 @@
     }
     &.htmx-settling {
       animation: 180ms cubic-bezier(0.4, 0, 1, 1) both fade-in;
-    }
-  }
-
-  #selectedEvent {
-    width: 75vw;
-
-    .event-description {
-      cursor: auto;
-      max-height: none;
-      background-image: none;
-      background-color: var(--text);
     }
   }
 

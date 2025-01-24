@@ -64,6 +64,7 @@ def events(event_id: int | None = None):
         event_attendees, event_members = _events_attendees(conn, events)
 
     if event is not None:
+        # Single event display
         if request.headers.get("HX-Target") == event.slug:
             return render_template(
                 "events/_event.html.j2",
@@ -89,7 +90,7 @@ def events(event_id: int | None = None):
                 "events/_event.list.html.j2",
                 events=events,
                 event_type_set=EventType,
-                attendees=event_attendees,
+                event_attendees=event_attendees,
                 members=event_members,
                 search=search,
                 offset=after_ix + 1,
@@ -101,7 +102,7 @@ def events(event_id: int | None = None):
                 "events/events.html.j2",
                 events=events,
                 event_type_set=EventType,
-                attendees=event_attendees,
+                event_attendees=event_attendees,
                 members=event_members,
                 search=search,
                 limit=limit,
@@ -451,52 +452,59 @@ def attendee(event_id: int, user_id: int):
             _add_user_to_event(event, user.id)
         else:
             logger.error("User %s tried to add self to closed event!", current_user)
-
-    elif method in ("PUT", "DELETE"):
+    elif method == "PUT":
         with db_conn() as conn:
             attendees_db = attendees_repo(conn)
-            target_attendee = attendees_db.get(event_id=event.id, user_id=user_id)
-            if target_attendee is None:
-                abort(404, "Attendee not found!")
-            else:
-                if method == "PUT":
-                    updates = {}
-                    for allowed in ("is_waiting_list", "is_trip_paid"):
-                        if (
-                            value := request.form.get(allowed, type=str_to_bool)
-                        ) is not None:
-                            updates[allowed] = value
+            attendees_db.get_or_404(event_id=event.id, user_id=user_id)
+            if "is_waiting_list" in request.form:
+                is_waiting_list = str_to_bool(request.form["is_waiting_list"])
+                attendees_db.update(
+                    _where=dict(event_id=event.id, user_id=user_id),
+                    is_waiting_list=is_waiting_list,
+                )
 
-                    attendees_db.update(
-                        _where=dict(event_id=event.id, user_id=user_id),
-                        **updates,
+                if is_waiting_list:
+                    action = (
+                        f"was moved by {current_user.full_name} to waiting list for"
                     )
-                    if "is_waiting_list" in updates:
-                        if updates["is_waiting_list"]:
-                            action = f"was moved by {current_user.full_name} to waiting list for"
-                        else:
-                            action = f"was moved by {current_user.full_name} to attending for"
-                        activity_repo(conn).insert(
-                            Activity(
-                                user_id=user_id,
-                                event_id=event_id,
-                                action=action,
-                            )
-                        )
-                elif method == "DELETE":
-                    attendees_db.delete_where(event_id=event.id, user_id=user_id)
-                    if current_user.id != user_id:
-                        action = f"removed {user.full_name} from"
-                    else:
-                        action = "left"
-                    activity_repo(conn).insert(
-                        Activity(
-                            user_id=current_user.id,
-                            event_id=event_id,
-                            action=action,
-                        )
+                else:
+                    action = f"was moved by {current_user.full_name} to attending for"
+                activity_repo(conn).insert(
+                    Activity(
+                        user_id=user_id,
+                        event_id=event_id,
+                        action=action,
                     )
-            # TODO: Audit!
+                )
+            elif "is_trip_paid" in request.form:
+                attendees_db.update(
+                    _where=dict(event_id=event.id, user_id=user_id),
+                    is_trip_paid=str_to_bool(request.form["is_trip_paid"]),
+                )
+                attendee = attendees_db.get_or_404(event_id=event.id, user_id=user.id)
+
+                if request.headers.get("HX-Request"):
+                    return render_template(
+                        "events/event._attendee.html.j2",
+                        attendee=attendee,
+                        user=user,
+                    )
+    elif method == "DELETE":
+        with db_conn() as conn:
+            attendees_db = attendees_repo(conn)
+            attendees_db.get_or_404(event_id=event.id, user_id=user_id)
+            attendees_db.delete_where(event_id=event.id, user_id=user_id)
+            if current_user.id != user_id:
+                action = f"removed {user.full_name} from"
+            else:
+                action = "left"
+            activity_repo(conn).insert(
+                Activity(
+                    user_id=current_user.id,
+                    event_id=event_id,
+                    action=action,
+                )
+            )
 
     return redirect(url_for(".events", event_id=event.id))
 
