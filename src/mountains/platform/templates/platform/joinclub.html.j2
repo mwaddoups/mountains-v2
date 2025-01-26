@@ -44,6 +44,8 @@
               <option value="{{ price.id }}">
                 {{ price.product.name }} ({{ price.nickname }}) [£{{ "%.2f" | format(price.unit_amount / 100) }}]
               </option>
+            {% else %}
+              <option>ERROR: Could not fetch membership prices, please refresh or contact administrator.</option>
             {% endfor %}
           </select>
         </label>

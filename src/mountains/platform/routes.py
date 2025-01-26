@@ -115,7 +115,11 @@ def routes(blueprint: Blueprint):
 
             return redirect(checkout_url)
         else:
-            membership_prices = stripe_api.membership_options(active_expiry)
+            try:
+                membership_prices = stripe_api.membership_options(active_expiry)
+            except Exception:
+                logger.exception("Error while fetching membership options from stripe!")
+                membership_prices = []
             return render_template(
                 "platform/joinclub.html.j2",
                 join_page=page,
