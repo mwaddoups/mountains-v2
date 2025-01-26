@@ -112,6 +112,16 @@ class Event:
             else:
                 return not attendee.is_trip_paid
 
+    def is_part_of_trial(self) -> bool:
+        return self.event_type in [
+            EventType.SUMMER_DAY_WALK,
+            EventType.SUMMER_WEEKEND,
+            EventType.WINTER_DAY_WALK,
+            EventType.WINTER_WEEKEND,
+            EventType.OUTDOOR_CLIMBING,
+            EventType.RUNNING,
+        ]
+
     @classmethod
     def from_form(
         cls,

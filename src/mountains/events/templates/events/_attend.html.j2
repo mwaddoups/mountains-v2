@@ -13,6 +13,20 @@
     {% elif "members_only" in popups %}
       {{ popups['members_only'] | markdown | safe }}
       <a href="{{ url_for('platform.join') }}" class="button">Joining Information</a>
+    {% elif 'trial' in popups %}
+      {{ popups['trial'] | markdown | safe }}
+      <h3>Past Events</h3>
+      <ul>
+        {% for event in past_events %}
+          <li>
+            <b>{{ event.event_dt.strftime("%b %-d, %Y") }}</b> <em>{{ event.title }}</em>
+          </li>
+        {% endfor %}
+      </ul>
+      <a hx-get="{{ url_for('.attend_event', event_id=event.id, trial='skip') }}"
+         class="button btn-cancel"
+         href="{{ url_for('.attend_event', event_id=event.id, trial='skip') }}">This is wrong - continue</a>
+      <a href="{{ url_for('platform.join') }}" class="button">Joining Information</a>
     {% else %}
       {% if "ice" in popups %}
         {{ popups['ice'] | markdown | safe }}

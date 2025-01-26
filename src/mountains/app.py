@@ -34,13 +34,17 @@ def create_app():
     app.config.from_prefixed_env("FLASK")
     logger.info("Running on DB: %s", app.config["DB_NAME"])
     # Ensure the session cookie as secure
+    app.jinja_options["autoescape"] = True
     app.config.update(
         SESSION_COOKIE_SECURE=True,
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
     )
 
-    app.config.update(CMC_MEMBERSHIP_EXPIRY=datetime.date(2025, 3, 31))
+    app.config.update(
+        CMC_MEMBERSHIP_EXPIRY=datetime.date(2025, 3, 31),
+        CMC_MAX_TRIAL_EVENTS=4,
+    )
 
     app.register_blueprint(platform.blueprint)
     app.register_blueprint(auth.blueprint)

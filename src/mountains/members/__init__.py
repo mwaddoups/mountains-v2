@@ -11,6 +11,7 @@ from flask import (
     request,
     url_for,
 )
+from requests.exceptions import ConnectionError
 from werkzeug.security import generate_password_hash
 
 from mountains.context import current_user, db_conn
@@ -100,9 +101,12 @@ def member(slug: str):
     discord_name = None
     if user.discord_id is not None:
         discord = DiscordAPI.from_app(current_app)
-        member = discord.get_member(member_id=user.discord_id)
-        if member is not None:
-            discord_name = member.member_name
+        try:
+            member = discord.get_member(member_id=user.discord_id)
+            if member is not None:
+                discord_name = member.member_name
+        except ConnectionError:
+            discord_name = "<Error communicating with discord>"
 
     return render_template(
         "members/member.html.j2",
@@ -139,10 +143,13 @@ def member_discord(slug: str):
             )
 
         discord = DiscordAPI.from_app(current_app)
-        discord_members = sorted(
-            [m for m in discord.fetch_all_members() if m.id not in taken_ids],
-            key=lambda m: m.member_name.lower(),
-        )
+        try:
+            discord_members = sorted(
+                [m for m in discord.fetch_all_members() if m.id not in taken_ids],
+                key=lambda m: m.member_name.lower(),
+            )
+        except ConnectionError:
+            discord_members = []
 
         return render_template(
             "members/member.discord.html.j2",

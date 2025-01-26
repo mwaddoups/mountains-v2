@@ -6,7 +6,11 @@
         Discord Username
         <small>(If you can't find your name, let us know on Discord)</small>
         <select name="discord_id" required>
-          {% for member in discord_members %}<option value="{{ member.id }}">{{ member.member_name }}</option>{% endfor %}
+          {% for member in discord_members %}
+            <option value="{{ member.id }}">{{ member.member_name }}</option>
+          {% else %}
+            <option>No suitable discord users found! Please refresh or contact the administrator.</option>
+          {% endfor %}
         </select>
       </label>
       <input type="submit" value="Link account" />

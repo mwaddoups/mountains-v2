@@ -379,34 +379,53 @@ def pay_event(event_id: int):
 
 @blueprint.route("/<int:event_id>/attend/")
 def attend_event(event_id: int):
-    with db_conn() as conn:
-        event = events_repo(conn).get_or_404(id=event_id)
-
-    user: User = current_user
-
     pages = {
         "discord": "discord-popup",
         "members_only": "members-only-popup",
         "ice": "ice-popup",
         "statement": "participation-statement",
+        "trial": "trial-popup",
     }
-    # TODO: TRIAL EVENTS!
 
     with db_conn() as conn:
-        popups = {
-            name: latest_content(conn, pages[name]) for name in event.popups_for(user)
-        }
+        event = events_repo(conn).get_or_404(id=event_id)
+        popup_names = event.popups_for(current_user)
+
+        if request.args.get("trial") != "skip" and not current_user.is_member:
+            attending = attendees_repo(conn).list_where(
+                user_id=current_user.id, is_waiting_list=False
+            )
+            events = [
+                e
+                for e in events_repo(conn).get_all(
+                    id=set(a.event_id for a in attending)
+                )
+            ]
+            past_events = [
+                e for e in events if not e.is_upcoming() and e.is_part_of_trial()
+            ]
+            if len(past_events) > current_app.config["CMC_MAX_TRIAL_EVENTS"]:
+                popup_names = ["trial"]
+        else:
+            past_events = None
+
+        popups = {name: latest_content(conn, pages[name]) for name in popup_names}
 
     if request.headers.get("HX-Target") == event.slug:
         return render_template(
             "events/_attend.html.j2",
             event=event,
             popups=popups,
-            user=user,
+            user=current_user,
+            past_events=past_events,
         )
     else:
         return render_template(
-            "events/attend.html.j2", event=event, popups=popups, user=user
+            "events/attend.html.j2",
+            event=event,
+            popups=popups,
+            user=current_user,
+            past_events=past_events,
         )
 
 
@@ -560,7 +579,7 @@ def _add_user_to_event(event: Event, user_id: int) -> None | Attendee:
             logger.warning(
                 "Attempt to add already existing user %s to event %s, ignoring...",
                 user_id,
-                event,
+                event.slug,
             )
             return None
         else:

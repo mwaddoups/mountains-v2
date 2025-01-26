@@ -10,7 +10,7 @@ from flask import (
     request,
     url_for,
 )
-from stripe.api_resources import event
+from requests.exceptions import ConnectionError
 
 from mountains.context import current_user, db_conn
 from mountains.discord import DiscordAPI
@@ -40,9 +40,6 @@ def check_authorised():
 def overview():
     num_activities = request.args.get("num_activities", type=int, default=50)
 
-    discord = DiscordAPI.from_app(current_app)
-    discord_names = {m.id: m.member_name for m in discord.fetch_all_members()}
-
     with db_conn() as conn:
         # Get these for sharing data
         user_map = {u.id: u for u in users_repo(conn).list()}
@@ -52,6 +49,17 @@ def overview():
         activities = sorted(
             activity_repo(conn).list(), key=lambda a: a.dt, reverse=True
         )
+
+    try:
+        discord = DiscordAPI.from_app(current_app)
+        discord_names = {m.id: m.member_name for m in discord.fetch_all_members()}
+    except ConnectionError:
+        # Discord is down
+        discord_names = {
+            u.discord_id: "<Error communicating with discord>"
+            for u in user_map.values()
+            if u.discord_id is not None
+        }
 
     # Get member counts
     member_stats = defaultdict(int)
