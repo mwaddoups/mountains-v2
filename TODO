@@ -16,7 +16,8 @@
 [x] HTMX attendee adder
 [x] Event popup stages
 [] Trial membership popup
-[] Form styling for clearer labels
+[x] Form styling for clearer labels
+[] Make grid more centered
 [] Up/Down arrows on attendees
 [] HTMX boost main links
 [x] Front page content - landing page
