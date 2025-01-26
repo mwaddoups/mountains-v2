@@ -16,7 +16,7 @@
           hx-post="{{ url_for('.album_photo', album_id=album.id, photo_id=photo.id) }}">
       {% if photo.starred %}
         <input type="hidden" name="starred" value="False">
-        <button type="submit">Unstar Photo</button>
+        <button type="submit" class="btn-cancel">Unstar Photo</button>
       {% else %}
         <input type="hidden" name="starred" value="True">
         <button type="submit">Star Photo</button>
