@@ -1,0 +1,20 @@
+{% extends "base.html.j2" %}
+{% block content %}
+  {% for user in committee | sort(attribute='committee_role.value') %}
+    <article class="card committee-bio">
+      {{ profile_picture(user, "160") }}
+      <div>
+        {% if user.committee_role and user.committee_bio %}
+          <h1>{{ user.committee_role.name | replace('_', ' ') | title }}</h1>
+          <h3>{{ user.full_name }}</h3>
+          <p>{{ user.committee_bio }}</p>
+        {% else %}
+          <p>
+            <em>No info found!</em>
+          </p>
+        {% endif %}
+      </div>
+    </article>
+  {% endfor %}
+  <p>To contact any of the committee, send an email to committee@clydemc.org</p>
+{% endblock content %}

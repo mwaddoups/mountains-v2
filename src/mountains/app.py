@@ -82,6 +82,12 @@ def create_app():
             page = latest_content(conn, "faqs")
         return render_template("page.html.j2", page=page)
 
+    @app.route("/committee")
+    def committee_bios():
+        with db_conn() as conn:
+            committee = [u for u in users_repo(conn).list_where(is_committee=True)]
+        return render_template("committee.bios.html.j2", committee=committee)
+
     @app.route("/privacy-policy")
     def privacy_policy():
         with db_conn() as conn:

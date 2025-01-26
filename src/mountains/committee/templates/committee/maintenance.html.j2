@@ -1,27 +1,6 @@
 {% extends "committee/base.html.j2" %}
 {% block content %}
   <h1>Committee - Maintenance</h1>
-  <section>
-    <h2>Site Permissions</h2>
-    <p>The following users have permissions to access admin parts of the site.</p>
-    <p>
-      <strong>Note that only committee and the site admin have access to the committee pages!</strong>
-    </p>
-    <p>New committee members can be set up on the individual members pages.</p>
-    <ul>
-      {% for u in user_map.values() %}
-        {% if u.is_admin %}
-          <li>
-            <mark>{{ u.full_name }} [Admin]</mark>
-          </li>
-        {% elif u.is_committee %}
-          <li class="color-committee cmc-color">{{ u.full_name }} [{{ u.committee_role.name | replace('_', '') }}]</li>
-        {% elif u.is_site_admin %}
-          <li class="color-coordinator cmc-color">{{ u.full_name }} [Coordinator]</li>
-        {% endif %}
-      {% endfor %}
-    </ul>
-  </section>
   <section id="dormant-users">
     <h2>Dormant Users</h2>
     {% if message %}<p role="status">{{ message }}</p>{% endif %}
@@ -63,5 +42,28 @@
         {% endfor %}
       </tbody>
     </table>
+  </section>
+  <section>
+    <h2>Site Permissions</h2>
+    <p>The following users have permissions to access admin parts of the site.</p>
+    <p>
+      <strong>Note that only committee and the site admin have access to the committee pages!</strong>
+    </p>
+    <p>New committee members can be set up on the individual members pages.</p>
+    <ul>
+      {% for u in user_map.values() %}
+        {% if u.is_admin %}
+          <li>
+            <mark>{{ u.full_name }} [Admin]</mark>
+          </li>
+        {% elif u.is_committee %}
+          <li class="color-committee cmc-color">
+            {{ u.full_name }} [Committee - {{ u.committee_role.name | replace('_', ' ') | title }}]
+          </li>
+        {% elif u.is_site_admin %}
+          <li class="color-coordinator cmc-color">{{ u.full_name }} [Coordinator]</li>
+        {% endif %}
+      {% endfor %}
+    </ul>
   </section>
 {% endblock content %}

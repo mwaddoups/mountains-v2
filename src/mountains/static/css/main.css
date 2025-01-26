@@ -1249,4 +1249,12 @@
       }
     }
   }
+
+  .committee-bio {
+    margin: 0.5rem 0;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    place-items: center;
+  }
 }
