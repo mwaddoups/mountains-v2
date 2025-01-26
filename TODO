@@ -17,7 +17,7 @@
 [x] Event popup stages
 [] Trial membership popup
 [x] Form styling for clearer labels
-[] Make grid more centered
+[x] Make grid more centered
 [] Up/Down arrows on attendees
 [] HTMX boost main links
 [x] Front page content - landing page
@@ -32,8 +32,8 @@
 # Code nice to haves
 
 [x] Blueprint breakout for the platform
-[] Remove create_table from repos
-[] Look at consolidating some of the code
+[x] Remove create_table from repos
+[x] Look at consolidating some of the code
 
 # Nice to have before done
 
@@ -43,7 +43,6 @@
 [] Recent payments for treasurer from stripe
 [] Event description previews
 [] Images for new pages
-[] Drafts
 [] Signup countdown
 [] Cleverer photo / profile processing (+ download original )
 [] Discord caching
@@ -54,6 +53,7 @@
 
 # Other Issues
 
+[] Drafts
 [] Membership rework
 [] Just-in-time repeating events
 [] is_deleted for attending users (to preseve payment)

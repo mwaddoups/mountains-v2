@@ -107,7 +107,6 @@ class User:
         first_name: str,
         last_name: str,
         about: str | None,
-        mobile: str,
     ) -> Self:
         slug = readable_id([first_name, last_name, str(id)])
 
@@ -128,7 +127,6 @@ class User:
             first_name=first_name,
             last_name=last_name,
             about=about,
-            mobile=mobile,
         )
 
 

@@ -8,6 +8,7 @@ dependencies = [
     "attrs>=24.3.0",
     "cattrs>=24.1.2",
     "flask[dotenv]>=3.1.0",
+    "gunicorn>=23.0.0",
     "mistune>=3.1.0",
     "pillow>=11.0.0",
     "requests>=2.32.3",

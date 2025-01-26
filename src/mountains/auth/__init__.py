@@ -164,7 +164,6 @@ def _register_new_user(db_name: str, form: Mapping[str, str]):
             first_name=form["first_name"],
             last_name=form["last_name"],
             about=form["about"],
-            mobile=form["mobile"],
         )
         logger.info("Registering new user %s...", user)
         user_db.insert(user)

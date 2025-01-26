@@ -46,11 +46,13 @@
       </label>
       <label>
         About You
-        <textarea name='about' placeholder="Write a bit about yourself..">{{ form.get('about', '') }}</textarea>
+        <small>(This will be visible on your profile on the club site)</small>
+        <textarea name='about'
+                  placeholder="Write a bit about yourself and your experience if you like...">{{ form.get('about', '') }}</textarea>
       </label>
       <label>
-        Mobile Number
-        <input type="text" name='mobile' value="{{ form.get('mobile', '') }}" />
+        I agree with the usage of my data in accordance with the <a href="{{ url_for('privacy_policy') }}">Privacy Policy</a>
+        <input type="checkbox" required />
       </label>
       <input type="submit" value="Register" />
     </form>
