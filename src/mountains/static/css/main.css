@@ -794,6 +794,10 @@
     --cmc-highlight: var(--cmc-color-discord);
   }
 
+  .cmc-color {
+    color: var(--cmc-highlight);
+  }
+
   .markdown-preview {
     width: 100%;
     margin: 0.5rem 0;

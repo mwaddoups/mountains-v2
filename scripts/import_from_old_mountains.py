@@ -81,6 +81,7 @@ with (
             profile_picture_url=u["profile_picture"][8:]
             if u["profile_picture"]
             else None,
+            is_admin=True if u["email"] == "mwaddoups@gmail.com" else False,
             is_committee=bool(u["is_committee"]),
             is_coordinator=bool(u["is_walk_coordinator"]),
             is_dormant=bool(u["is_dormant"]),

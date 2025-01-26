@@ -31,6 +31,7 @@ class User:
     mobile: str = ""
     in_case_emergency: str = ""
     profile_picture_url: str | None = None
+    is_admin: bool = False
     is_committee: bool = False
     is_coordinator: bool = False
     discord_id: str | None = None
@@ -64,7 +65,7 @@ class User:
 
     @property
     def is_site_admin(self) -> bool:
-        return self.is_coordinator or self.is_committee
+        return self.is_coordinator or self.is_committee or self.is_admin
 
     @property
     def missing_profile_color(self) -> str:
@@ -145,6 +146,7 @@ def users_repo(conn: sqlite3.Connection) -> Repository[User]:
             "mobile TEXT NOT NULL",
             "in_case_emergency TEXT NOT NULL",
             "profile_picture_url TEXT",
+            "is_admin BOOLEAN NOT NULL",
             "is_committee BOOLEAN NOT NULL",
             "is_coordinator BOOLEAN NOT NULL",
             "discord_id TEXT",

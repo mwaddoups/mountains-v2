@@ -11,6 +11,23 @@
       {% endif %}
     {% endfor %}
   </section>
+  <section>
+    <h2>Site Permissions</h2>
+    <p>The following users have permissions to access admin parts of the site.</p>
+    <ul>
+      {% for u in user_map.values() %}
+        {% if u.is_admin %}
+          <li>
+            <mark>{{ u.full_name }} [Admin]</mark>
+          </li>
+        {% elif u.is_committee %}
+          <li class="color-committee cmc-color">{{ u.full_name }} [Committee]</li>
+        {% elif u.is_site_admin %}
+          <li class="color-coordinator cmc-color">{{ u.full_name }} [Coordinator]</li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </section>
   <section id="dormant-users">
     <h2>Dormant Users</h2>
     <p>

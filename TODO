@@ -18,8 +18,7 @@
 [] Trial membership popup
 [x] Form styling for clearer labels
 [x] Make grid more centered
-[] Up/Down arrows on attendees
-[] HTMX boost main links
+[x] Up/Down arrows on attendees
 [x] Front page content - landing page
 [] Committee Bios
 [x] Footer
@@ -37,6 +36,7 @@
 
 # Nice to have before done
 
+[] HTMX boost main links
 [] Image infinite scroll
 [] Breadcrumbs
 [] HTMX preload
