@@ -17,6 +17,7 @@
     <p>
       <strong>Note that only committee and the site admin have access to the committee pages!</strong>
     </p>
+    <p>New committee members can be set up on the individual members pages.</p>
     <ul>
       {% for u in user_map.values() %}
         {% if u.is_admin %}
@@ -24,7 +25,7 @@
             <mark>{{ u.full_name }} [Admin]</mark>
           </li>
         {% elif u.is_committee %}
-          <li class="color-committee cmc-color">{{ u.full_name }} [Committee]</li>
+          <li class="color-committee cmc-color">{{ u.full_name }} [{{ u.committee_role }}]</li>
         {% elif u.is_site_admin %}
           <li class="color-coordinator cmc-color">{{ u.full_name }} [Coordinator]</li>
         {% endif %}

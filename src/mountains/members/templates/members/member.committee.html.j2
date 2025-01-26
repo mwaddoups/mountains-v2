@@ -1,0 +1,42 @@
+{% extends "members/base.html.j2" %}
+{% block content %}
+  <a href="{{ url_for('.member', slug=user.slug) }}">< Return to profile</a>
+  <h1>Committee Details for {{ user.full_name }}</h1>
+  <p>
+    Use this form to update details and bios for new committee members.
+    These are mainly used for the public facing Committee page.
+  </p>
+  <form method="post">
+    <label>
+      On committee?
+      {% if user.is_committee %}
+        <input type="checkbox" name="is_committee" checked />
+      {% else %}
+        <input type="checkbox" name="is_committee" />
+      {% endif %}
+    </label>
+    <label>
+      Committee Role
+      <select name="committee_role" required>
+        {% if user.committee_role == None %}
+          <option value="" selected>No Role</option>
+        {% else %}
+          <option value="">No Role</option>
+        {% endif %}
+        {% for role in committee_roles %}
+          {% if user.committee_role == role %}
+            <option value="{{ role.value }}" selected>{{ role.name | replace('_', ' ') | lower | title }}</option>
+          {% else %}
+            <option value="{{ role.value }}">{{ role.name | replace('_', ' ') | lower | title }}</option>
+          {% endif %}
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      Committee Bio
+      <small>(Publicly available on the committee page)</small>
+      <textarea name="committee_bio">{{ user.committee_bio }}</textarea>
+    </label>
+    <input type="submit" value="Update Committee Details" />
+  </form>
+{% endblock content %}

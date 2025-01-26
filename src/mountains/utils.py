@@ -44,4 +44,4 @@ def str_to_bool(val: str) -> bool:
     elif val in ("False", "false"):
         return False
     else:
-        raise ValueError(f"Could not interpret string {val:!r} as bool")
+        raise ValueError(f"Could not interpret string {repr(val)} as bool")

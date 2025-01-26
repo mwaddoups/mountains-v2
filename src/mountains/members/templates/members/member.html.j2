@@ -31,6 +31,7 @@
                        value="{{ not user.is_coordinator }}" />
                 <input type="submit" value="Toggle Coordinator" />
               </form>
+              <a class="button" href="{{ url_for('.committee_edit', id=user.id) }}">Edit Committee Details</a>
               {% if user.mobile %}
                 <mark>Mobile: {{ user.mobile }}</mark>
               {% else %}

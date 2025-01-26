@@ -4,6 +4,7 @@ from pathlib import Path
 
 from flask import (
     Blueprint,
+    abort,
     current_app,
     redirect,
     render_template,
@@ -16,7 +17,7 @@ from werkzeug.security import generate_password_hash
 from mountains.context import current_user, db_conn
 from mountains.discord import DiscordAPI
 from mountains.models.events import attendees_repo, events_repo
-from mountains.models.users import User, upload_profile, users_repo
+from mountains.models.users import CommitteeRole, User, upload_profile, users_repo
 from mountains.utils import str_to_bool
 
 logger = logging.getLogger(__name__)
@@ -157,6 +158,37 @@ def member_discord(slug: str):
             user=user,
             discord_members=discord_members,
         )
+
+
+@blueprint.route("/<int:id>/committee", methods=["GET", "POST"])
+def committee_edit(id: int):
+    with db_conn() as conn:
+        user = users_repo(conn).get_or_404(id=id)
+
+        if not (current_user.is_committee or current_user.is_admin):
+            abort(403)
+
+        if request.method == "POST":
+            is_committee = "is_committee" in request.form
+
+            if request.form["committee_role"] == "" or not is_committee:
+                committee_role = None
+            else:
+                committee_role = CommitteeRole(
+                    int(request.form["committee_role"])
+                ).value
+
+            users_repo(conn).update(
+                id=user.id,
+                is_committee="is_committee" in request.form,
+                committee_bio=request.form["committee_bio"],
+                committee_role=committee_role,
+            )
+            return redirect(url_for(".member", slug=user.slug))
+
+    return render_template(
+        "members/member.committee.html.j2", user=user, committee_roles=CommitteeRole
+    )
 
 
 @blueprint.route("/<int:id>/edit", methods=["GET", "POST"])
