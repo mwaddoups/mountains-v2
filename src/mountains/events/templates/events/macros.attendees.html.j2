@@ -12,9 +12,10 @@
     {% else %}
       {% set color = "color-guest" %}
     {% endif %}
-    <a href="{{ url_for('platform.members.member', slug=user.slug) }}"
-       class="attendee-name {{ color }}">{{ user.full_name }}</a>
-    {% if att_user.is_trip_paid %}<span class="trip-paid">{{ bi_cash_coin() }}</span>{% endif %}
+    <span class="attendee-name {{ color }}">
+      <a href="{{ url_for('platform.members.member', slug=user.slug) }}">{{ user.full_name }}</a>
+      {% if att_user.is_trip_paid %}<span class="trip-paid">{{ bi_cash_coin() }}</span>{% endif %}
+    </span>
     {% if g.current_user.is_site_admin %}
       <span class="admin">
         <small>({{ user.mobile if user.mobile else 'No mobile!' }})</small>

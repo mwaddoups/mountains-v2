@@ -917,6 +917,9 @@
 
   .event {
     padding: 1em;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
 
     &.event-past {
       opacity: 50%;
@@ -933,40 +936,51 @@
     }
 
     header {
-      padding-bottom: 0.25em;
-      h1 {
-        letter-spacing: -0.04em;
-        margin: 0 0 0.25em 0;
-        font-size: x-large;
-        color: var(--primary);
+      display: grid;
+      grid-template: "date title admin" / auto 1fr auto;
+      @media (max-width: 800px) {
+        grid-template:
+          ". admin"
+          "date title" / auto 1fr auto;
+      }
+      gap: 1rem;
+      align-items: center;
 
-        a {
-          color: inherit;
-        }
+      .event-date {
+        grid-area: date;
       }
-      .badge {
-        margin-right: 0.25em;
-      }
-      p {
-        /* Calendar icon before (BI) */
-        &::before {
-          content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-calendar' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z'/%3E%3C/svg%3E");
+
+      .event-title {
+        grid-area: title;
+        h1 {
+          letter-spacing: -0.04em;
+          margin: 0 0 0.25em 0;
+          font-size: x-large;
+          color: var(--primary);
+
+          a {
+            color: inherit;
+          }
         }
-        font-weight: 500;
-        margin: 0;
-        padding-top: 0.5rem;
-        display: block;
+        .badge {
+          margin-right: 0.25em;
+        }
+
+        svg {
+          width: 1em;
+          height: 1em;
+        }
       }
 
       .admin {
-        margin-left: auto;
+        grid-area: admin;
+        justify-self: right;
       }
     }
 
     .event-description {
       border-left: 1px solid var(--cmc-highlight);
       padding-left: 1rem;
-      margin-bottom: 1em;
     }
 
     /* If it's being displayed as part of a list, collapse the description */
@@ -996,6 +1010,9 @@
     }
 
     .event-all-attendees {
+      display: grid;
+      grid-template-rows: 1fr;
+      gap: 0.5rem;
       /* Slide in and out on HTMX changes */
       &.htmx-request {
         animation: 180ms cubic-bezier(0.4, 0, 1, 1) both fade-out,
@@ -1008,7 +1025,6 @@
     }
 
     details.attendees {
-      margin-bottom: 1em;
       summary {
         display: list-item;
         font-weight: 500;
@@ -1025,8 +1041,15 @@
       }
 
       .attending-user {
-        display: flex;
+        display: grid;
+        grid-template: "profile name admin" / auto 1fr auto;
+        @media (max-width: 800px) {
+          grid-template:
+            "profile name"
+            ". admin" / auto 1fr;
+        }
         align-items: center;
+        justify-items: start;
         gap: 0.25rem;
 
         .trip-paid {
@@ -1037,12 +1060,20 @@
           }
         }
 
+        .profile-picture {
+          grid-area: profile;
+        }
+
         .attendee-name {
+          grid-area: name;
           color: var(--cmc-highlight);
           font-size: 0.875rem;
         }
         .admin {
-          display: contents;
+          grid-area: admin;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.25rem;
         }
       }
     }

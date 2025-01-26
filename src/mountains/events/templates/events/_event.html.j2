@@ -1,3 +1,4 @@
+{% from "macros/bi.html.j2" import bi_calendar %}
 {% from "macros/theme.html.j2" import badge, color_class %}
 {% from "macros/profile.html.j2" import profile_picture %}
 <article id="{{ event.slug }}"
@@ -6,26 +7,24 @@
          class="event card{{ ' event-past' if not event.is_upcoming() }}">
   {% if request.args.pay_success %}<p role="status">Payment successful! Thank you :)</p>{% endif %}
   {% if request.args.pay_cancel %}<p role="alert">Payment was cancelled!</p>{% endif %}
-  <header class="flex">
+  <header>
     <div class="event-date">
       <span>{{ event.event_dt.strftime("%A") }}</span>
       <span>{{ event.event_dt.strftime("%-d") }}</span>
       <span>{{ event.event_dt.strftime("%b %Y") }}</span>
     </div>
-    <div>
-      <span class="flex">
-        <h1>
-          <a hx-disable="true" href="{{ url_for('.event', id=event.id) }}">{{ event.title }}</a>
-        </h1>
-      </span>
+    <div class="event-title">
+      <h1>
+        <a hx-disable="true" href="{{ url_for('.event', id=event.id) }}">{{ event.title }}</a>
+      </h1>
       {{ badge(event.event_type.name) }}
       {% if event.is_members_only %}{{ badge("Members Only") }}{% endif %}
       {% if event.event_end_dt %}
         <p>
-          {{ event.event_dt.strftime("%A, %b %d, %Y, %H:%M") }} 🡪 {{ event.event_end_dt.strftime("%A, %b %d, %Y, %H:%M") }}
+          {{ bi_calendar() }} {{ event.event_dt.strftime("%A, %b %d, %Y, %H:%M") }} 🡪 {{ event.event_end_dt.strftime("%A, %b %d, %Y, %H:%M") }}
         </p>
       {% else %}
-        <p>&nbsp;{{ event.event_dt.strftime("%A, %b %d, %Y, %H:%M") }}</p>
+        <p>{{ bi_calendar() }} {{ event.event_dt.strftime("%A, %b %d, %Y, %H:%M") }}</p>
       {% endif %}
     </div>
     {% if g.current_user.is_site_admin %}
