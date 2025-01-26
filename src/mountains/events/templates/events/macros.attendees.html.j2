@@ -65,7 +65,6 @@
 {% macro attendee_list(attendees, event, user_map, is_waiting_list) %}
   <details class="attendees">
     <summary>
-      <span>{{ attendee_title }}</span>
       {% if not is_waiting_list %}
         <span>Attendees ({{ attendees | length }} total, {{ event.max_attendees if event.max_attendees and event.max_attendees > 0 else 'no' }} max)</span>
       {% else %}

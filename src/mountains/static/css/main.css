@@ -1006,9 +1006,8 @@
     details.attendees {
       margin-bottom: 1em;
       summary {
-        display: block;
+        display: list-item;
         font-weight: 500;
-        font-size: 1em;
       }
 
       &[open] .attendees-summary {
@@ -1103,10 +1102,19 @@
     align-items: center;
     justify-content: space-between;
   }
-  .events-calendar {
+  main {
+    &.htmx-swapping {
+      animation: 180ms cubic-bezier(0.4, 0, 1, 1) both fade-out;
+    }
+    &.htmx-settling {
+      animation: 180ms cubic-bezier(0.4, 0, 1, 1) both fade-in;
+    }
+  }
+  #events-calendar {
     table-layout: fixed;
     width: 100%;
     border-collapse: collapse;
+
     th {
       text-align: center;
     }

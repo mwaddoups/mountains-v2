@@ -8,12 +8,18 @@
   </div>
 {% endmacro %}
 {% block content %}
-  <div class="calendar-controls">
-    <a href="{{ url_for('.events_calendar', year=prev_month_dt.year, month=prev_month_dt.month) }}">< {{ prev_month_dt.strftime("%B %Y") }}</a>
+  <div class="calendar-controls"
+       hx-target="main"
+       hx-select="main"
+       hx-indicator="#events-calendar"
+       hx-swap="outerHTML swap:0.2s settle:0.2s">
+    <a hx-get="{{ url_for('.events_calendar', year=prev_month_dt.year, month=prev_month_dt.month) }}"
+       href="{{ url_for('.events_calendar', year=prev_month_dt.year, month=prev_month_dt.month) }}">< {{ prev_month_dt.strftime("%B %Y") }}</a>
     <h3>{{ month_dt.strftime("%B %Y") }}</h3>
-    <a href="{{ url_for('.events_calendar', year=next_month_dt.year, month=next_month_dt.month) }}">{{ next_month_dt.strftime("%B %Y") }} ></a>
+    <a hx-get="{{ url_for('.events_calendar', year=next_month_dt.year, month=next_month_dt.month) }}"
+       href="{{ url_for('.events_calendar', year=next_month_dt.year, month=next_month_dt.month) }}">{{ next_month_dt.strftime("%B %Y") }} ></a>
   </div>
-  <table class="events-calendar">
+  <table id="events-calendar">
     <thead>
       <tr>
         {% for day in ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] %}
