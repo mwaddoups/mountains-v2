@@ -55,6 +55,9 @@ class Event:
     is_locked: bool
     price_id: str | None
 
+    def __str__(self):
+        return self.slug
+
     def is_full(self, attendees: list[Attendee]) -> bool:
         if any(a.is_waiting_list for a in attendees):
             return True

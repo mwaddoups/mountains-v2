@@ -15,7 +15,7 @@ from mountains.models.events import (
 )
 from mountains.models.photos import Album, Photo, albums_repo, photos_repo
 from mountains.models.tokens import tokens_repo
-from mountains.models.users import User, users_repo
+from mountains.models.users import CommitteeRole, User, users_repo
 from mountains.utils import readable_id
 
 parser = argparse.ArgumentParser()
@@ -66,7 +66,21 @@ with (
         # Take uploads/ off the start
         profile_url = u["profile_picture"][8:]
 
-        # TODO: still not importing all fields
+        if u["committee_role"] == "Chair":
+            committee_role = CommitteeRole.CHAIR
+        elif u["committee_role"] == "Vice-Chair":
+            committee_role = CommitteeRole.VICE_CHAIR
+        elif u["committee_role"] == "Treasurer":
+            committee_role = CommitteeRole.TREASURER
+        elif u["committee_role"] == "Secretary":
+            committee_role = CommitteeRole.SECRETARY
+        elif u["committee_role"] == "General":
+            committee_role = CommitteeRole.GENERAL
+        elif u["committee_role"] == "":
+            committee_role = None
+        else:
+            raise Exception(f"Unknown role {u['committee_role']:!r} !")
+
         new_user = User(
             id=u["id"],
             slug=u_slug,
@@ -92,6 +106,8 @@ with (
             last_login_utc=datetime.fromisoformat(u["last_login"])
             if u["last_login"] is not None
             else None,
+            committee_role=committee_role,
+            committee_bio=u["committee_bio"] if u["committee_bio"] is not None else "",
         )
 
         user_repo.insert(new_user)

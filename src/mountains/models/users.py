@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import enum
 import sqlite3
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -17,6 +18,14 @@ if TYPE_CHECKING:
     from typing import Self
 
     from werkzeug.datastructures import FileStorage
+
+
+class CommitteeRole(enum.Enum):
+    CHAIR = 1
+    VICE_CHAIR = 2
+    TREASURER = 3
+    SECRETARY = 4
+    GENERAL = 10
 
 
 @define(kw_only=True)
@@ -39,6 +48,8 @@ class User:
     is_dormant: bool = False
     created_on_utc: datetime.datetime = Factory(now_utc)
     last_login_utc: datetime.datetime | None = None
+    committee_role: CommitteeRole | None = None
+    committee_bio: str = ""
 
     def __str__(self):
         return f"{self.full_name} ({self.email})"
@@ -152,6 +163,8 @@ def users_repo(conn: sqlite3.Connection) -> Repository[User]:
             "discord_id TEXT",
             "membership_expiry DATE",
             "is_dormant BOOLEAN NOT NULL",
+            "committee_role INTEGER",
+            "committee_bio INTEGER NOT NULL",
             "created_on_utc DATETIME NOT NULL",
             "last_login_utc DATETIME",
         ],
