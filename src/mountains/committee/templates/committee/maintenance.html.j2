@@ -1,0 +1,67 @@
+{% extends "committee/base.html.j2" %}
+{% block content %}
+  <h1>Committee - Maintenance</h1>
+  <section>
+    <h2>Site Permissions</h2>
+    <p>The following users have permissions to access admin parts of the site.</p>
+    <p>
+      <strong>Note that only committee and the site admin have access to the committee pages!</strong>
+    </p>
+    <p>New committee members can be set up on the individual members pages.</p>
+    <ul>
+      {% for u in user_map.values() %}
+        {% if u.is_admin %}
+          <li>
+            <mark>{{ u.full_name }} [Admin]</mark>
+          </li>
+        {% elif u.is_committee %}
+          <li class="color-committee cmc-color">{{ u.full_name }} [{{ u.committee_role.name | replace('_', '') }}]</li>
+        {% elif u.is_site_admin %}
+          <li class="color-coordinator cmc-color">{{ u.full_name }} [Coordinator]</li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </section>
+  <section id="dormant-users">
+    <h2>Dormant Users</h2>
+    {% if message %}<p role="status">{{ message }}</p>{% endif %}
+    <p>
+      This shows non-member users who either joined more than 3 months ago and have not become a member,
+      or have let their membership expire for longer than 3 months. Note we only started monitoring login in 2024, and activity in 2023.
+    </p>
+    <p>
+      <strong>Found {{ dormant_users | length }} inactive users!</strong>
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Last Login</th>
+          <th scope="col">Last Activity</th>
+          <th scope="col">Membership Expiry</th>
+          <th scope="col">Account Created</th>
+          <th scope="col">Discord Name</th>
+          <th scope="col">Make Inactive</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for dormant in dormant_users %}
+          <tr>
+            <td>{{ dormant.user.full_name }}</td>
+            <td>{{ dormant.user.last_login_utc.strftime("%b %d, %Y") if dormant.user.last_login_utc else 'Pre-2024' }}</td>
+            <td>{{ dormant.last_activity.strftime("%b %d, %Y") if dormant.last_activity else 'Pre-2023' }}</td>
+            <td>{{ dormant.user.membership_expiry if dormant.user.membership_expiry }}</td>
+            <td>{{ dormant.user.created_on_utc.strftime("%b %d, %Y") }}</td>
+            <td>{{ dormant.discord_name if dormant.discord_name }}</td>
+            <td>
+              <form method="post"
+                    action="{{ url_for('.member_dormant', user_id=dormant.user.id) }}">
+                <input type="submit" value="Deactivate" />
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endblock content %}

@@ -50,6 +50,33 @@ def overview():
             activity_repo(conn).list(), key=lambda a: a.dt, reverse=True
         )
 
+    # Get member counts
+    member_stats = defaultdict(int)
+    for u in user_map.values():
+        if not u.is_dormant:
+            member_stats[u.membership_expiry] += 1
+
+    return render_template(
+        "committee/overview.html.j2",
+        member_stats=member_stats,
+        activities=activities,
+        num_activities=num_activities,
+        user_map=user_map,
+        event_map=event_map,
+    )
+
+
+@blueprint.route("/maintenance")
+def maintenance():
+    with db_conn() as conn:
+        # Get these for sharing data
+        user_map = {u.id: u for u in users_repo(conn).list()}
+        event_map = {e.id: e for e in events_repo(conn).list()}
+        # Get activities
+        activities = sorted(
+            activity_repo(conn).list(), key=lambda a: a.dt, reverse=True
+        )
+
     try:
         discord = DiscordAPI.from_app(current_app)
         discord_names = {m.id: m.member_name for m in discord.fetch_all_members()}
@@ -60,12 +87,6 @@ def overview():
             for u in user_map.values()
             if u.discord_id is not None
         }
-
-    # Get member counts
-    member_stats = defaultdict(int)
-    for u in user_map.values():
-        if not u.is_dormant:
-            member_stats[u.membership_expiry] += 1
 
     # Calculate dormant user info
     dormant_users = [
@@ -86,10 +107,9 @@ def overview():
     ]
 
     return render_template(
-        "committee/overview.html.j2",
-        member_stats=member_stats,
+        "committee/maintenance.html.j2",
         activities=activities,
-        num_activities=num_activities,
+        message=request.args.get("message"),
         dormant_users=dormant_users,
         user_map=user_map,
         event_map=event_map,
@@ -106,7 +126,13 @@ def member_dormant(user_id: int):
 
         users_db.update(id=user.id, is_dormant=True)
 
-    return redirect(url_for(".overview", _anchor="dormant-users"))
+    return redirect(
+        url_for(
+            ".maintenance",
+            _anchor="dormant-users",
+            message=f"Made {user.full_name} dormant!",
+        )
+    )
 
 
 @blueprint.route("/treasurer")
