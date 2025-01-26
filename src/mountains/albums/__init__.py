@@ -16,7 +16,7 @@ from flask import (
     url_for,
 )
 
-from mountains.context import db_conn
+from mountains.context import current_user, db_conn
 from mountains.models.photos import Album, Photo, albums_repo, photos_repo, upload_photo
 from mountains.models.users import User, users_repo
 from mountains.utils import str_to_bool
@@ -57,6 +57,7 @@ def albums():
 @blueprint.route("/add", methods=["GET", "POST"])
 def add_album():
     if request.method == "POST":
+        current_user.check_authorised()
         if event_date_str := request.form["event_date"]:
             event_date = datetime.date.fromisoformat(event_date_str)
         else:
@@ -131,6 +132,7 @@ def album(id: int):
 @blueprint.route("/<int:album_id>/photos/<int:photo_id>", methods=["GET", "POST"])
 def album_photo(album_id: int, photo_id: int):
     if request.method == "POST":
+        current_user.check_authorised()
         starred = request.form.get("starred", type=str_to_bool, default=None)
         if starred is not None:
             with db_conn() as conn:

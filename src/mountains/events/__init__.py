@@ -112,10 +112,9 @@ def events(event_id: int | None = None):
 
 @blueprint.route("/<id>", methods=["POST"])
 def event(id: int):
-    if not current_user.is_authorised():
-        abort(403)
-
     if request.form["method"] == "DELETE":
+        current_user.check_authorised()
+
         with db_conn() as conn:
             events_db = events_repo(conn)
             event = events_db.get_or_404(id=id)
@@ -193,6 +192,7 @@ def events_calendar(year: int | None = None, month: int | None = None):
 @blueprint.route("/add", methods=["GET", "POST"])
 @blueprint.route("/<int:id>/edit", methods=["GET", "POST", "PUT"])
 def edit_event(id: int | None = None):
+    current_user.check_authorised()
     method = req_method(request)
 
     if id is not None:
@@ -205,9 +205,6 @@ def edit_event(id: int | None = None):
 
     error: str | None = None
     if method != "GET":
-        if not current_user.is_authorised():
-            abort(403)
-
         try:
             with db_conn(locked=True) as conn:
                 events_db = events_repo(conn)

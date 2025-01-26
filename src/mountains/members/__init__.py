@@ -4,7 +4,6 @@ from pathlib import Path
 
 from flask import (
     Blueprint,
-    abort,
     current_app,
     redirect,
     render_template,
@@ -51,6 +50,8 @@ def member(slug: str):
     if request.method == "POST":
         with db_conn() as conn:
             user = users_repo(conn).get_or_404(slug=slug)
+            current_user.check_authorised(user.id)
+
             if "membership_expiry" in request.form:
                 discord = DiscordAPI.from_app(current_app)
                 if expiry_str := request.form["membership_expiry"]:
@@ -122,8 +123,8 @@ def member_discord(slug: str):
     if request.method == "POST":
         with db_conn() as conn:
             user = users_repo(conn).get_or_404(slug=slug)
-            if not current_user.is_authorised(user.id):
-                abort(403)
+
+            current_user.check_authorised(user.id)
 
             if "remove_id" in request.form:
                 discord_id = None
@@ -163,6 +164,7 @@ def edit_member(id: int):
     with db_conn() as conn:
         user = users_repo(conn).get_or_404(id=id)
 
+    current_user.check_authorised(user.id)
     message = None
     if request.method == "POST":
         updates = {}

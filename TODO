@@ -15,17 +15,18 @@
 [x] HTMX event search
 [x] HTMX attendee adder
 [x] Event popup stages
-[] Trial membership popup
+[x] Trial membership popup
 [x] Form styling for clearer labels
 [x] Make grid more centered
 [x] Up/Down arrows on attendees
 [x] Front page content - landing page
 [] Committee Bios
+[] Starring photos
 [x] Footer
-[] Permissions audit + mid-roles (coordinator vs. committee/admin)
-[] General styling / TODO checks
-[] Deployment setup + testing
+[x] Permissions audit + mid-roles (coordinator vs. committee/admin)
+[x] General styling / TODO checks
 [x] Serve HTMX locally
+[] Deployment setup + testing
 [] Deployment testing for slow performance
 
 # Code nice to haves
@@ -36,6 +37,7 @@
 
 # Nice to have before done
 
+[] Image pasting in markdown
 [] HTMX boost main links
 [] Image infinite scroll
 [] Breadcrumbs
