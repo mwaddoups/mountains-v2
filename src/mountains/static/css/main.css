@@ -499,6 +499,7 @@
     padding: 0.5rem;
     @media (max-width: 800px) {
       flex-direction: column;
+      align-items: start;
 
       /* Handle expanding the hamburger */
       /* We set the height manually here, may be a better way to do this */
@@ -554,10 +555,11 @@
       display: flex;
       gap: 0.5rem;
       align-items: center;
-      margin-left: auto;
+      flex: 1 1 auto;
+      justify-content: end;
       @media (max-width: 800px) {
-        margin-left: unset;
         flex-direction: column;
+        align-items: start;
       }
     }
   }
