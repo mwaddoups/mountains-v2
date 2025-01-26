@@ -32,7 +32,7 @@ blueprint = Blueprint(
 
 @blueprint.before_request
 def check_authorised():
-    if not current_user.is_authorised():
+    if not current_user.is_committee and not current_user.is_admin:
         abort(403)
 
 

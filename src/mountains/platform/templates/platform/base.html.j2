@@ -41,7 +41,7 @@
       <li>
         <a href="https://www.tshirtstudio.com/marketplace/clyde-mountaineering-club">Club Merch</a>
       </li>
-      {% if g.current_user.is_site_admin %}
+      {% if g.current_user.is_committee or g.current_user.is_admin %}
         {% call nav_link('platform.committee.overview', 'Committee', class="admin") %}
           <ul>
             {{ nav_link('platform.committee.overview', 'Overview') }}

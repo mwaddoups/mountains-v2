@@ -14,6 +14,9 @@
   <section>
     <h2>Site Permissions</h2>
     <p>The following users have permissions to access admin parts of the site.</p>
+    <p>
+      <strong>Note that only committee and the site admin have access to the committee pages!</strong>
+    </p>
     <ul>
       {% for u in user_map.values() %}
         {% if u.is_admin %}
