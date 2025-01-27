@@ -1,5 +1,6 @@
 import logging
 from collections import defaultdict
+from pathlib import Path
 
 from flask import (
     Blueprint,
@@ -10,6 +11,7 @@ from flask import (
     request,
     url_for,
 )
+from requests.auth import CONTENT_TYPE_FORM_URLENCODED
 from requests.exceptions import ConnectionError
 
 from mountains.context import current_user, db_conn
@@ -18,7 +20,7 @@ from mountains.models.activity import activity_repo
 from mountains.models.events import attendees_repo, events_repo
 from mountains.models.pages import Page, latest_page, pages_repo
 from mountains.models.users import users_repo
-from mountains.utils import now_utc
+from mountains.utils import now_utc, slugify
 
 logger = logging.getLogger(__name__)
 
@@ -168,9 +170,11 @@ def treasurer():
 
 @blueprint.route("/pages", methods=["GET", "POST"])
 def page_editor():
+    CONTENT_PATH = Path(current_app.config["STATIC_FOLDER"]) / "content"
     preview = None
-    message = None
+    message = request.args.get("message")
     if request.method == "POST":
+        message = None
         if "preview" in request.form:
             preview = request.form
         else:
@@ -205,6 +209,22 @@ def page_editor():
                     new_name = request.form["new_name"]
                     pages_db.update(_where={"name": old_name}, name=new_name)
                     message = f"Changed name from {old_name} -> {new_name}"
+                elif "add_image" in request.form:
+                    file = request.files["image_file"]
+                    if file.filename is not None:
+                        name = slugify(request.form["name"])
+                        file_name = Path(file.filename).with_stem(name)
+                        file_path = CONTENT_PATH / file_name
+                        if file_path.exists():
+                            message = f"File name {file_name} already exists!"
+                        else:
+                            file.save(CONTENT_PATH / file_name)
+                            message = f"Image {file_name} uploaded successfully."
+
+            if message is not None:
+                return redirect(url_for(".page_editor", message=message))
+            else:
+                return redirect(url_for(".page_editor"))
 
     with db_conn() as conn:
         all_pages = pages_repo(conn).list()
@@ -213,6 +233,14 @@ def page_editor():
             [latest_page(name, pages_repo(conn)) for name in page_names],
             key=lambda p: p.description,
         )
+
+    image_paths = [Path("content") / f.name for f in CONTENT_PATH.glob("*")]
+
+    # Get images
     return render_template(
-        "committee/pages.edit.html.j2", pages=pages, preview=preview, message=message
+        "committee/pages.edit.html.j2",
+        pages=pages,
+        preview=preview,
+        message=message,
+        image_paths=image_paths,
     )

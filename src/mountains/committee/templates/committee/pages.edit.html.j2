@@ -1,8 +1,12 @@
 {% extends "committee/base.html.j2" %}
 {% block content %}
-  <h1>Page Editor</h1>
+  <h1>Page Content</h1>
+  <h2>Page Editing</h2>
   {% if message %}<p role="alert">{{ message }}</p>{% endif %}
-  <p>You can edit any of the text on club pages below.</p>
+  <p>
+    You can edit any of the text on club pages below.
+    To upload images for use in this, use the image uploader section below to get the appropriate markdown.
+  </p>
   {% for page in pages %}
     <details {{ 'open' if preview and preview.name == page.name }}>
       <summary>{{ page.description }} ({{ page.name }}, v{{ page.version }})</summary>
@@ -31,6 +35,38 @@
       </form>
     </details>
   {% endfor %}
+  <h2>Image Upload</h2>
+  <p>
+    This form can be used to upload images, or to find an existing uploaded image to generate markdown for use in page content.
+  </p>
+  <details>
+    <summary>Upload Images for use in pages</summary>
+    <form method="post" enctype="multipart/form-data">
+      <label>
+        Image Name
+        <input type="text" name="name" required />
+      </label>
+      <label>
+        Image Upload
+        <input type="file" name="image_file" accept="image/*" required />
+      </label>
+      <input type="submit" name="add_image" value="Add Image" />
+    </form>
+    <section id="uploaded-images">
+      <h3>Available Images</h3>
+      {% for image in image_paths %}
+        {% set img_url = url_for('static', filename=image) %}
+        <figure class="card">
+          <img src="{{ img_url }}" height="256" width="256" alt="uploaded_img" />
+          <p>To use this in a page, copy the markdown below.</p>
+          <p>
+            <code>![]({{ img_url }})</code>
+          </p>
+        </figure>
+      {% endfor %}
+    </section>
+  </details>
+  <h2>Site Admin</h2>
   <p>The below is for the use of the website admin only.</p>
   <details>
     <summary>Create a new page</summary>

@@ -42,7 +42,7 @@
 
 [] Image pasting in markdown
 [] HTMX boost main links
-[] Image infinite scroll
+[x] Image infinite scroll
 [] Breadcrumbs
 [] HTMX preload
 [] Recent payments for treasurer from stripe

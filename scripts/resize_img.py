@@ -1,7 +1,7 @@
 from PIL import Image
 
-with Image.open("images/cmc_full.png") as im:
-    new_width = 512
+with Image.open("images/climbing.png") as im:
+    new_width = 1024
     new_height = im.height // (im.width // new_width)
     resized = im.resize((new_width, new_height))
-    resized.save(f"images/cmc_full_{new_width}.png")
+    resized.save(f"images/climbing_{new_width}.png")
