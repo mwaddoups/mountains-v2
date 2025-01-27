@@ -38,7 +38,7 @@ def connection(
 
 @register_structure_hook
 def structure_datetime(val, _) -> datetime.datetime:
-    return datetime.datetime.fromisoformat(val)
+    return datetime.datetime.fromisoformat(val).replace(tzinfo=None)
 
 
 @register_unstructure_hook

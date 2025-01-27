@@ -25,26 +25,26 @@ def routes(blueprint: Blueprint):
     @blueprint.before_request
     def require_logon():
         if (token_id := session.get("token_id")) is None:
-            return redirect(url_for("auth.login"))
+            return _hard_redirect(url_for("auth.login"))
         else:
             with db_conn() as conn:
                 token = tokens_repo(conn).get(id=token_id)
                 if token is None:
                     # Something weird happened
                     del session["token_id"]
-                    return redirect(url_for("auth.login"))
+                    return _hard_redirect(url_for("auth.login"))
 
                 user = users_repo(conn).get(id=token.user_id)
                 if user is None:
                     # Something weird happened
                     del session["token_id"]
-                    return redirect(url_for("auth.login"))
+                    return _hard_redirect(url_for("auth.login"))
                 elif (
                     user.is_dormant
                     and request.endpoint
                     and not request.endpoint.endswith("dormant")
                 ):
-                    return redirect(url_for(".dormant"))
+                    return _hard_redirect(url_for(".dormant"))
 
     @blueprint.route("/dormant", methods=["GET", "POST"])
     def dormant():
@@ -133,3 +133,11 @@ def routes(blueprint: Blueprint):
     blueprint.register_blueprint(committee.blueprint, url_prefix="/committee")
     blueprint.register_blueprint(albums.blueprint, url_prefix="/albums")
     blueprint.register_blueprint(events.blueprint, url_prefix="/events")
+
+
+def _hard_redirect(url):
+    response = redirect(url)
+    if request.headers.get("HX-Request"):
+        response.headers["HX-Redirect"] = url
+
+    return response
