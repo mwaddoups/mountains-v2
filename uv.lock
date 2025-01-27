@@ -300,6 +300,7 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "djlint" },
+    { name = "mountains" },
     { name = "pytest" },
 ]
 
@@ -318,6 +319,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "djlint", specifier = ">=1.36.3" },
+    { name = "mountains", virtual = "." },
     { name = "pytest", specifier = ">=8.3.4" },
 ]
 

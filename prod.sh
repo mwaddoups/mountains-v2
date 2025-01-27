@@ -1,0 +1,1 @@
+uv run gunicorn --workers=4 -k gthread --threads 4 'mountains:create_app()'

@@ -15,7 +15,7 @@ wheels/
 *.db-shm
 
 # Environment variables for testing / prod
-.env
+*.env
 
 # Stripe CLI
 stripe
