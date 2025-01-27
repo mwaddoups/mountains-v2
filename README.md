@@ -7,11 +7,13 @@ On a base Ubuntu 24.04 droplet, we
 3. Follow the instructions from certbot to enable https, and set to renew in crontab.
 4. Git clone our repo, and install uv.
 5. Copy the test.db to prod.db, and the prod.env.
-6. Run `prod.sh` to start
+6. Run `prod.sh` to start, if running locally
+7. Create a systemctl service `/etc/systemd/system/gunicorn.service` for managing running
 
 ### For updates
 
-1. Template updates happen automatically (following `git pull`)
+1. `git pull` the new repo
+2. Restart the gunicorn service
 
 ### For managing the old import
 

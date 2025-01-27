@@ -368,10 +368,15 @@ def pay_event(event_id: int):
 
         return redirect(checkout_url)
     else:
+        notify_signup = "notify_signup" in request.args
         if request.headers.get("HX-Target") == event.slug:
-            return render_template("events/_pay.html.j2", event=event)
+            return render_template(
+                "events/_pay.html.j2", event=event, notify_signup=notify_signup
+            )
         else:
-            return render_template("events/pay.html.j2", event=event)
+            return render_template(
+                "events/pay.html.j2", event=event, notify_signup=notify_signup
+            )
 
 
 @blueprint.route("/<int:event_id>/attend/")
@@ -448,7 +453,9 @@ def attendee(event_id: int, user_id: int):
 
             if user.id == current_user.id and event.needs_payment_from(attendee):
                 # They need to pay - redirect straightaway
-                return redirect(url_for(".pay_event", event_id=event.id))
+                return redirect(
+                    url_for(".pay_event", event_id=event.id, notify_signup=True)
+                )
             else:
                 return redirect(url_for(".events", event_id=event.id))
         else:

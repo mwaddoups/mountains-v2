@@ -19,6 +19,7 @@
         {% if event.price_id %}
           {% if not current_attendee.is_trip_paid %}
             <a href="{{ url_for('.pay_event', event_id=current_attendee.event_id) }}"
+               hx-get="{{ url_for('.pay_event', event_id=current_attendee.event_id) }}"
                class="button">Pay Now</a>
           {% else %}
             <button disabled>You've paid!</button>

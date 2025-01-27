@@ -2,7 +2,7 @@
          hx-target="this"
          hx-swap="outerHTML show:top settle:0.5s"
          class="event card">
-  <p role="status">You have signed up and have a place on the event!</p>
+  {% if notify_signup %}<p role="status">You have signed up and have a place on the event!</p>{% endif %}
   <h1>Trip Payment</h1>
   <p>
     The trip requires payment to confirm your place.
