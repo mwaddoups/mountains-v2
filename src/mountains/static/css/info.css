@@ -77,7 +77,7 @@ main {
     }
 
     p {
-      text-align: right;
+      text-align: left;
     }
     @media (max-width: 800px) {
       grid-template-columns: 1fr;
