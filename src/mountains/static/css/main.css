@@ -1150,10 +1150,13 @@
   #events-calendar {
     table-layout: fixed;
     width: 100%;
+    min-width: 35rem;
     border-collapse: collapse;
 
     th {
       text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     td.events-calendar-day {
@@ -1181,6 +1184,8 @@
     }
 
     .calendar-event {
+      overflow: hidden;
+      text-overflow: ellipsis;
       background-color: var(--cmc-highlight);
       color: var(--text-white);
       padding: 0.375rem;
