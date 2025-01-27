@@ -125,7 +125,10 @@ with connection(args.output_db) as out_conn:
 
         user_repo.insert(new_user)
         inserted += 1
-    print(f"Inserted {inserted} users (password: password)")
+    if args.scramble_pw:
+        print(f"Inserted {inserted} users (password: <scrambled>)")
+    else:
+        print(f"Inserted {inserted} users (password: password)")
     print(f"Skipped {skipped} users (blank names, or not approved)")
 
     # Do the events import
