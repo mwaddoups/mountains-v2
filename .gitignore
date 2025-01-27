@@ -20,6 +20,9 @@ wheels/
 # Stripe CLI
 stripe
 
+# Downloaded Datadumps
+datadump.json
+
 # Images (for now)
 images/
 src/mountains/static/profile

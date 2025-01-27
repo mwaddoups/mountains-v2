@@ -1,7 +1,8 @@
 import argparse
-import sqlite3
+import json
 from datetime import datetime
 
+from cattrs import structure
 from werkzeug.security import generate_password_hash
 
 from mountains.db import connection
@@ -19,7 +20,7 @@ from mountains.models.users import CommitteeRole, User, users_repo
 from mountains.utils import readable_id
 
 parser = argparse.ArgumentParser()
-parser.add_argument("input_db")
+parser.add_argument("input_datadump")
 parser.add_argument("output_db")
 args = parser.parse_args()
 
@@ -38,11 +39,16 @@ event_map = {
 }
 
 pw_hash = generate_password_hash("password")
-with (
-    sqlite3.connect(args.input_db) as in_conn,
-    connection(args.output_db) as out_conn,
-):
-    in_conn.row_factory = sqlite3.Row
+
+with open(args.input_datadump) as f:
+    input_data = json.load(f)
+    # List of json objects which each have 'model', 'fields'
+    # Models are
+    # {'photos.album', 'drfpasswordless.callbacktoken', 'events.event', 'members.experience',
+    # 'payments.membershipprice', 'sessions.session', 'members.user', 'kit.kit', 'kit.kitborrow', 'events.attendinguser',
+    # 'activity.activity', 'authtoken.token', 'photos.photo', 'admin.logentry'}
+
+with connection(args.output_db) as out_conn:
     user_repo = users_repo(out_conn)
     tokens_db = tokens_repo(out_conn)
     # recreate tokens
@@ -52,16 +58,20 @@ with (
     # Do the user import
     user_repo.drop_table()
     user_repo.create_table()
-    old_users_res = in_conn.execute("SELECT * FROM members_user")
-    old_users = old_users_res.fetchall()
+    old_users = [
+        {"id": d["pk"], **d["fields"]}
+        for d in input_data
+        if d["model"] == "members.user"
+    ]
     inserted = 0
     skipped = 0
     for u in old_users:
-        u = dict(u)
+        # In the datadump, IDs start at 1
+        id = u["id"]
         if not u["first_name"] or not u["last_name"] or not bool(u["is_approved"]):
             skipped += 1
             continue
-        u_slug = readable_id([u["first_name"], u["last_name"], str(u["id"])])
+        u_slug = readable_id([u["first_name"], u["last_name"], str(id)])
 
         # Take uploads/ off the start
         profile_url = u["profile_picture"][8:]
@@ -81,33 +91,34 @@ with (
         else:
             raise Exception(f"Unknown role {u['committee_role']:!r} !")
 
-        new_user = User(
-            id=u["id"],
-            slug=u_slug,
-            email=u["email"],
-            password_hash=pw_hash,
-            first_name=u["first_name"],
-            last_name=u["last_name"],
-            about=u["about"],
-            mobile=u["mobile_number"],
-            in_case_emergency=u["in_case_emergency"],
-            discord_id=u["discord_id"],
-            profile_picture_url=u["profile_picture"][8:]
-            if u["profile_picture"]
-            else None,
-            is_admin=True if u["email"] == "mwaddoups@gmail.com" else False,
-            is_committee=bool(u["is_committee"]),
-            is_coordinator=bool(u["is_walk_coordinator"]),
-            is_dormant=bool(u["is_dormant"]),
-            membership_expiry=datetime.fromisoformat(u["membership_expiry"]).date()
-            if u["membership_expiry"] is not None
-            else None,
-            created_on_utc=datetime.fromisoformat(u["date_joined"]),
-            last_login_utc=datetime.fromisoformat(u["last_login"])
-            if u["last_login"] is not None
-            else None,
-            committee_role=committee_role,
-            committee_bio=u["committee_bio"] if u["committee_bio"] is not None else "",
+        new_user = structure(
+            dict(
+                id=id,
+                slug=u_slug,
+                email=u["email"],
+                password_hash=pw_hash,
+                first_name=u["first_name"],
+                last_name=u["last_name"],
+                about=u["about"],
+                mobile=u["mobile_number"],
+                in_case_emergency=u["in_case_emergency"],
+                discord_id=u["discord_id"],
+                profile_picture_url=u["profile_picture"][8:]
+                if u["profile_picture"]
+                else None,
+                is_admin=True if u["email"] == "mwaddoups@gmail.com" else False,
+                is_committee=bool(u["is_committee"]),
+                is_coordinator=bool(u["is_walk_coordinator"]),
+                is_dormant=bool(u["is_dormant"]),
+                membership_expiry=u["membership_expiry"],
+                created_on_utc=u["date_joined"],
+                last_login_utc=u["last_login"],
+                committee_role=committee_role,
+                committee_bio=u["committee_bio"]
+                if u["committee_bio"] is not None
+                else "",
+            ),
+            User,
         )
 
         user_repo.insert(new_user)
@@ -120,39 +131,44 @@ with (
     events_db.drop_table()
     events_db.create_table()
 
-    old_events = in_conn.execute("SELECT * FROM events_event").fetchall()
+    old_events = [
+        {"id": d["pk"], **d["fields"]}
+        for d in input_data
+        if d["model"] == "events.event"
+    ]
     inserted = 0
     skipped = 0
     for ev in old_events:
-        ev = dict(ev)
+        id = ev["id"]
         ev_slug = readable_id([
             datetime.fromisoformat(ev["event_date"]).strftime("%Y-%m-%d"),
             ev["title"],
-            str(ev["id"]),
+            str(id),
         ])
 
-        new_event = Event(
-            id=ev["id"],
-            slug=ev_slug,
-            title=ev["title"],
-            description=ev["description"],
-            event_dt=datetime.fromisoformat(ev["event_date"]),
-            event_end_dt=datetime.fromisoformat(ev["event_end_date"])
-            if ev["event_end_date"]
-            else None,
-            created_on_utc=datetime.fromisoformat(ev["created_date"]),
-            updated_on_utc=datetime.fromisoformat(ev["created_date"]),
-            event_type=event_map[ev["event_type"]],
-            max_attendees=int(ev["max_attendees"]),
-            signup_open_dt=datetime.fromisoformat(ev["signup_open_date"])
-            if ev["signup_open_date"]
-            else None,
-            show_participation_ice=bool(ev["show_popup"]),
-            is_members_only=bool(ev["members_only"]),
-            is_locked=not bool(ev["signup_open"]),
-            price_id=ev["price_id"],
-            is_draft=False,
-            is_deleted=bool(ev["is_deleted"]),
+        new_event = structure(
+            dict(
+                id=id,
+                slug=ev_slug,
+                title=ev["title"],
+                description=ev["description"],
+                event_dt=(ev["event_date"]),
+                event_end_dt=(ev["event_end_date"]) if ev["event_end_date"] else None,
+                created_on_utc=(ev["created_date"]),
+                updated_on_utc=(ev["created_date"]),
+                event_type=event_map[ev["event_type"]],
+                max_attendees=int(ev["max_attendees"]),
+                signup_open_dt=(ev["signup_open_date"])
+                if ev["signup_open_date"]
+                else None,
+                show_participation_ice=bool(ev["show_popup"]),
+                is_members_only=bool(ev["members_only"]),
+                is_locked=not bool(ev["signup_open"]),
+                price_id=ev["price_id"],
+                is_draft=False,
+                is_deleted=bool(ev["is_deleted"]),
+            ),
+            Event,
         )
 
         events_db.insert(new_event)
@@ -164,17 +180,22 @@ with (
     attendees_db.drop_table()
     attendees_db.create_table()
 
-    old_attendees = in_conn.execute("SELECT * FROM events_attendinguser").fetchall()
+    old_attendees = [
+        d["fields"] for d in input_data if d["model"] == "events.attendinguser"
+    ]
+
     inserted = 0
     skipped = 0
     for au in old_attendees:
-        au = dict(au)
-        new_au = Attendee(
-            user_id=au["user_id"],
-            event_id=au["event_id"],
-            is_waiting_list=au["is_waiting_list"],
-            is_trip_paid=au["is_trip_paid"],
-            joined_at_utc=datetime.fromisoformat(au["list_join_date"]),
+        new_au = structure(
+            dict(
+                user_id=au["user"],
+                event_id=au["event"],
+                is_waiting_list=au["is_waiting_list"],
+                is_trip_paid=au["is_trip_paid"],
+                joined_at_utc=(au["list_join_date"]),
+            ),
+            Attendee,
         )
 
         attendees_db.insert(new_au)
@@ -186,18 +207,23 @@ with (
     albums_db.drop_table()
     albums_db.create_table()
 
-    old_albums = in_conn.execute("SELECT * FROM photos_album").fetchall()
+    old_albums = [
+        {"id": d["pk"], **d["fields"]}
+        for d in input_data
+        if d["model"] == "photos.album"
+    ]
     inserted = 0
     skipped = 0
     for al in old_albums:
-        al = dict(al)
-        new_al = Album(
-            id=al["id"],
-            name=al["name"],
-            event_date=datetime.fromisoformat(al["event_date"]).date()
-            if al["event_date"]
-            else None,
-            created_at_utc=datetime.fromisoformat(al["created"]),
+        id = al["id"]
+        new_al = structure(
+            dict(
+                id=id,
+                name=al["name"],
+                event_date=(al["event_date"]),
+                created_at_utc=(al["created"]),
+            ),
+            Album,
         )
 
         albums_db.insert(new_al)
@@ -209,19 +235,26 @@ with (
     photos_db.drop_table()
     photos_db.create_table()
 
-    old_photos = in_conn.execute("SELECT * FROM photos_photo").fetchall()
+    old_photos = [
+        {"id": d["pk"], **d["fields"]}
+        for d in input_data
+        if d["model"] == "photos.photo"
+    ]
     inserted = 0
     skipped = 0
     for p in old_photos:
-        p = dict(p)
-        if p["album_id"] and p["uploader_id"]:
-            new_p = Photo(
-                id=p["id"],
-                starred=p["starred"],
-                uploader_id=p["uploader_id"],
-                photo_path=p["photo"],
-                album_id=p["album_id"],
-                created_at_utc=datetime.fromisoformat(p["uploaded"]),
+        id = p["id"]
+        if p["album"] and p["uploader"]:
+            new_p = structure(
+                dict(
+                    id=id,
+                    starred=p["starred"],
+                    uploader_id=p["uploader"],
+                    photo_path=p["photo"],
+                    album_id=p["album"],
+                    created_at_utc=(p["uploaded"]),
+                ),
+                Photo,
             )
 
             photos_db.insert(new_p)
@@ -237,16 +270,20 @@ with (
     activity_db.drop_table()
     activity_db.create_table()
 
-    old_activity = in_conn.execute("SELECT * FROM activity_activity").fetchall()
+    old_activity = [
+        d["fields"] for d in input_data if d["model"] == "activity.activity"
+    ]
     inserted = 0
     skipped = 0
     for a in old_activity:
-        a = dict(a)
-        new_a = Activity(
-            user_id=a["user_id"],
-            event_id=a["event_id"],
-            dt=datetime.fromisoformat(a["timestamp"]),
-            action=a["action"],
+        new_a = structure(
+            dict(
+                user_id=a["user"],
+                event_id=a["event"],
+                dt=(a["timestamp"]),
+                action=a["action"],
+            ),
+            Activity,
         )
 
         activity_db.insert(new_a)
