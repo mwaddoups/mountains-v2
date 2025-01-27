@@ -1,5 +1,6 @@
 import argparse
 import json
+import uuid
 from datetime import datetime
 
 from cattrs import structure
@@ -22,6 +23,7 @@ from mountains.utils import readable_id
 parser = argparse.ArgumentParser()
 parser.add_argument("input_datadump")
 parser.add_argument("output_db")
+parser.add_argument("--scramble-pw", action="store_true")
 args = parser.parse_args()
 
 
@@ -96,7 +98,7 @@ with connection(args.output_db) as out_conn:
                 id=id,
                 slug=u_slug,
                 email=u["email"],
-                password_hash=pw_hash,
+                password_hash=str(uuid.uuid4()) if args.scramble_pw else pw_hash,
                 first_name=u["first_name"],
                 last_name=u["last_name"],
                 about=u["about"],
