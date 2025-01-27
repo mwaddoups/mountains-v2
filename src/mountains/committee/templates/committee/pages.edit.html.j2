@@ -44,12 +44,15 @@
     <form method="post" enctype="multipart/form-data">
       <label>
         Image Name
+        <small>(Not that important, just for reference)</small>
         <input type="text" name="name" required />
       </label>
       <label>
         Image Upload
+        <small>Should be a reasonable size to occupy 75% of the width of the page</small>
         <input type="file" name="image_file" accept="image/*" required />
       </label>
+      <strong>Please make sure the image is sized to an appropriate size!</strong>
       <input type="submit" name="add_image" value="Add Image" />
     </form>
     <section id="uploaded-images">
