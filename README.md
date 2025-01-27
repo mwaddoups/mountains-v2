@@ -8,6 +8,11 @@ On a base Ubuntu 24.04 droplet, we
 4. Git clone our repo, and install uv.
 5. Copy the test.db to prod.db, and the prod env to .env
 
+### For managing the old import
+
+1. Set up the old mountains as an SSH host.
+2. Use the relevant `scripts/` to rsync old media and download old data.
+
 TODO
 
 - gunicorn installation

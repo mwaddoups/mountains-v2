@@ -2,6 +2,9 @@
 {% block content %}
   <h1>Login</h1>
   {% if error %}<strong role="alert">{{ error }}</strong>{% endif %}
+  <p role="status">
+    If you had an old website account, you will need to set your password for the first time by going through Forgot Password, below.
+  </p>
   <form method="post" action="{{ url_for('auth.login') }}">
     <label>
       Email
