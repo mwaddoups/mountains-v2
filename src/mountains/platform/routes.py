@@ -2,6 +2,7 @@ import logging
 
 from flask import (
     Blueprint,
+    Response,
     abort,
     current_app,
     redirect,
@@ -136,8 +137,11 @@ def routes(blueprint: Blueprint):
 
 
 def _hard_redirect(url):
-    response = redirect(url)
     if request.headers.get("HX-Request"):
+        response = Response(status=200)
         response.headers["HX-Redirect"] = url
+        return response
+    else:
+        response = redirect(url)
 
     return response

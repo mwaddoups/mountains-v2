@@ -3,6 +3,7 @@
   display: grid;
   gap: 1rem;
   grid-template-columns: repeat(auto-fill, var(--member-width));
+  justify-content: space-between;
 
   .member {
     /* Make sure no member names overlap */
