@@ -5,6 +5,7 @@ import textwrap
 import mistune
 from flask import Flask, Response, current_app, g, render_template, request, session
 from flask.logging import default_handler
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from mountains.context import db_conn, send_mail
 from mountains.discord import DiscordAPI
@@ -24,6 +25,10 @@ from .models.users import users_repo
 
 def create_app():
     app = Flask(__name__)
+
+    # If we're not running in debug mode, we're likely behind a proxy
+    if not app.debug:
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
     # Set up logging for any logger on 'mountains'
     logger = logging.getLogger("mountains")
