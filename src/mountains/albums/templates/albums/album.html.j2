@@ -32,7 +32,20 @@
          hx-target="this"
          _="on htmx:afterSettle call #photo.showModal()"></div>
   </dialog>
-  <section id="gallery">
-    {% include "albums/album._gallery.html.j2" %}
-  </section>
+  <div id="expanding-gallery">
+    <section id="gallery">
+      {% with photos=photos[:limit] %}
+        {% include "albums/album._gallery.html.j2" %}
+      {% endwith %}
+    </section>
+    {% if photos | length > limit %}
+      <a class="button"
+         hx-get="{{ url_for('.album', id=album.id, limit=limit+5) }}"
+         hx-target="#expanding-gallery"
+         hx-select="#expanding-gallery"
+         hx-swap="outerHTML"
+         hx-trigger="click, intersect once"
+         href="{{ url_for('.album', id=album.id, limit=limit+5) }}">Show More</a>
+    {% endif %}
+  </div>
 {% endblock content %}

@@ -112,6 +112,7 @@ def album(id: int):
         else:
             return redirect(url_for(".album", id=album.id))
 
+    limit = request.args.get("limit", type=int, default=5)
     with db_conn() as conn:
         photos = sorted(
             photos_repo(conn).list_where(album_id=album.id),
@@ -126,6 +127,7 @@ def album(id: int):
         album=album,
         photos=photos,
         user_map=user_map,
+        limit=limit,
     )
 
 
