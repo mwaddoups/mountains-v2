@@ -9,6 +9,7 @@ On a base Ubuntu 24.04 droplet, we
 5. Copy the test.db to prod.db, and the prod.env.
 6. Run `prod.sh` to start, if running locally
 7. Create a systemctl service `/etc/systemd/system/gunicorn.service` for managing running
+8. Link static uploads and profile folders directly to nginx static
 
 ### For updates
 

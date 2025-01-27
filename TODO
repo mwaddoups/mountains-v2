@@ -21,14 +21,15 @@
 [x] Up/Down arrows on attendees
 [x] Front page content - landing page
 [x] Committee Bios
+[] Photo lazy loading
 [] Starring photos - add BI icon
 [] Height of NAV menu
 [x] Footer
 [x] Permissions audit + mid-roles (coordinator vs. committee/admin)
 [x] General styling / TODO checks
 [x] Serve HTMX locally
-[] Deployment setup + testing (server name? other things?)
-[] Deployment testing for slow performance
+[x] Deployment setup + testing (server name? other things?)
+[x] Deployment testing for slow performance
 
 # Code nice to haves
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Any, ClassVar
 
 import requests
@@ -8,6 +9,8 @@ from cattrs import structure
 
 if TYPE_CHECKING:
     from flask import Flask
+
+logger = logging.getLogger(__name__)
 
 _MEMBER_ROLE_ID = "974275340874678283"
 
@@ -101,7 +104,7 @@ class DiscordAPI:
                 f"https://discord.com/api/v10/guilds/{self.GUILD_ID}/members/{user_id}/roles/{_MEMBER_ROLE_ID}",
                 headers=self._api_headers(),
             )
-            print(res.content)
+            logger.debug("Set member role with response %r", res.content)
         else:
             print(
                 f"DEBUG: Not actually posting to Discord, would set user_id {user_id} to member!"
@@ -113,7 +116,7 @@ class DiscordAPI:
                 f"https://discord.com/api/v10/guilds/{self.GUILD_ID}/members/{user_id}/roles/{_MEMBER_ROLE_ID}",
                 headers=self._api_headers(),
             )
-            print(res.content)
+            logger.debug("Removed member role with response %r", res.content)
         else:
             print(
                 f"DEBUG: Not actually posting to Discord, would remove member from user_id {user_id}!"

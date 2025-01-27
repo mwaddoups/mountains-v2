@@ -145,7 +145,6 @@ class Repository[T]:
             """,
             tuple(itertools.chain.from_iterable(v for v in kwargs.values())),
         )
-        print(cur)
         rows = cur.fetchall()
         return [structure(dict(row), self.storage_cls) for row in rows]
 

@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import datetime
+import logging
 import sqlite3
 import uuid
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from attrs import Factory, define
+from flask import current_app
 from PIL import Image
 
 from mountains.db import Repository
@@ -14,6 +16,8 @@ from mountains.utils import now_utc
 
 if TYPE_CHECKING:
     from werkzeug.datastructures import FileStorage
+
+logger = logging.getLogger(__name__)
 
 
 @define
@@ -33,6 +37,20 @@ class Photo:
     # Relative to static (e.g. uploads/photos/...)
     photo_path: Path
     created_at_utc: datetime.datetime = Factory(now_utc)
+
+    def thumb_path(self, width=128) -> Path:
+        static_dir = Path(current_app.config["STATIC_FOLDER"])
+        path = self.photo_path.with_stem(self.photo_path.stem + f".th.{width}")
+        file_path = static_dir / path
+        if not file_path.exists():
+            # Create thumbnail for first time
+            with Image.open(static_dir / self.photo_path) as im:
+                logger.info("Creating thumbnail for photo %s", self.id)
+                if im.width > width:
+                    new_height = int(im.height * (width / im.width))
+                    resized = im.resize((width, new_height))
+                    resized.save(file_path)
+        return path
 
 
 def upload_photo(file: FileStorage, static_dir: Path, new_width: int = 1920) -> Path:

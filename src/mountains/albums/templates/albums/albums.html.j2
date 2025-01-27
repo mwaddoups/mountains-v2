@@ -17,7 +17,7 @@
         <div class="album-photos">
           {% for photo in album_photos[album.id][:5] %}
             {# djlint:off #}
-            <img src="{{ url_for('static', filename=photo.photo_path) }}" loading="lazy" />
+            <img src="{{ url_for('static', filename=photo.thumb_path()) }}" loading="lazy" />
             {# djlint:on #}
           {% endfor %}
         </div>
