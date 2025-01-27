@@ -2,9 +2,13 @@
 {% block content %}
   <h1>Login</h1>
   {% if error %}<strong role="alert">{{ error }}</strong>{% endif %}
-  <p role="status">
-    If you had an old website account, you will need to set your password for the first time by going through Forgot Password, below.
-  </p>
+  <div role="status" style="text-align: center;">
+    <p>Our website was upgraded in January 2025.</p>
+    <p>
+      If you have only ever logged in via email, <strong>you will need to create a password.</strong>
+    </p>
+    <a class="button" href="{{ url_for('auth.forgot_password') }}">Request a new password here</a>
+  </div>
   <form method="post" action="{{ url_for('auth.login') }}">
     <label>
       Email
