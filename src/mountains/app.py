@@ -56,7 +56,10 @@ def create_app():
 
     @app.template_filter("markdown")
     def convert_markdown(s: str) -> str:
-        return mistune.html(s)  # type: ignore
+        html: str = mistune.html(s)  # type: ignore
+
+        # Give all images a custom tag to avoid issues
+        return html.replace("<img", '<img class="markdown"')
 
     @app.context_processor
     def now_dt() -> dict:

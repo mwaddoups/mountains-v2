@@ -1262,4 +1262,10 @@
     gap: 1rem;
     place-items: center;
   }
+
+  img.markdown {
+    max-width: 75%;
+    margin: 1rem auto;
+    border-radius: var(--standard-border-radius);
+  }
 }
