@@ -112,6 +112,7 @@ with connection(args.output_db) as out_conn:
                 is_committee=bool(u["is_committee"]),
                 is_coordinator=bool(u["is_walk_coordinator"]),
                 is_dormant=bool(u["is_dormant"]),
+                is_winter_skills=u["is_winter_skills"],
                 membership_expiry=u["membership_expiry"],
                 created_on_utc=u["date_joined"],
                 last_login_utc=u["last_login"],

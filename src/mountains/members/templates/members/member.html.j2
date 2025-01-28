@@ -31,6 +31,12 @@
                        value="{{ not user.is_coordinator }}" />
                 <input type="submit" value="Toggle Coordinator" />
               </form>
+              <form method="post">
+                <input type="hidden"
+                       name="is_winter_skills"
+                       value="{{ not user.is_winter_skills }}" />
+                <input type="submit" value="Toggle Winter Skills" />
+              </form>
               <a class="button" href="{{ url_for('.committee_edit', id=user.id) }}">Edit Committee Details</a>
               {% if user.mobile %}
                 <mark>Mobile: {{ user.mobile }}</mark>
@@ -64,6 +70,7 @@
           {% if user.is_committee %}{{ badge("committee") }}{% endif %}
           {% if user.is_coordinator %}{{ badge("coordinator") }}{% endif %}
           {% if user.is_member %}{{ badge("member") }}{% endif %}
+          {% if user.is_winter_skills %}<span class="badge color-winter-weekend">❄️</span>{% endif %}
         </div>
       </hgroup>
     </header>

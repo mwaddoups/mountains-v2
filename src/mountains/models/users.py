@@ -43,6 +43,7 @@ class User:
     is_admin: bool = False
     is_committee: bool = False
     is_coordinator: bool = False
+    is_winter_skills: bool = False
     discord_id: str | None = None
     membership_expiry: datetime.date | None = None
     is_dormant: bool = False
@@ -160,6 +161,7 @@ def users_repo(conn: sqlite3.Connection) -> Repository[User]:
             "is_admin BOOLEAN NOT NULL",
             "is_committee BOOLEAN NOT NULL",
             "is_coordinator BOOLEAN NOT NULL",
+            "is_winter_skills BOOLEAN NOT NULL",
             "discord_id TEXT",
             "membership_expiry DATE",
             "is_dormant BOOLEAN NOT NULL",

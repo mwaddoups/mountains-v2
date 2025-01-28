@@ -79,6 +79,12 @@ def member(slug: str):
                 )
             ) is not None:
                 users_repo(conn).update(id=user.id, is_coordinator=is_coordinator)
+            elif (
+                is_winter_skills := request.form.get(
+                    "is_winter_skills", type=str_to_bool, default=None
+                )
+            ) is not None:
+                users_repo(conn).update(id=user.id, is_winter_skills=is_winter_skills)
 
             return redirect(url_for(".member", slug=slug))
 
