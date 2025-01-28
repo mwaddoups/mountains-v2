@@ -90,11 +90,11 @@
 
   body > header {
     border-bottom: 2px solid var(--primary);
-    margin-bottom: 0.5rem;
   }
 
   body > main {
     /* The main container is just a grid */
+    margin-top: 0.5rem;
     display: grid;
     grid-template-columns: subgrid;
     min-height: 100vh;
@@ -553,10 +553,11 @@
 
     aside {
       display: flex;
-      gap: 0.5rem;
+      gap: 1rem;
       align-items: center;
       flex: 1 1 auto;
       justify-content: end;
+      margin-right: 1rem;
       @media (max-width: 800px) {
         flex-direction: column;
         align-items: start;
@@ -565,64 +566,76 @@
   }
 
   /* Sidebar */
-  aside > nav {
-    padding: 0 1rem;
-    white-space: nowrap;
+  body > aside {
+    justify-self: left;
+    > nav {
+      padding: 0.5rem 1rem;
+      background-color: var(--primary);
+      white-space: nowrap;
+      height: 100%;
 
-    :is(a, a:visited) {
-      color: var(--primary);
-    }
-
-    ul,
-    ol {
-      display: flex;
-      flex-direction: column;
-    }
-
-    li {
-      margin: 0.25rem 0;
-    }
-
-    ul ul,
-    ol ol {
-      border-left: 1px solid rgb(from var(--primary) r g b / 0.5);
-      padding-left: 1rem;
-    }
-
-    #sidebar-hamburger {
-      display: none;
-    }
-
-    /* Hide sub-links for non-active nav */
-    > ul > li {
-      ul:not(:has([aria-selected="true"])) {
-        height: 0;
-        visibility: hidden;
-        transform: scaleY(0);
+      :is(a, a:visited) {
+        color: var(--text-white);
       }
 
-      &:hover ul:not(:has([aria-selected="true"])) {
-        height: auto;
-        visibility: visible;
-        transform: scaleY(1);
-        transition: all ease-in 0.2s;
+      ul,
+      ol {
+        display: flex;
+        flex-direction: column;
       }
-    }
 
-    /* Style active links for final layer only */
-    [aria-selected="true"]:not(:has(ul)) {
-      text-decoration: underline;
+      li {
+        margin: 0.25rem 0;
+      }
+
+      ul ul,
+      ol ol {
+        border-left: 1px solid rgb(from var(--primary) r g b / 0.5);
+        padding-left: 1rem;
+      }
+
+      #sidebar-hamburger {
+        display: none;
+      }
+
+      /* Hide sub-links for non-active nav */
+      > ul > li {
+        ul:not(:has([aria-selected="true"])) {
+          height: 0;
+          visibility: hidden;
+          transform: scaleY(0);
+        }
+
+        &:hover ul:not(:has([aria-selected="true"])) {
+          height: auto;
+          visibility: visible;
+          transform: scaleY(1);
+          transition: all ease-in 0.2s;
+        }
+      }
+
+      /* Style active links for final layer only */
+      [aria-selected="true"]:not(:has(ul)) {
+        text-decoration: underline;
+      }
     }
   }
 
   @media (max-width: 800px) {
-    aside {
+    body > aside {
+      justify-self: auto;
       > nav {
+        height: auto;
+        background-color: transparent;
         position: fixed;
         bottom: 1.8rem;
         right: 1.5rem;
         z-index: 99;
         text-align: right;
+
+        :is(a, a:visited) {
+          color: var(--primary);
+        }
 
         > ul {
           text-align: left;
