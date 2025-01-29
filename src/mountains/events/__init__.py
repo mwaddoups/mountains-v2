@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import datetime
 import logging
-from dis import disco
 from sqlite3 import Connection
 
 from flask import (
