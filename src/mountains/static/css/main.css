@@ -612,6 +612,7 @@
     align-content: start;
     color: var(--primary);
 
+    /* Position the sidebar expander in the right place (bit absolute here)  */
     div:has(#sidebar-expander) {
       position: relative;
       width: 100%;
@@ -622,6 +623,7 @@
         font-size: 1rem;
         padding: 0.125rem;
 
+        /* Reset any inherited styling */
         color: var(--primary);
         background-color: white;
         filter: var(--standard-drop-shadow);
@@ -631,11 +633,13 @@
       }
     }
 
+    /* Hadle flipping the sidebar */
     div:has(+ nav.sidebar-expanded) #sidebar-expander {
       svg {
         transform: rotate(180deg);
       }
     }
+
     > nav {
       /* Set up a high level grid for lining everything up */
       display: grid;
@@ -651,6 +655,7 @@
         display: contents;
       }
 
+      /* Make sure our a > svg + span is in the right grid */
       a {
         padding: 0.5rem 0;
         display: grid;
@@ -670,6 +675,7 @@
         }
       }
 
+      /* We make this a subgrid rather than contents for transitions */
       li > ul {
         display: grid;
         grid-template-columns: subgrid;
@@ -677,16 +683,16 @@
         overflow: hidden;
       }
 
+      /* Animations for transitions - timings are synced with JS here */
       &:is(.sidebar-expanding) {
-        animation-name: nav-expand;
-        animation-duration: 0.5s;
+        animation: 0.5s ease-in-out both nav-expand;
         overflow: hidden;
         width: 10rem;
       }
       &:is(.sidebar-retracting) {
-        animation-name: nav-retract;
-        animation-duration: 0.5s;
-        max-width: 3.5rem;
+        animation: 0.5s ease-in-out both nav-retract;
+        overflow: hidden;
+        width: 10rem;
 
         a {
           /* For transitioning the border */
@@ -697,11 +703,7 @@
         }
 
         li > ul {
-          gap: 0;
-          animation-name: nav-sub-shrink;
-          animation-duration: 0.5s;
-          opacity: 0;
-          max-height: 0;
+          animation: 0.5s ease-in-out both nav-sub-shrink;
         }
       }
 

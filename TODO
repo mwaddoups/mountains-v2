@@ -33,6 +33,7 @@
 
 # Committe requests
 [x] Sidebar rework
+[x] On mobile, retract sidebar by default
 [] Committee sub-roles
 [x] Winter Skills
 [] Image styling in markdown

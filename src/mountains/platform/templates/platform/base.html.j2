@@ -21,7 +21,8 @@
     <button id="sidebar-expander"
       data-tooltip="Show/Hide"
       {# djlint:off #}
-          _="on click 
+          _="init if window.innerWidth < 800 then remove .sidebar-expanded from #sidebar-nav end
+             on click 
               if #sidebar-nav does not match .sidebar-expanded 
                 toggle .sidebar-expanding on #sidebar-nav for 0.5s then toggle .sidebar-expanded on #sidebar-nav
                 else remove .sidebar-expanded from #sidebar-nav then toggle .sidebar-retracting on #sidebar-nav for 0.5s
