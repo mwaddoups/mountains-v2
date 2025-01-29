@@ -906,6 +906,10 @@
       color: var(--text);
     }
 
+    :is(button, .button, input[type="submit"]) svg {
+      color: var(--text-white);
+    }
+
     &:is(mark) {
       border-color: var(--cmc-color-committee);
     }
