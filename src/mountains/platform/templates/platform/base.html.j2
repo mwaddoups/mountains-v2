@@ -1,6 +1,6 @@
 {% extends "base.html.j2" %}
-{% from 'macros/bi.html.j2' import bi_list %}
-{% macro nav_link(endpoint, name, class="") %}
+{% import 'macros/bi.html.j2' as bi %}
+{% macro nav_link(endpoint, name, class="", icon=None) %}
   {% set target_url = url_for(endpoint, **kwargs) %}
   <li class="{{ class }}">
     {% if caller %}
@@ -10,14 +10,16 @@
       {% set is_selected = request.path == target_url %}
     {% endif %}
     <a href="{{ target_url }}"
-       aria-selected="{{ 'true' if is_selected else 'false' }}">{{ name }}</a>
+       aria-selected="{{ 'true' if is_selected else 'false' }}">
+      {% if icon %}{{ icon() }}{% endif %}
+      <span>{{ name }}</span></a>
     {% if caller %}{{ caller() }}{% endif %}
   </li>
 {% endmacro %}
 {% block sidebar %}
   <nav id="sidebar-nav" data-expanded="false">
     <ul preload>
-      {% call nav_link('platform.home', 'Club Info') %}
+      {% call nav_link('platform.home', 'Club Info', icon=bi.bi_house) %}
         <ul>
           {{ nav_link('platform.home', 'Overview') }}
           {{ nav_link('platform.home', 'Day Walks', page='day-walks') }}
@@ -26,30 +28,39 @@
           {{ nav_link('platform.home', 'Trail Running', page='running') }}
         </ul>
       {% endcall %}
-      {% call nav_link('platform.events.events', 'Events') %}
+      {% call nav_link('platform.events.events', 'Events', icon=bi.bi_calendar) %}
         <ul>
           {{ nav_link('platform.events.events', 'Upcoming') }}
           {{ nav_link('platform.events.events_calendar', 'Calendar') }}
         </ul>
       {% endcall %}
-      {{ nav_link('platform.members.members', 'Members') }}
-      {{ nav_link('platform.albums.albums', 'Photos') }}
-      {{ nav_link('platform.join', 'Join the Club') }}
+      {{ nav_link('platform.members.members', 'Members', icon=bi.bi_people_fill) }}
+      {{ nav_link('platform.albums.albums', 'Photos', icon=bi.bi_images) }}
+      {{ nav_link('platform.join', 'Join the Club', icon=bi.bi_pencil_square) }}
       <li>
         <a target="_blank"
            rel="noreferrer"
-           href="https://docs.google.com/spreadsheets/d/1__K5wAU1Cw9k2pcbia1crBqj7HAUX6f1UOEd-X1lU8c/edit?usp=drivesdk">Kit Library</a>
+           href="https://docs.google.com/spreadsheets/d/1__K5wAU1Cw9k2pcbia1crBqj7HAUX6f1UOEd-X1lU8c/edit?usp=drivesdk">
+          {{ bi.bi_tools() }}
+          <span>Kit Library</span>
+        </a>
       </li>
       <li>
-        <a target="_blank" rel="noreferrer" href="https://discord.gg/98K3CafRxk">Discord</a>
+        <a target="_blank" rel="noreferrer" href="https://discord.gg/98K3CafRxk">
+          {{ bi.bi_discord() }}
+          <span>Discord</span>
+        </a>
       </li>
       <li>
         <a target="_blank"
            rel="noreferrer"
-           href="https://www.tshirtstudio.com/marketplace/clyde-mountaineering-club">Club Merch</a>
+           href="https://www.tshirtstudio.com/marketplace/clyde-mountaineering-club">
+          {{ bi.bi_bag_check_fill() }}
+          <span>Club Merch</span>
+        </a>
       </li>
       {% if g.current_user.is_committee or g.current_user.is_admin %}
-        {% call nav_link('platform.committee.overview', 'Committee', class="admin") %}
+        {% call nav_link('platform.committee.overview', 'Committee', class="admin", icon=bi.bi_person_fill_lock) %}
           <ul>
             {{ nav_link('platform.committee.overview', 'Overview') }}
             {{ nav_link('platform.committee.maintenance', 'Maintenance') }}
@@ -61,7 +72,7 @@
     </ul>
     <button id="sidebar-hamburger"
             onclick="document.getElementById('sidebar-nav').dataset.expanded = document.getElementById('sidebar-nav').dataset.expanded === 'true' ? 'false' : 'true' ">
-      {{ bi_list() }}
+      {{ bi.bi_list() }}
     </button>
   </nav>
 {% endblock sidebar %}

@@ -568,107 +568,70 @@
   /* Sidebar */
   body > aside {
     justify-self: left;
+
     > nav {
-      padding: 0.5rem 1rem;
+      /* Set up a high level grid for lining everything up */
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.25rem 0.75rem;
+      padding: 0.5rem;
+      align-content: start;
+      align-items: center;
+
+      /* Ensure sidebar spans full screen */
       background-color: var(--primary);
       white-space: nowrap;
       height: 100%;
 
-      :is(a, a:visited) {
-        color: var(--text-white);
-      }
-
+      /* Hide these so it's just a list of <a> tags */
       ul,
-      ol {
-        display: flex;
-        flex-direction: column;
-      }
-
+      ol,
       li {
-        margin: 0.25rem 0;
+        display: contents;
       }
 
-      ul ul,
-      ol ol {
-        border-left: 1px solid rgb(from var(--primary) r g b / 0.5);
-        padding-left: 1rem;
+      li:not(:has([aria-selected="true"])) {
+        > ul {
+          display: none;
+        }
+      }
+
+      a {
+        display: grid;
+        grid-template-columns: subgrid;
+        grid-column: span 2;
+        padding: 0.5rem;
+        color: var(--text-white);
+
+        > svg {
+          place-self: center;
+          width: 1.1em;
+          height: 1.1em;
+          grid-column: 1;
+        }
+        > span {
+          grid-column: 2;
+        }
       }
 
       #sidebar-hamburger {
         display: none;
       }
-
-      /* Hide sub-links for non-active nav */
-      > ul > li {
-        ul:not(:has([aria-selected="true"])) {
-          height: 0;
-          visibility: hidden;
-          transform: scaleY(0);
-        }
-
-        &:hover ul:not(:has([aria-selected="true"])) {
-          height: auto;
-          visibility: visible;
-          transform: scaleY(1);
-          transition: all ease-in 0.2s;
-        }
-      }
-
-      /* Style active links for final layer only */
-      [aria-selected="true"]:not(:has(ul)) {
-        text-decoration: underline;
-      }
     }
-  }
 
-  @media (max-width: 800px) {
-    body > aside {
-      justify-self: auto;
-      > nav {
-        height: auto;
-        background-color: transparent;
-        position: fixed;
-        bottom: 1.8rem;
-        right: 1.5rem;
-        z-index: 99;
-        text-align: right;
+    > nav > ul > li > a {
+      font-weight: 500;
+    }
 
-        :is(a, a:visited) {
-          color: var(--primary);
-        }
-
-        > ul {
-          text-align: left;
-          visibility: hidden;
-          transition: all ease-in-out 0.1s;
-          padding: 1em;
-          border-radius: var(--standard-border-radius);
-          filter: drop-shadow(1px 1px 2px var(--border));
-        }
-
-        opacity: 0.8;
-        &[data-expanded="true"] {
-          opacity: 1;
-          > ul {
-            visibility: visible;
-            margin-right: 1rem;
-            background-color: white;
-            font-size: 1.2rem;
-          }
-        }
-
-        #sidebar-hamburger {
-          display: inline-block;
-          margin-left: auto;
-          background-color: var(--primary);
-          padding: 0.5rem;
-          border-radius: 100rem;
-          > svg {
-            width: 2rem;
-            height: 2rem;
-          }
-        }
-      }
+    > nav > ul > li > a[aria-selected="true"] {
+      border-radius: var(--standard-border-radius);
+      border: 1px solid var(--text-light);
+      font-weight: 500;
+    }
+    /* Style active links for final layer only */
+    [aria-selected="true"]:not(:has(+ ul)) {
+      text-decoration: underline;
+      text-decoration-color: var(--accent);
     }
   }
 
