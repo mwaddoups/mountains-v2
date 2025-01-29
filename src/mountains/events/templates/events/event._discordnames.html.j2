@@ -1,0 +1,18 @@
+<dialog _="init call me.showModal()">
+  <h1>Discord Names</h1>
+  <small>(for {{ event.title }})</small>
+  {% for user in users %}
+    {% if not user.discord_id or not user.discord_id in id_to_username %}
+      <p role="alert">No discord ID found for: {{ user.full_name }}</p>
+    {% endif %}
+  {% endfor %}
+  <p>You can copy and paste the discord usernames below.</p>
+  <p class="event-discord-names">
+    {% for user in users %}
+      {% if user.discord_id in id_to_username %}@{{ id_to_username[user.discord_id] }}{% endif %}
+    {% endfor %}
+  </p>
+  <form method="dialog">
+    <button _="on click remove closest <dialog/>">Close</button>
+</form>
+</dialog>

@@ -970,6 +970,14 @@
     }
   }
 
+  .event-discord-names {
+    background-color: white;
+    filter: var(--standard-drop-shadow);
+    border-radius: var(--standard-border-radius);
+    padding: 1rem;
+    color: var(--primary);
+  }
+
   #event-list {
     display: grid;
     grid-template-columns: 1fr;

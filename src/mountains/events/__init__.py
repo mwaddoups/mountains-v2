@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import logging
+from dis import disco
 from sqlite3 import Connection
 
 from flask import (
@@ -15,6 +16,7 @@ from flask import (
 )
 
 from mountains.context import current_user, db_conn
+from mountains.discord import DiscordAPI
 from mountains.errors import MountainException
 from mountains.models.activity import Activity, activity_repo
 from mountains.models.events import (
@@ -524,6 +526,34 @@ def attendee(event_id: int, user_id: int):
         return redirect(url_for(".events", event_id=event.id))
     else:
         abort(405)
+
+
+@blueprint.route("/<int:event_id>/discordnames/")
+def discord_names(event_id: int):
+    with db_conn() as conn:
+        event = events_repo(conn).get_or_404(id=event_id)
+        attendees = attendees_repo(conn).list_where(
+            event_id=event_id, is_waiting_list=False
+        )
+        users = users_repo(conn).get_all(id=set(a.user_id for a in attendees))
+
+    discord = DiscordAPI.from_app(current_app)
+    id_to_username = {m.id: m.username for m in discord.fetch_all_members()}
+
+    if request.headers.get("HX-Request"):
+        return render_template(
+            "events/event._discordnames.html.j2",
+            id_to_username=id_to_username,
+            users=users,
+            event=event,
+        )
+    else:
+        return render_template(
+            "events/event.discordnames.html.j2",
+            id_to_username=id_to_username,
+            users=users,
+            event=event,
+        )
 
 
 def _get_sorted_filtered_events(

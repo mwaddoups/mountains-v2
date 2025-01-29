@@ -40,6 +40,10 @@
           <a class="button" href="{{ url_for('.edit_event', id=event.id) }}">Edit event</a>
           <a class="button"
              href="{{ url_for('.edit_event', copy_from=event.id) }}">Copy event</a>
+          <a class="button"
+             hx-get="{{ url_for('.discord_names', event_id=event.id) }}"
+             hx-swap="afterend"
+             href="{{ url_for('.discord_names', event_id=event.id) }}">Discord Usernames</a>
           <form method="post"
                 hx-post="{{ url_for('.event', id=event.id) }}"
                 hx-confirm="Are you sure you want to delete {{ event.title }}?"
