@@ -17,7 +17,20 @@
   </li>
 {% endmacro %}
 {% block sidebar %}
-  <nav id="sidebar-nav" data-expanded="false">
+  <div>
+    <button id="sidebar-expander"
+      data-tooltip="Show/Hide"
+      {# djlint:off #}
+          _="on click 
+              if #sidebar-nav does not match .sidebar-expanded 
+                toggle .sidebar-expanding on #sidebar-nav for 0.5s then toggle .sidebar-expanded on #sidebar-nav
+                else remove .sidebar-expanded from #sidebar-nav then toggle .sidebar-retracting on #sidebar-nav for 0.5s
+            ">
+      {# djlint:on #}
+      {{ bi.bi_arrow_bar_right() }}
+    </button>
+  </div>
+  <nav id="sidebar-nav" class="sidebar-expanded">
     <ul preload>
       {% call nav_link('platform.home', 'Club Info', icon=bi.bi_house) %}
         <ul>
@@ -70,9 +83,5 @@
         {% endcall %}
       {% endif %}
     </ul>
-    <button id="sidebar-hamburger"
-            onclick="document.getElementById('sidebar-nav').dataset.expanded = document.getElementById('sidebar-nav').dataset.expanded === 'true' ? 'false' : 'true' ">
-      {{ bi.bi_list() }}
-    </button>
   </nav>
 {% endblock sidebar %}

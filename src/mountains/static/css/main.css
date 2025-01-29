@@ -485,6 +485,7 @@
     opacity: 75%;
     padding: 0.125rem;
     border-radius: var(--standard-border-radius);
+    white-space: nowrap;
   }
 }
 
@@ -565,23 +566,83 @@
     }
   }
 
-  /* Sidebar */
-  body > aside {
-    justify-self: left;
+  @keyframes nav-expand {
+    from {
+      max-width: 3.5rem;
+    }
 
+    to {
+      max-width: 10rem;
+    }
+  }
+
+  @keyframes nav-retract {
+    from {
+      max-width: 10rem;
+    }
+
+    to {
+      max-width: 3.5rem;
+    }
+  }
+
+  @keyframes nav-sub-shrink {
+    from {
+      max-height: 10em;
+      opacity: 1;
+    }
+
+    to {
+      max-height: 0;
+      opacity: 0;
+    }
+  }
+  /* Sidebar */
+  body > aside:has(nav) {
+    justify-self: left;
+    background-color: white;
+    filter: var(--standard-drop-shadow);
+    padding: 0 0.25rem;
+    /* Ensure the expand button has space */
+    margin-right: 0.75rem;
+    /* Ensure sidebar spans full screen */
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    align-content: start;
+    color: var(--primary);
+
+    div:has(#sidebar-expander) {
+      position: relative;
+      width: 100%;
+      > #sidebar-expander {
+        position: absolute;
+        top: 0.75rem;
+        left: calc(100% - 0.5rem);
+        font-size: 1rem;
+        padding: 0.125rem;
+
+        color: var(--primary);
+        background-color: white;
+        filter: var(--standard-drop-shadow);
+        border: 1px solid transparent;
+        align-self: end;
+        margin: 0;
+      }
+    }
+
+    div:has(+ nav.sidebar-expanded) #sidebar-expander {
+      svg {
+        transform: rotate(180deg);
+      }
+    }
     > nav {
       /* Set up a high level grid for lining everything up */
       display: grid;
-      grid-template-columns: auto 1fr;
+      grid-template-columns: 2.5rem 1fr;
       gap: 0.25rem 0.75rem;
       padding: 0.5rem;
-      align-content: start;
       align-items: center;
-
-      /* Ensure sidebar spans full screen */
-      background-color: var(--primary);
-      white-space: nowrap;
-      height: 100%;
 
       /* Hide these so it's just a list of <a> tags */
       ul,
@@ -590,23 +651,18 @@
         display: contents;
       }
 
-      li:not(:has([aria-selected="true"])) {
-        > ul {
-          display: none;
-        }
-      }
-
       a {
+        padding: 0.5rem 0;
         display: grid;
         grid-template-columns: subgrid;
-        grid-column: span 2;
-        padding: 0.5rem;
-        color: var(--text-white);
+        grid-column: 1 / -1;
+        border-radius: var(--standard-border-radius);
+        white-space: nowrap;
 
         > svg {
           place-self: center;
-          width: 1.1em;
-          height: 1.1em;
+          width: 1.1rem;
+          height: 1.1rem;
           grid-column: 1;
         }
         > span {
@@ -614,24 +670,75 @@
         }
       }
 
-      #sidebar-hamburger {
-        display: none;
+      li > ul {
+        display: grid;
+        grid-template-columns: subgrid;
+        grid-column: 1 / -1;
+        overflow: hidden;
+      }
+
+      &:is(.sidebar-expanding) {
+        animation-name: nav-expand;
+        animation-duration: 0.5s;
+        overflow: hidden;
+        width: 10rem;
+      }
+      &:is(.sidebar-retracting) {
+        animation-name: nav-retract;
+        animation-duration: 0.5s;
+        max-width: 3.5rem;
+
+        a {
+          /* For transitioning the border */
+          span {
+            color: transparent !important;
+          }
+          border-color: transparent !important;
+        }
+
+        li > ul {
+          gap: 0;
+          animation-name: nav-sub-shrink;
+          animation-duration: 0.5s;
+          opacity: 0;
+          max-height: 0;
+        }
+      }
+
+      &:not(.sidebar-expanded, .sidebar-expanding, .sidebar-retracting) {
+        grid-template-columns: 2.5rem;
+
+        li > ul,
+        a span {
+          display: none;
+        }
       }
     }
 
+    /* Top level links are bolded */
     > nav > ul > li > a {
       font-weight: 500;
     }
 
-    > nav > ul > li > a[aria-selected="true"] {
-      border-radius: var(--standard-border-radius);
-      border: 1px solid var(--text-light);
-      font-weight: 500;
+    /* Style top level active-links with a border */
+    > nav > ul > li > a {
+      border: 1px solid transparent;
+
+      &[aria-selected="true"] {
+        border: 1px solid var(--primary);
+      }
     }
+
+    /* Styling for nested non-active links */
+    li:not(:has([aria-selected="true"])) {
+      > ul {
+        display: none;
+      }
+    }
+
     /* Style active links for final layer only */
     [aria-selected="true"]:not(:has(+ ul)) {
-      border-radius: var(--standard-border-radius);
-      background-color: lch(from var(--primary) calc(l - 10) c h);
+      background-color: rgb(from var(--primary) r g b / 0.2);
     }
   }
 
