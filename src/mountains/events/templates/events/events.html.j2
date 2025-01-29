@@ -4,6 +4,7 @@
   <form hx-target="#event-list"
         hx-select="#event-list"
         hx-swap="outerHTML settle:0.2s"
+        hx-push-url="true"
         hx-get="{{ url_for('.events') }}"
         hx-trigger="change">
     <div>
@@ -16,7 +17,7 @@
         {% for event_type in event_type_set %}
           <label class="event-filter color-{{ color_class(event_type.name) }}">
             {{ event_type.name | replace('_', ' ') | lower | title }}
-            {% if event_type in event_types %}
+            {% if filters_enabled and event_type in event_types %}
               <input type="checkbox"
                      name="event_type"
                      value="{{ event_type.value }}"
@@ -28,7 +29,9 @@
         {% endfor %}
       </fieldset>
     </label>
-    <input type="submit" value="Update" \>
+    <noscript>
+      <input type="submit" value="Update" \>
+    </noscript>
   </form>
   <form hx-get="{{ url_for('.events') }}"
         hx-target="#event-list"

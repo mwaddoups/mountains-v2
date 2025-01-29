@@ -41,7 +41,11 @@ def events(event_id: int | None = None):
     search = request.args.get("search")
     limit = request.args.get("limit", type=int, default=5)
 
-    if "filters_enabled" in request.args and "event_type" in request.args:
+    filters_enabled = "filters_enabled" in request.args
+
+    print(request.args)
+
+    if filters_enabled:
         event_types = request.args.getlist(
             "event_type", type=lambda x: EventType(int(x))
         )
@@ -96,6 +100,7 @@ def events(event_id: int | None = None):
                 offset=after_ix + 1,
                 limit=limit,
                 event_types=event_types,
+                filters_enabled=filters_enabled,
             )
         else:
             return render_template(
@@ -107,6 +112,7 @@ def events(event_id: int | None = None):
                 search=search,
                 limit=limit,
                 event_types=event_types,
+                filters_enabled=filters_enabled,
             )
 
 

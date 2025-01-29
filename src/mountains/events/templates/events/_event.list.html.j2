@@ -8,12 +8,24 @@
     {% include "events/_event.html.j2" %}
   {% endwith %}
   {% if loop.last and loop.index0 != (events | length) %}
-    <a class="button"
-       id="show-more-events"
-       hx-target="this"
-       hx-get="{{ url_for('.events', limit=10, after=event.id) }}"
-       hx-swap="outerHTML"
-       hx-trigger="click, intersect once"
-       href="{{ url_for('.events', limit=limit+10, _anchor=event.slug) }}">Show More</a>
+    <form method="get"
+          action="{{ url_for('.events', _anchor=event.slug) }}"
+          id="show-more-events"
+          hx-target="this"
+          hx-get="{{ url_for('.events', after=event.id) }}"
+          hx-trigger="submit, intersect once"
+          hx-swap="outerHTML">
+      {# Make sure we preserve filtering #}
+      {% if filters_enabled %}
+        <input type="hidden" name="filters_enabled" value="on" />
+        {% for event_type in event_type_set %}
+          {% if event_type in event_types %}<input type="hidden" name="event_type" value="{{ event_type.value }}" />{% endif %}
+        {% endfor %}
+      {% endif %}
+      <input type="hidden" name="limit" value="{{ limit + 10 }}" />
+      <input type="submit" value="Show More" />
+    </form>
   {% endif %}
+{% else %}
+  <p role="status">No events found - are you using filters?</p>
 {% endfor %}
