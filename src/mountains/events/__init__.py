@@ -43,8 +43,6 @@ def events(event_id: int | None = None):
 
     filters_enabled = "filters_enabled" in request.args
 
-    print(request.args)
-
     if filters_enabled:
         event_types = request.args.getlist(
             "event_type", type=lambda x: EventType(int(x))

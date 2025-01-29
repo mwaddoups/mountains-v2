@@ -1,4 +1,5 @@
 {% from "macros/theme.html.j2" import color_class %}
+{% import "macros/bi.html.j2" as bi %}
 {% extends "platform/base.html.j2" %}
 {% block content %}
   <form hx-target="#event-list"
@@ -7,10 +8,17 @@
         hx-push-url="true"
         hx-get="{{ url_for('.events') }}"
         hx-trigger="change">
-    <div>
+    <input type="search"
+           name="search"
+           hx-get="{{ url_for('.events') }}"
+           hx-trigger="input changed delay:500ms, keyup[key=='Enter']"
+           placeholder="Search for an event..."
+           value="{{ search if search else '' }}" />
+    <label id="enable-filters-checkbox">
+      {{ bi.bi_filter() }}
+      Filters
       <input id="event-filters-enabled" type="checkbox" name="filters_enabled" />
-      <label for="event-filters-enabled">Event Filters</label>
-    </div>
+    </label>
     <label id="event-filters-list">
       Event Types
       <fieldset>
@@ -32,17 +40,6 @@
     <noscript>
       <input type="submit" value="Update" \>
     </noscript>
-  </form>
-  <form hx-get="{{ url_for('.events') }}"
-        hx-target="#event-list"
-        hx-select="#event-list"
-        hx-swap="outerHTML">
-    <input type="search"
-           name="search"
-           hx-get="{{ url_for('.events') }}"
-           hx-trigger="input changed delay:500ms, keyup[key=='Enter']"
-           placeholder="Search for an event..."
-           value="{{ search if search else '' }}" />
   </form>
   {% if g.current_user.is_site_admin %}
     <form class="admin flex" action="{{ url_for('.edit_event') }}">

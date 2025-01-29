@@ -22,6 +22,7 @@
           {% if event_type in event_types %}<input type="hidden" name="event_type" value="{{ event_type.value }}" />{% endif %}
         {% endfor %}
       {% endif %}
+      {% if search %}<input type="hidden" name="search" value="{{ search }}" />{% endif %}
       <input type="hidden" name="limit" value="{{ limit + 10 }}" />
       <input type="submit" value="Show More" />
     </form>
