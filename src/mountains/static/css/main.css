@@ -1060,16 +1060,22 @@
 
       .event-title {
         grid-area: title;
-        h1 {
-          letter-spacing: -0.04em;
-          margin: 0 0 0.25em 0;
-          font-size: x-large;
-          color: var(--primary);
 
-          a {
-            color: inherit;
+        .event-heading {
+          display: grid;
+          grid-template-columns: auto auto;
+          gap: 0.5rem;
+          justify-content: left;
+          place-items: center;
+
+          h1 {
+            letter-spacing: -0.04em;
+            margin: 0 0 0.25em 0;
+            font-size: x-large;
+            color: var(--primary);
           }
         }
+
         .badge {
           margin-right: 0.25em;
         }
@@ -1092,15 +1098,16 @@
     }
 
     /* If it's being displayed as part of a list, collapse the description */
-    &:not(:only-of-type) .event-description {
+    &:not(:only-of-type)
+      :is(.event-description-expanded, .event-description-retracted) {
       /* This is set low, but max-height is controlled by javascript */
       cursor: pointer;
-      max-height: 15em;
+      max-height: 15rem;
       transition: max-height ease-in-out 0.2s;
       overflow: clip;
 
-      &[data-expanded="true"] {
-        max-height: 500em;
+      &:is(.event-description-expanded) {
+        max-height: 500rem;
       }
 
       /* Set up the fade if not expanded */
@@ -1111,7 +1118,7 @@
         var(--text) 0%,
         #cccccc 15em
       );
-      &[data-expanded="true"] {
+      &:is(.event-description-expanded) {
         background-image: none;
         background-color: var(--text);
       }

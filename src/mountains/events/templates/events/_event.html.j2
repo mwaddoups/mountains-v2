@@ -1,4 +1,4 @@
-{% from "macros/bi.html.j2" import bi_calendar %}
+{% from "macros/bi.html.j2" import bi_calendar, bi_arrow_clockwise %}
 {% from "macros/theme.html.j2" import badge, color_class %}
 {% from "macros/profile.html.j2" import profile_picture %}
 <article id="{{ event.slug }}"
@@ -14,9 +14,15 @@
       <span>{{ event.event_dt.strftime("%b %Y") }}</span>
     </div>
     <div class="event-title">
-      <h1>
-        <a hx-disable="true" href="{{ url_for('.event', id=event.id) }}">{{ event.title }}</a>
-      </h1>
+      <div class="event-heading">
+        <a hx-disable="true" href="{{ url_for('.event', id=event.id) }}">
+          <h1>{{ event.title }}</h1>
+        </a>
+        <a class="button event-refresh-button"
+           data-tooltip="Refresh"
+           href="{{ url_for('.event', id=event.id) }}"
+           hx-get="{{ url_for('.event', id=event.id) }}">{{ bi_arrow_clockwise() }}</a>
+      </div>
       {{ badge(event.event_type.name) }}
       {% if event.is_members_only %}{{ badge("Members Only") }}{% endif %}
       {% if event.event_end_dt %}
@@ -48,8 +54,15 @@
   </header>
   {# Tiny bit of javascript to handle expansion of the description #}
   <section class="event-description {{ color_class(event.event_type.name) }}"
-           data-expanded="false"
-           onclick="this.dataset.expanded = (this.dataset.expanded === 'false' ? 'true' : 'false') ">
+    {# djlint:off #}
+           _="init measure my height then if height > 240
+              then 
+                add .event-description-retracted to me 
+              end
+              on click if I match .event-description-retracted or .event-description-expanded 
+                then toggle between .event-description-expanded and .event-description-retracted on me 
+              ">
+    {# djlint:on #}
     {{ event.description | markdown | safe }}
   </section>
   <section class="event-all-attendees">
