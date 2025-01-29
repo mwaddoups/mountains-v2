@@ -63,7 +63,15 @@
           <img src="{{ img_url }}" height="256" width="256" alt="uploaded_img" />
           <p>To use this in a page, copy the markdown below.</p>
           <p>
-            <code>![]({{ img_url }})</code>
+            <code>
+              &lt;figure class="markdown"&gt;
+              <br />
+              &lt;img src="{{ img_url }}" /&gt;
+              <br />
+              &lt;figcaption&gt;Credits go here&lt;/figcaption&gt;
+              <br />
+              &lt;/figure&gt;
+            </code>
           </p>
         </figure>
       {% endfor %}

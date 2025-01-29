@@ -1369,9 +1369,22 @@
     place-items: center;
   }
 
-  img.markdown {
-    max-width: 75%;
-    margin: 1rem auto;
-    border-radius: var(--standard-border-radius);
+  figure.markdown {
+    background-color: white;
+    filter: var(--standard-drop-shadow);
+    padding: 1rem;
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: 1fr;
+    place-items: center;
+    margin: 0 5%;
+    img {
+      border-radius: var(--standard-border-radius);
+    }
+    figcaption {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      text-align: center;
+    }
   }
 }
