@@ -97,10 +97,12 @@
         <div>{{ bullet_pages['running'] | markdown | safe }}</div>
       </article>
     </a>
-    <article class="event-detail color-winter-weekend">
-      <h2>Winter</h2>
-      <div>{{ bullet_pages['winter'] | markdown | safe }}</div>
-    </article>
+    <a href="{{ url_for('platform.home', page='day-walks', _anchor='winter-walking') }}">
+      <article class="event-detail color-winter-weekend">
+        <h2>Winter</h2>
+        <div>{{ bullet_pages['winter'] | markdown | safe }}</div>
+      </article>
+    </a>
     <article class="event-detail color-social">
       <h2>Social</h2>
       <div>{{ bullet_pages['socials'] | markdown | safe }}</div>
