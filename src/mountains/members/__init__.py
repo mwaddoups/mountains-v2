@@ -96,11 +96,12 @@ def member(slug: str):
         attended = [
             events_db.get(id=att.event_id)
             for att in attendees_repo(conn).list_where(user_id=user.id)
+            if not att.is_waiting_list
         ]
 
     num_attended = request.args.get("num_attended", type=int, default=20)
     attended = sorted(
-        [e for e in attended if e is not None],
+        [e for e in attended if e is not None and not e.is_upcoming()],
         key=lambda e: e.event_dt,
         reverse=True,
     )
