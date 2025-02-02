@@ -1193,7 +1193,9 @@
 
         .attendee-name {
           grid-area: name;
-          color: var(--cmc-highlight);
+          a {
+            color: var(--cmc-highlight);
+          }
           font-size: 0.875rem;
         }
         .admin {
