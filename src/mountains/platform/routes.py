@@ -90,6 +90,12 @@ def routes(blueprint: Blueprint):
         else:
             abort(404)
 
+    @blueprint.route("/resources")
+    def resources():
+        with db_conn() as conn:
+            page_text = latest_content(conn, "club-resources")
+        return render_template("platform/info.page.html.j2", content=page_text)
+
     @blueprint.route("/join", methods=["GET", "POST"])
     def join():
         with db_conn() as conn:
