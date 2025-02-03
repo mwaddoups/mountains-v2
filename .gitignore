@@ -13,6 +13,7 @@ wheels/
 *.db
 *.db-wal
 *.db-shm
+*.db*
 
 # Environment variables for testing / prod
 *.env
