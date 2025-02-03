@@ -54,7 +54,7 @@ def albums():
     )
 
 
-@blueprint.route("/add", methods=["GET", "POST"])
+@blueprint.route("/add/", methods=["GET", "POST"])
 def add_album():
     if request.method == "POST":
         current_user.check_authorised()
@@ -76,7 +76,7 @@ def add_album():
         return render_template("albums/album.add.html.j2")
 
 
-@blueprint.route("/<int:id>", methods=["GET", "POST"])
+@blueprint.route("/<int:id>/", methods=["GET", "POST"])
 def album(id: int):
     with db_conn() as conn:
         album = albums_repo(conn).get_or_404(id=id)
@@ -131,7 +131,7 @@ def album(id: int):
     )
 
 
-@blueprint.route("/<int:album_id>/photos/<int:photo_id>", methods=["GET", "POST"])
+@blueprint.route("/<int:album_id>/photos/<int:photo_id>/", methods=["GET", "POST"])
 def album_photo(album_id: int, photo_id: int):
     if request.method == "POST":
         current_user.check_authorised()

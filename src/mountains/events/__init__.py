@@ -35,9 +35,9 @@ logger = logging.getLogger(__name__)
 blueprint = Blueprint("events", __name__, template_folder="templates")
 
 
-@blueprint.route("/upcoming")
+@blueprint.route("/upcoming/")
 @blueprint.route("/")
-@blueprint.route("/<int:event_id>")
+@blueprint.route("/<int:event_id>/")
 def events(event_id: int | None = None):
     search = request.args.get("search")
     limit = request.args.get("limit", type=int, default=5)
@@ -115,7 +115,7 @@ def events(event_id: int | None = None):
             )
 
 
-@blueprint.route("/<id>", methods=["POST"])
+@blueprint.route("/<id>/", methods=["POST"])
 def event(id: int):
     if request.form["method"] == "DELETE":
         current_user.check_authorised()
@@ -137,8 +137,8 @@ def event(id: int):
     return redirect(url_for(".events"))
 
 
-@blueprint.route("/calendar")
-@blueprint.route("/calendar/<int:year>/<int:month>")
+@blueprint.route("/calendar/")
+@blueprint.route("/calendar/<int:year>/<int:month>/")
 def events_calendar(year: int | None = None, month: int | None = None):
     now = now_utc()
     if year is None:
@@ -194,8 +194,8 @@ def events_calendar(year: int | None = None, month: int | None = None):
     )
 
 
-@blueprint.route("/add", methods=["GET", "POST"])
-@blueprint.route("/<int:id>/edit", methods=["GET", "POST", "PUT"])
+@blueprint.route("/add/", methods=["GET", "POST"])
+@blueprint.route("/<int:id>/edit/", methods=["GET", "POST", "PUT"])
 def edit_event(id: int | None = None):
     current_user.check_authorised()
     method = req_method(request)
@@ -309,7 +309,7 @@ def edit_event(id: int | None = None):
         )
 
 
-@blueprint.route("/<int:event_id>/addattendee")
+@blueprint.route("/<int:event_id>/addattendee/")
 def event_attendee_add(event_id: int):
     with db_conn() as conn:
         if not current_user.is_authorised():
@@ -344,7 +344,7 @@ def event_attendee_add(event_id: int):
         )
 
 
-@blueprint.route("/<int:event_id>/pay", methods=["GET", "POST"])
+@blueprint.route("/<int:event_id>/pay/", methods=["GET", "POST"])
 def pay_event(event_id: int):
     with db_conn() as conn:
         attendee = attendees_repo(conn).get_or_404(
@@ -437,7 +437,7 @@ def attend_event(event_id: int):
 
 
 @blueprint.route(
-    "/<int:event_id>/attendees/<int:user_id>",
+    "/<int:event_id>/attendees/<int:user_id>/",
     methods=["POST", "PUT", "DELETE"],
 )
 def attendee(event_id: int, user_id: int):

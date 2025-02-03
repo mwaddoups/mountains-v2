@@ -47,7 +47,7 @@ def routes(blueprint: Blueprint):
                 ):
                     return _hard_redirect(url_for(".dormant"))
 
-    @blueprint.route("/dormant", methods=["GET", "POST"])
+    @blueprint.route("/dormant/", methods=["GET", "POST"])
     def dormant():
         if request.method == "POST":
             with db_conn() as conn:
@@ -59,7 +59,7 @@ def routes(blueprint: Blueprint):
             return render_template("platform/dormant.html.j2", content=page)
 
     @blueprint.route("/")
-    @blueprint.route("/info")
+    @blueprint.route("/info/")
     @blueprint.route("/info/<page>")
     def home(page: str | None = None):
         info_pages = {
@@ -90,13 +90,13 @@ def routes(blueprint: Blueprint):
         else:
             abort(404)
 
-    @blueprint.route("/resources")
+    @blueprint.route("/resources/")
     def resources():
         with db_conn() as conn:
             page_text = latest_content(conn, "club-resources")
         return render_template("platform/info.page.html.j2", content=page_text)
 
-    @blueprint.route("/join", methods=["GET", "POST"])
+    @blueprint.route("/join/", methods=["GET", "POST"])
     def join():
         with db_conn() as conn:
             page = latest_content(conn, "join-club")

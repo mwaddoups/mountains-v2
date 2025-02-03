@@ -11,7 +11,6 @@ from flask import (
     request,
     url_for,
 )
-from requests.auth import CONTENT_TYPE_FORM_URLENCODED
 from requests.exceptions import ConnectionError
 
 from mountains.context import current_user, db_conn
@@ -68,7 +67,7 @@ def overview():
     )
 
 
-@blueprint.route("/maintenance")
+@blueprint.route("/maintenance/")
 def maintenance():
     with db_conn() as conn:
         # Get these for sharing data
@@ -118,7 +117,7 @@ def maintenance():
     )
 
 
-@blueprint.route("/dormant/<int:user_id>", methods=["POST"])
+@blueprint.route("/dormant/<int:user_id>/", methods=["POST"])
 def member_dormant(user_id: int):
     with db_conn() as conn:
         users_db = users_repo(conn)
@@ -137,7 +136,7 @@ def member_dormant(user_id: int):
     )
 
 
-@blueprint.route("/treasurer")
+@blueprint.route("/treasurer/")
 def treasurer():
     with db_conn() as conn:
         # Get these for sharing data
@@ -168,7 +167,7 @@ def treasurer():
     )
 
 
-@blueprint.route("/pages", methods=["GET", "POST"])
+@blueprint.route("/pages/", methods=["GET", "POST"])
 def page_editor():
     CONTENT_PATH = Path(current_app.config["STATIC_FOLDER"]) / "content"
     preview = None

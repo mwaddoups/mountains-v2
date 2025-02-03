@@ -38,8 +38,11 @@ def create_app():
     # Load from the local .env file
     app.config.from_prefixed_env("FLASK")
     logger.info("Running on DB: %s", app.config["DB_NAME"])
-    # Ensure the session cookie as secure
+
+    # Set up autoescaping by default
     app.jinja_options["autoescape"] = True
+
+    # Ensure the session cookie as secure
     app.config.update(
         SESSION_COOKIE_SECURE=True,
         SESSION_COOKIE_HTTPONLY=True,
@@ -83,26 +86,26 @@ def create_app():
             recent_photos=recent_photos,
         )
 
-    @app.route("/faqs")
+    @app.route("/faqs/")
     def faqs():
         with db_conn() as conn:
             page = latest_content(conn, "faqs")
         return render_template("page.html.j2", page=page)
 
-    @app.route("/committee")
+    @app.route("/committee/")
     def committee_bios():
         with db_conn() as conn:
             committee = [u for u in users_repo(conn).list_where(is_committee=True)]
         return render_template("committee.bios.html.j2", committee=committee)
 
-    @app.route("/privacy-policy")
+    @app.route("/privacy-policy/")
     def privacy_policy():
         with db_conn() as conn:
             page = latest_content(conn, "privacy-policy")
         return render_template("page.html.j2", page=page)
 
     # This route is fixed and set in Stripe config
-    @app.post("/api/payments/handleorder")
+    @app.post("/api/payments/handleorder/")
     def handle_stripe_order():
         """
         This is a webhook that is called by stripe to process orders.

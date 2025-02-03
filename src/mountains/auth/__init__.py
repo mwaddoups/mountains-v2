@@ -26,7 +26,7 @@ __all__ = ["blueprint"]
 blueprint = Blueprint("auth", __name__, url_prefix="/auth", template_folder="templates")
 
 
-@blueprint.route("/login", methods=["GET", "POST"])
+@blueprint.route("/login/", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         form = request.form
@@ -64,7 +64,7 @@ def login():
     return render_template("auth/login.html.j2", error=request.args.get("error"))
 
 
-@blueprint.route("/forgotpassword", methods=["GET", "POST"])
+@blueprint.route("/forgotpassword/", methods=["GET", "POST"])
 def forgot_password():
     if request.method == "POST":
         email = request.form["email"]
@@ -96,7 +96,7 @@ def forgot_password():
         return render_template("auth/forgotpassword.html.j2")
 
 
-@blueprint.route("/resetpassword", methods=["GET", "POST"])
+@blueprint.route("/resetpassword/", methods=["GET", "POST"])
 def reset_password():
     with db_conn() as conn:
         token_id = request.args.get("token")
@@ -124,7 +124,7 @@ def reset_password():
     return render_template("auth/resetpassword.html.j2")
 
 
-@blueprint.route("/register", methods=["GET", "POST"])
+@blueprint.route("/register/", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
         try:
@@ -138,7 +138,7 @@ def register():
     return render_template("auth/register.html.j2")
 
 
-@blueprint.route("/logout", methods=["POST"])
+@blueprint.route("/logout/", methods=["POST"])
 def logout():
     del session["token_id"]
     return redirect(url_for("index"))

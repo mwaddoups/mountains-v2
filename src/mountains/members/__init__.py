@@ -46,7 +46,7 @@ def members():
     )
 
 
-@blueprint.route("/<slug>", methods=["GET", "POST"])
+@blueprint.route("/<slug>/", methods=["GET", "POST"])
 def member(slug: str):
     if request.method == "POST":
         with db_conn() as conn:
@@ -126,7 +126,7 @@ def member(slug: str):
     )
 
 
-@blueprint.route("/<slug>/discord", methods=["GET", "POST"])
+@blueprint.route("/<slug>/discord/", methods=["GET", "POST"])
 def member_discord(slug: str):
     if request.method == "POST":
         with db_conn() as conn:
@@ -167,7 +167,7 @@ def member_discord(slug: str):
         )
 
 
-@blueprint.route("/<int:id>/committee", methods=["GET", "POST"])
+@blueprint.route("/<int:id>/committee/", methods=["GET", "POST"])
 def committee_edit(id: int):
     with db_conn() as conn:
         user = users_repo(conn).get_or_404(id=id)
@@ -198,7 +198,7 @@ def committee_edit(id: int):
     )
 
 
-@blueprint.route("/<int:id>/edit", methods=["GET", "POST"])
+@blueprint.route("/<int:id>/edit/", methods=["GET", "POST"])
 def edit_member(id: int):
     with db_conn() as conn:
         user = users_repo(conn).get_or_404(id=id)
