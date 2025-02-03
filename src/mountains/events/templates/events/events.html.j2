@@ -42,14 +42,16 @@
     </noscript>
   </form>
   {% if g.current_user.is_site_admin %}
-    <form class="admin flex" action="{{ url_for('.edit_event') }}">
-      <label for="event_template">Event Template</label>
-      <select name="template" id="event_template">
-        {% for event_type in event_type_set %}
-          <option value="{{ event_type.value }}">{{ event_type.name | replace('_', ' ') | lower | title }}</option>
-        {% endfor %}
-        <option value="">No Template</option>
-      </select>
+    <form class="admin" action="{{ url_for('.edit_event') }}">
+      <label for="event_template">
+        Event Template
+        <select name="template" id="event_template">
+          {% for event_type in event_type_set %}
+            <option value="{{ event_type.value }}">{{ event_type.name | replace('_', ' ') | lower | title }}</option>
+          {% endfor %}
+          <option value="">No Template</option>
+        </select>
+      </label>
       <input type="submit" value="Add new event" />
     </form>
   {% endif %}
