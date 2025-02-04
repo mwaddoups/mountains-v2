@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 from attrs import Factory, define, field
 from flask import abort
-from PIL import Image
+from PIL import Image, ImageOps
 
 from mountains.db import Repository
 from mountains.errors import ValidationError
@@ -190,16 +190,11 @@ def upload_profile(
 
     # Now resize the image using PIL
     with Image.open(upload_path) as im:
-        # Crop to square
-        square_size = min(im.width, im.height)
-        left = im.width // 2 - (square_size // 2)
-        right = left + square_size
-        top = im.height // 2 - (square_size // 2)
-        bottom = square_size
-
-        cropped = im.crop((left, top, right, bottom))
-        resized = cropped.resize((size, size))
-        thumb = cropped.resize((th_size, th_size))
+        # fit will center and crop
+        resized = ImageOps.fit(im, (size, size))
+        thumb = ImageOps.fit(im, (th_size, th_size))
+        ImageOps.exif_transpose(resized, in_place=True)
+        ImageOps.exif_transpose(thumb, in_place=True)
 
         resized.save(upload_path)
         thumb.save(_thumb_path(upload_path))

@@ -23,6 +23,10 @@
       {% endif %}
     </form>
   {% endif %}
+  {% set orig_path = photo.orig_path() %}
+  {% if orig_path %}
+    <a class="button" href="{{ url_for('static', filename=orig_path) }}">Download original</a>
+  {% endif %}
   {% if next_photo %}
     <a class="button"
        hx-boost="true"
