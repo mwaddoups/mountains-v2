@@ -352,7 +352,7 @@ def pay_event(event_id: int):
         )
         event = events_repo(conn).get_or_404(id=event_id)
 
-    if event.price_id is None:
+    if not event.price_id:
         # TODO: Flash message
         return redirect(url_for(".event", id=event.id))
     elif attendee.is_trip_paid or attendee.is_waiting_list:

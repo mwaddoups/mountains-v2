@@ -150,8 +150,7 @@ def treasurer():
         unpaid_attendees = [
             a
             for a in attendees
-            if event_map[a.event_id].price_id is not None
-            and event_map[a.event_id].is_upcoming()
+            if event_map[a.event_id].price_id and event_map[a.event_id].is_upcoming()
         ]
         unpaid_events = [
             event_map[e_id] for e_id in set(a.event_id for a in unpaid_attendees)
