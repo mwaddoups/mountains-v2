@@ -34,10 +34,12 @@ def login():
             user_db = users_repo(conn)
             token_db = tokens_repo(conn)
 
-            user = user_db.get(email=form["email"])
+            email = form["email"].lower()
+            user = user_db.get(email=email)
             if user is None or not check_password_hash(
                 user.password_hash, form["password"]
             ):
+                logger.warning("Failed login attempt for email %s", email)
                 return redirect(
                     url_for(
                         "auth.login",
@@ -67,7 +69,7 @@ def login():
 @blueprint.route("/forgotpassword/", methods=["GET", "POST"])
 def forgot_password():
     if request.method == "POST":
-        email = request.form["email"]
+        email = request.form["email"].lower()
         with db_conn() as conn:
             user_db = users_repo(conn)
             if (user := user_db.get(email=email)) is not None:
@@ -90,6 +92,10 @@ def forgot_password():
                     to=[user.email],
                     subject="Password reset for CMC",
                     msg_markdown=f"Reset your password: {reset_url}",
+                )
+            else:
+                logger.warning(
+                    "Attempt to reset password for non-existent email %s", email
                 )
         return render_template("auth/forgotpassword.html.j2", was_reset=True)
     else:
@@ -153,13 +159,13 @@ def _register_new_user(db_name: str, form: Mapping[str, str]):
     # Lock the DB so we can generate a new user ID and insert
     with db_conn(locked=True) as conn:
         user_db = users_repo(conn)
-        if user_db.get(email=form["email"]) is not None:
+        if user_db.get(email=form["email"].lower()) is not None:
             raise MountainException(
-                f"The email {form['email']} has already been registered."
+                f"The email {form['email'].lower()} has already been registered."
             )
         user = User.from_registration(
             id=user_db.next_id(),
-            email=form["email"],
+            email=form["email"].lower(),
             password_hash=password_hash,
             first_name=form["first_name"],
             last_name=form["last_name"],

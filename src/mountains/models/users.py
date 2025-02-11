@@ -135,7 +135,7 @@ class User:
         return cls(
             id=id,
             slug=slug,
-            email=email,
+            email=email.lower(),
             password_hash=password_hash,
             first_name=first_name,
             last_name=last_name,
