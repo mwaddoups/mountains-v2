@@ -45,7 +45,8 @@ def routes(blueprint: Blueprint):
                     and request.endpoint
                     and not request.endpoint.endswith("dormant")
                 ):
-                    return _hard_redirect(url_for(".dormant"))
+                    # Needs to be absolute as wont necesarily be called from within this app
+                    return _hard_redirect(url_for("platform.dormant"))
 
     @blueprint.route("/dormant/", methods=["GET", "POST"])
     def dormant():
