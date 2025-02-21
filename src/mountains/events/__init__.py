@@ -287,10 +287,7 @@ def edit_event(id: int | None = None):
                         template_names[event_type], pages_repo(conn)
                     ).markdown
 
-            if event_type not in (
-                EventType.INDOOR_CLIMBING,
-                EventType.SOCIAL,
-            ):
+            if event_type not in (EventType.SOCIAL,):
                 event_form["show_participation_ice"] = "true"
 
             if event_type in (
