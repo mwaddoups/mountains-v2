@@ -353,6 +353,11 @@
     > * {
       font-weight: normal;
     }
+
+    /* Allow use of span as an alternative for root label */
+    > span {
+      font-weight: 500;
+    }
   }
 
   /* Style forms to look like grids */
