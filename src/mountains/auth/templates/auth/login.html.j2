@@ -11,7 +11,7 @@
     </p>
     <a class="button" href="{{ url_for('auth.forgot_password') }}">Request a new password here</a>
   </div>
-  <form method="post" action="{{ url_for('auth.login') }}">
+  <form method="post" action="{{ url_for('auth.login', redirect=redirect) }}">
     <label>
       Email
       <input type="email" name="email" />

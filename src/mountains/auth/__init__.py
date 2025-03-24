@@ -28,6 +28,7 @@ blueprint = Blueprint("auth", __name__, url_prefix="/auth", template_folder="tem
 
 @blueprint.route("/login/", methods=["GET", "POST"])
 def login():
+    redirect_path = request.args.get("redirect")
     if request.method == "POST":
         form = request.form
         with db_conn() as conn:
@@ -43,6 +44,7 @@ def login():
                 return redirect(
                     url_for(
                         "auth.login",
+                        redirect=redirect_path,
                         error="Login failed - check username and password.",
                     )
                 )
@@ -61,9 +63,15 @@ def login():
                 token = AuthToken.from_id(id=user.id, valid_days=30)
                 token_db.insert(token)
                 session["token_id"] = token.id
+                if redirect_path:
+                    return redirect(request.root_path + redirect_path)
                 return redirect(url_for("platform.home"))
 
-    return render_template("auth/login.html.j2", error=request.args.get("error"))
+    return render_template(
+        "auth/login.html.j2",
+        error=request.args.get("error"),
+        redirect=redirect_path,
+    )
 
 
 @blueprint.route("/forgotpassword/", methods=["GET", "POST"])

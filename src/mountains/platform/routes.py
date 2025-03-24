@@ -25,21 +25,24 @@ logger = logging.getLogger(__name__)
 def routes(blueprint: Blueprint):
     @blueprint.before_request
     def require_logon():
+        logon_url_with_redirect = _hard_redirect(
+            url_for("auth.login", redirect=request.path)
+        )
         if (token_id := session.get("token_id")) is None:
-            return _hard_redirect(url_for("auth.login"))
+            return logon_url_with_redirect
         else:
             with db_conn() as conn:
                 token = tokens_repo(conn).get(id=token_id)
                 if token is None:
                     # Something weird happened
                     del session["token_id"]
-                    return _hard_redirect(url_for("auth.login"))
+                    return logon_url_with_redirect
 
                 user = users_repo(conn).get(id=token.user_id)
                 if user is None:
                     # Something weird happened
                     del session["token_id"]
-                    return _hard_redirect(url_for("auth.login"))
+                    return logon_url_with_redirect
                 elif (
                     user.is_dormant
                     and request.endpoint
