@@ -18,7 +18,10 @@
   </section>
   <section>
     <h2>Become a Member (Expiring {{ membership_expiry.strftime("%b %-d, %Y") }})</h2>
-    {% if g.current_user.discord_id %}
+    <p role="alert">
+      Membership is currently closed to new members as we are moving to 2025/2026 membership year - please keep an eye on the Discord for when renewals open.
+    </p>
+    {# {% if g.current_user.discord_id %}
       <form method="post">
         <label>
           Date of Birth
@@ -64,9 +67,7 @@
           <input type="checkbox" required />
         </label>
         <label>
-          <span>I agree to follow the <a href="https://drive.google.com/file/d/1SZBMa6yRvDpmk1u4cnRTcrVG7r9ly-Wz/view?usp=sharing"
-    target="_blank"
-    rel="noreferrer">Club Code of Conduct.</a></span>
+          <span>I agree to follow the <a href="https://drive.google.com/file/d/1SZBMa6yRvDpmk1u4cnRTcrVG7r9ly-Wz/view?usp=sharing" target="_blank" rel="noreferrer">Club Code of Conduct.</a></span>
           <input type="checkbox" required />
         </label>
         <input type="submit" value="Proceed to Payment">
@@ -75,8 +76,7 @@
       <p>
         Your account doesn't have a Discord username associated with it yet! You need to join Discord in order to join the club.
       </p>
-      <a class="button"
-         href="{{ url_for('platform.members.member_discord', slug=g.current_user.slug) }}">Set Discord Username</a>
-    {% endif %}
+      <a class="button" href="{{ url_for('platform.members.member_discord', slug=g.current_user.slug) }}">Set Discord Username</a>
+    {% endif %} #}
   </section>
 {% endblock content %}
