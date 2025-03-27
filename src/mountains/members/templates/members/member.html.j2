@@ -16,7 +16,7 @@
             <summary>Admin</summary>
             <article class="admin-panel">
               {# Update this for a new year #}
-              {% set member_expiry = "2025-03-31" %}
+              {% set member_expiry = config['CMC_MEMBERSHIP_EXPIRY'].isoformat() %}
               <form method="post">
                 <input type="hidden" name="membership_expiry" value="{{ member_expiry }}" />
                 <input type="submit" value="Set Member ({{ member_expiry }})" />

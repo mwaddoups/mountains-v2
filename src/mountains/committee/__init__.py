@@ -78,11 +78,16 @@ def maintenance():
             activity_repo(conn).list(), key=lambda a: a.dt, reverse=True
         )
 
+    discord_names: dict[str | None, str]
+    discord_is_member: dict[str | None, bool]
     try:
         discord = DiscordAPI.from_app(current_app)
-        discord_names = {m.id: m.member_name for m in discord.fetch_all_members()}
+        discord_members = {m.id: m for m in discord.fetch_all_members()}
+        discord_names = {m.id: m.member_name for m in discord_members.values()}
+        discord_is_member = {m.id: m.is_member for m in discord_members.values()}
     except ConnectionError:
         # Discord is down
+        discord_is_member = {}
         discord_names = {
             u.discord_id: "<Error communicating with discord>"
             for u in user_map.values()
@@ -90,11 +95,12 @@ def maintenance():
         }
 
     # Calculate dormant user info
+    discord_names[None] = "<No Discord link set>"
     dormant_users = [
         {
             "user": u,
             "discord_name": discord_names.get(
-                u.discord_id, "<ID missing from Discord?>"
+                u.discord_id, "<Was on discord, but now missing?>"
             )
             if u.discord_id
             else None,
@@ -107,11 +113,25 @@ def maintenance():
         if not u.is_dormant and u.is_inactive_on(now_utc(), threshold_days=90)
     ]
 
+    member_mismatches = [
+        {
+            "user": u,
+            "discord_name": discord_names.get(
+                u.discord_id, "<Was on discord, but now missing?>"
+            ),
+            "discord_member": discord_is_member.get(u.discord_id, False),
+        }
+        for u in user_map.values()
+        if (u.is_member and not discord_is_member.get(u.discord_id, False))
+        or (not u.is_member and discord_is_member.get(u.discord_id, False))
+    ]
+
     return render_template(
         "committee/maintenance.html.j2",
         activities=activities,
         message=request.args.get("message"),
         dormant_users=dormant_users,
+        member_mismatches=member_mismatches,
         user_map=user_map,
         event_map=event_map,
     )

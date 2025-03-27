@@ -43,6 +43,53 @@
       </tbody>
     </table>
   </section>
+  <section id="membership-discord">
+    <h2>Membership-Discord Matching</h2>
+    <p>
+      Users are set as member on discord only when they first buy membership.
+      <strong>Removing membership on discord must be done manually!</strong>
+    </p>
+    <p>
+      The below lists show any mismatches between both, which should be resolved manually by
+      checking if they've actually paid or not and updating.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Account Created</th>
+          <th scope="col">Discord Name</th>
+          <th scope="col">Membership Expiry</th>
+          <th scope="col">Website Member?</th>
+          <th scope="col">Discord Member?</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for member in member_mismatches %}
+          <tr>
+            <td>{{ member.user.full_name }}</td>
+            <td>{{ member.user.created_on_utc.strftime("%b %d, %Y") }}</td>
+            <td>{{ member.discord_name if member.discord_name }}</td>
+            <td>{{ member.user.membership_expiry if member.user.membership_expiry else 'Never was a member' }}</td>
+            {% if member.user.is_member %}
+              <td>Yes</td>
+            {% else %}
+              <td>
+                <strong role="alert">No</strong>
+              </td>
+            {% endif %}
+            {% if member.discord_member %}
+              <td>Yes</td>
+            {% else %}
+              <td>
+                <strong role="alert">No</strong>
+              </td>
+            {% endif %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
   <section>
     <h2>Site Permissions</h2>
     <p>The following users have permissions to access admin parts of the site.</p>
