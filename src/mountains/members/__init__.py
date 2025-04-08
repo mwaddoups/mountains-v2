@@ -32,7 +32,7 @@ blueprint = Blueprint(
 @blueprint.route("/")
 def members():
     with db_conn() as conn:
-        members = users_repo(conn).list()
+        members = users_repo(conn).list_where(is_dormant=False)
 
     if search := request.args.get("search"):
         low_search = search.lower()
