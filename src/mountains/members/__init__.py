@@ -256,10 +256,23 @@ def edit_member(id: int):
 
 
 def _member_sort_key(user: User) -> tuple:
+    if user.is_committee:
+        # We sort by positon - we assume that the enum is sorted by seniority
+        # and all values are less than 100
+        if user.committee_role is None:
+            role_key = 100
+        else:
+            role_key = user.committee_role.value
+
+    elif user.is_coordinator:
+        role_key = 110
+    elif user.is_member:
+        role_key = 120
+    else:
+        role_key = 130
+
     return (
-        not user.is_committee,
-        not user.is_coordinator,
-        not user.is_member,
+        role_key,
         user.created_on_utc,
         user.last_name,
     )

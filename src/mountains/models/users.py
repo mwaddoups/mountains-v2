@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 
 
 class CommitteeRole(enum.Enum):
+    # Numbers should be less than 100 here otherwise member sorting might not work
     CHAIR = 1
     VICE_CHAIR = 2
     TREASURER = 3
