@@ -18,6 +18,14 @@
       <input type="text" name="title" value="{{ form.title }}" required />
     </label>
     <label>
+      Draft Event?
+      {% if form.is_draft %}
+        <input type="checkbox" name="is_draft" checked />
+      {% else %}
+        <input type="checkbox" name="is_draft" />
+      {% endif %}
+    </label>
+    <label>
       Start Date
       <small>(24h time)</small>
       <input type="datetime-local"

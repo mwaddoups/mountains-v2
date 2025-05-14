@@ -36,6 +36,8 @@
         <input type="button" disabled value="Signup opens at {{ open_str }}" />
       {% elif event.is_locked %}
         <input type="button" disabled value="Signup LOCKED!" />
+      {% elif event.is_draft %}
+        <input type="button" disabled value="Signup disabled - event is draft!" />
       {% else %}
         {% if event.is_full(attendees) %}
           <input type="submit" value="Join Waiting List" />

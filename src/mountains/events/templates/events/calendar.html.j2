@@ -1,12 +1,6 @@
 {% from "macros/profile.html.j2" import profile_picture %}
 {% from "macros/theme.html.j2" import badge, color_class %}
 {% extends "platform/base.html.j2" %}
-{% macro calendar_event(event, time_str) %}
-  <div class="calendar-event {{ color_class(event.event_type.name) }}">
-    <span>{{ time_str }}</span>
-    <span>{{ event.title }}</span>
-  </div>
-{% endmacro %}
 {% block content %}
   <div class="calendar-controls"
        hx-target="main"
@@ -35,7 +29,7 @@
             {% for event in events %}
               {% if event.is_happening_on(day_dt) %}
                 <a href="{{ url_for('.event', id=event.id) }}">
-                  <article class="calendar-event {{ color_class(event.event_type.name) }}">
+                  <article class="calendar-event {{ color_class(event.event_type.name) }}{{ ' calendar-event-draft' if event.is_draft }}">
                     {% if event.event_dt.date() == day_dt %}
                       <span>{{ event.event_dt.strftime("%H:%M") }}</span>
                     {% elif event.event_dt.date() < day_dt and event.event_end_dt and event.event_end_dt.date() > day_dt %}
@@ -43,7 +37,7 @@
                     {% elif event.event_end_dt and event.event_end_dt.date() == day_dt %}
                       <span>{{ event.event_end_dt.strftime("%H:%M") }}</span>
                     {% endif %}
-                    <span>{{ event.title }}</span>
+                    <span>{{ '[DRAFT] ' if event.is_draft }}{{ event.title }}</span>
                   </article>
                 </a>
               {% endif %}

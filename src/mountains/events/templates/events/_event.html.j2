@@ -4,7 +4,7 @@
 <article id="{{ event.slug }}"
          hx-target="this"
          hx-swap="outerHTML show:top settle:0.5s"
-         class="event card{{ ' event-past' if not event.is_upcoming() }}">
+         class="event card{{ ' event-past' if not event.is_upcoming() }}{{ ' event-draft' if event.is_draft }}">
   {% if request.args.pay_success %}<p role="status">Payment successful! Thank you :)</p>{% endif %}
   {% if request.args.pay_cancel %}<p role="alert">Payment was cancelled!</p>{% endif %}
   <header>
@@ -16,7 +16,7 @@
     <div class="event-title">
       <div class="event-heading">
         <a hx-disable="true" href="{{ url_for('.event', id=event.id) }}">
-          <h1>{{ event.title }}</h1>
+          <h1>{{ '[DRAFT] ' if event.is_draft else '' }}{{ event.title }}</h1>
         </a>
         <a class="button event-refresh-button"
            data-tooltip="Refresh"

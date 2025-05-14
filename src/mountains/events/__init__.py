@@ -166,12 +166,15 @@ def events_calendar(year: int | None = None, month: int | None = None):
         events = [
             e
             for e in events_repo(conn).list_where(is_deleted=False)
-            if (e.event_dt >= start and e.event_dt <= end)
-            or (
-                e.event_end_dt is not None
-                and e.event_end_dt >= start
-                and e.event_end_dt <= end
+            if (
+                (e.event_dt >= start and e.event_dt <= end)
+                or (
+                    e.event_end_dt is not None
+                    and e.event_end_dt >= start
+                    and e.event_end_dt <= end
+                )
             )
+            and (current_user.is_site_admin or not e.is_draft)
         ]
 
     days = [
@@ -562,6 +565,9 @@ def _get_sorted_filtered_events(
         for e in events_repo(conn).list_where(is_deleted=False)
         if e.event_type in event_types
     ]
+
+    if not current_user.is_site_admin:
+        events = [e for e in events if not e.is_draft]
 
     if search:
         events = [e for e in events if search.lower() in e.title.lower()]

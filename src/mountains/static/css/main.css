@@ -1055,6 +1055,9 @@
     &.event-past {
       opacity: 50%;
     }
+    &.event-draft {
+      background-color: #eee;
+    }
 
     /* Slide in and out on HTMX changes */
     &.htmx-request {
@@ -1330,6 +1333,12 @@
       margin: 0 0.125rem 0.125rem 0.125rem;
       border-radius: var(--standard-border-radius);
       font-size: small;
+
+      &.calendar-event-draft {
+        background-color: var(--text-white);
+        color: var(--cmc-highlight);
+        border: 1px solid var(--cmc-highlight);
+      }
 
       > span:first-child {
         font-weight: bold;
