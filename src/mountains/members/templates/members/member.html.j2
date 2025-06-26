@@ -43,6 +43,11 @@
               {% else %}
                 <mark>Mobile: <small>No mobile found</small></mark>
               {% endif %}
+              {% if user.ice %}
+                <mark>ICE: {{ user.ice }}</mark>
+              {% else %}
+                <mark>ICE: <small>No ICE found</small></mark>
+              {% endif %}
               <mark>Email: {{ user.email }}</mark>
               {% if user.membership_expiry %}
                 <mark>Member until: {{ user.membership_expiry.strftime("%Y-%m-%d") }}</mark>
