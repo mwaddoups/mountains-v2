@@ -442,12 +442,21 @@ def attend_event(event_id: int):
 )
 def attendee(event_id: int, user_id: int):
     current_user.check_authorised(user_id)
+    method = req_method(request)
+
+    # Handle updating ICE and mobile if provided
+    if method == "POST":
+        if "in_case_emergency" in request.form and "mobile" in request.form:
+            with db_conn() as conn:
+                users_repo(conn).update(
+                    id=user_id,
+                    in_case_emergency=request.form["in_case_emergency"],
+                    mobile=request.form["mobile"],
+                )
 
     with db_conn() as conn:
         event = events_repo(conn).get_or_404(id=event_id)
         user = users_repo(conn).get_or_404(id=user_id)
-
-    method = req_method(request)
 
     if method == "POST":
         if event.is_open() or current_user.is_site_admin:
