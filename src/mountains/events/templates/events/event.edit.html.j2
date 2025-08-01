@@ -7,7 +7,7 @@
     <h1>New Event</h1>
   {% endif %}
   {% if error %}<p role="alert">{{ error }}</p>{% endif %}
-  <form method="post">
+  <form method="post" enctype="multipart/form-data">
     {% if editing %}
       <input type="hidden" name="method" value="PUT" />
     {% else %}
@@ -127,6 +127,19 @@
       <small>(Needed for payment, get from treasurer)</small>
       <input type="text" name="price_id" value="{{ form.price_id }}" />
     </label>
+    <label>
+      GPX Route Upload
+      <small>If helpful, you can upload a GPX file here that will be mapped on the event. If one already exists, uploading here will replace it.</small>
+      <input type="file" name="new_map_path" accept="application/gpx+xml" />
+    </label>
+    {% if form.map_path %}
+      <input type="hidden" name="existing_map_path" value="{{ form.map_path }}" />
+      <label>
+        GPX Route Removal
+        <small>Tick the checkbox below to remove any existing GPX route.</small>
+        <input type="checkbox" name="remove_map" />
+      </label>
+    {% endif %}
     <input type="submit" value="Submit" />
   </form>
 {% endblock content %}

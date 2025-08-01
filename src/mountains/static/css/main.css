@@ -1123,6 +1123,10 @@
       padding-left: 1rem;
     }
 
+    .event-map {
+      height: 30em;
+    }
+
     /* If it's being displayed as part of a list, collapse the description */
     &:not(:only-of-type)
       :is(.event-description-expanded, .event-description-retracted) {
@@ -1147,6 +1151,10 @@
       &:is(.event-description-expanded) {
         background-image: none;
         background-color: var(--text);
+      }
+
+      .event-map {
+        height: 6em;
       }
     }
 

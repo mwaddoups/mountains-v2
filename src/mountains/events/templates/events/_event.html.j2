@@ -68,6 +68,32 @@
               ">
     {# djlint:on #}
     {{ event.description | markdown | safe }}
+    {% if event.map_path %}
+      <h3>Route Map</h3>
+      {% set map_id = 'event-map-' + (event.id | string) %}
+      {% set stats_id = 'event-stats-' + (event.id | string) %}
+      <div class="event-map" id="{{ map_id }}"></div>
+      <a href="{{ url_for('static', filename=event.map_path) }}">Download GPX <span id="{{ stats_id }}"></span></a>
+      <script type="module">
+        const map = L.map("{{ map_id }}");
+        L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: 'Map data &copy; <a href="http://www.osm.org">OpenStreetMap</a>'
+        }).addTo(map);
+
+        // URL to your GPX file or the GPX itself as a XML string.
+        const url = "{{ url_for('static', filename=event.map_path) }}";
+        const options = {
+          async: true,
+          polyline_options: { color: 'red' },
+        };
+
+        const gpx = new L.GPX(url, options).on('loaded', (e) => {
+          map.fitBounds(e.target.getBounds());
+          document.getElementById("{{ stats_id }}").innerText = `(${(e.target.get_distance() / 1000).toFixed(2)}km, ${e.target.get_elevation_gain().toFixed(0)}m elev.)`
+        }).addTo(map);
+
+      </script>
+    {% endif %}
   </section>
   <section class="event-all-attendees">
     {% include "events/event._attendees.html.j2" %}

@@ -4,14 +4,16 @@ import datetime
 import enum
 import sqlite3
 import zoneinfo
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from attrs import Factory, define
+from werkzeug.datastructures import FileStorage
 
 from mountains.db import Repository
 from mountains.errors import MountainException
 from mountains.models.users import User
-from mountains.utils import now_utc, readable_id
+from mountains.utils import now_utc, readable_id, slugify
 
 if TYPE_CHECKING:
     from typing import Self
@@ -53,6 +55,7 @@ class Event:
     is_draft: bool
     is_deleted: bool
     is_locked: bool
+    map_path: Path | None
     price_id: str | None
 
     def __str__(self):
@@ -131,6 +134,8 @@ class Event:
         *,
         id: int,
         form: ImmutableMultiDict[str, str],
+        files: ImmutableMultiDict[str, FileStorage],
+        static_path: Path,
         created_on_utc: datetime.datetime | None = None,
         updated_on_utc: datetime.datetime | None = None,
         is_deleted: bool = False,
@@ -161,6 +166,21 @@ class Event:
         if updated_on_utc is None:
             updated_on_utc = now
 
+        # Fetch and store GPX map if present
+        if "remove_map" in form:
+            # Manual removal requested
+            map_path = None
+        elif "new_map_path" in files and files["new_map_path"].filename != "":
+            file = files["new_map_path"]
+            filename = f"{id}-{slugify(title)}-gpx.gpx"
+            gpx_folder = Path("event-gpx")
+            if not (static_path / gpx_folder).exists():
+                (static_path / gpx_folder).mkdir()
+            map_path = gpx_folder / filename
+            file.save(static_path / map_path)
+        else:
+            map_path = form.get("existing_map_path", type=Path)
+
         return cls(
             id=id,
             slug=slug,
@@ -179,6 +199,7 @@ class Event:
             is_deleted=False,
             created_on_utc=now,
             updated_on_utc=now,
+            map_path=map_path,
         )
 
     def to_form(self) -> dict[str, str]:
@@ -203,6 +224,8 @@ class Event:
             as_form["is_locked"] = "1"
         if self.is_draft:
             as_form["is_draft"] = "1"
+        if self.map_path is not None:
+            as_form["map_path"] = str(self.map_path)
         return as_form
 
 
@@ -237,6 +260,7 @@ def events_repo(conn: sqlite3.Connection) -> Repository[Event]:
             "is_deleted BOOLEAN NOT NULL DEFAULT false",
             "is_locked BOOLEAN NOT NULL DEFAULT false",
             "price_id TEXT",
+            "map_path TEXT",
         ],
         storage_cls=Event,
     )

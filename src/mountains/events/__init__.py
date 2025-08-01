@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import logging
+from pathlib import Path
 from sqlite3 import Connection
 
 from flask import (
@@ -216,8 +217,14 @@ def edit_event(id: int | None = None):
         try:
             with db_conn(locked=True) as conn:
                 events_db = events_repo(conn)
+                static_path = Path(current_app.config["STATIC_FOLDER"])
                 if method == "POST" and event is None:
-                    event = Event.from_form(id=events_db.next_id(), form=request.form)
+                    event = Event.from_form(
+                        id=events_db.next_id(),
+                        form=request.form,
+                        files=request.files,
+                        static_path=static_path,
+                    )
                     events_db.insert(event)
                     action = "created event"
                 elif method == "PUT" and event is not None:
@@ -225,8 +232,10 @@ def edit_event(id: int | None = None):
                     event = Event.from_form(
                         id=event.id,
                         form=request.form,
+                        files=request.files,
                         created_on_utc=event.created_on_utc,
                         is_deleted=event.is_deleted,
+                        static_path=static_path,
                     )
                     events_db.delete_where(id=event.id)
                     events_db.insert(event)
