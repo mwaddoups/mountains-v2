@@ -59,7 +59,13 @@ class Photo:
                 if im.width > width:
                     new_height = int(im.height * (width / im.width))
                     resized = im.resize((width, new_height))
-                    ImageOps.exif_transpose(resized, in_place=True)
+                    try:
+                        ImageOps.exif_transpose(resized, in_place=True)
+                    except Exception as e:
+                        logger.exception(
+                            "Exception while transposing newly uploadeed image.",
+                            exc_info=e,
+                        )
                     resized.save(file_path)
         return path
 
@@ -72,16 +78,24 @@ def upload_photo(file: FileStorage, static_dir: Path, new_width: int = 1920) -> 
     file_type = Path(file.filename).suffix
     filename = Path(random_str).with_suffix(file_type)
     upload_path = static_dir / "uploads" / "photos" / filename
-    file.save(upload_path)
+
+    logger.info("Handling photo upload %s...", file.filename)
+
+    # Save the original
+    orig_path = upload_path.with_stem(upload_path.stem + ".orig")
+    file.save(orig_path)
 
     # Now resize the image using PIL
-    with Image.open(upload_path) as im:
-        # Save the original too
-        im.save(upload_path.with_stem(upload_path.stem + ".orig"))
+    with Image.open(orig_path) as im:
         if im.width > new_width:
             new_height = int(im.height * (new_width / im.width))
             resized = im.resize((new_width, new_height))
-            ImageOps.exif_transpose(resized, in_place=True)
+            try:
+                ImageOps.exif_transpose(resized, in_place=True)
+            except Exception as e:
+                logger.exception(
+                    "Exception while transposing newly uploadeed image.", exc_info=e
+                )
             resized.save(upload_path)
 
     return Path("uploads") / "photos" / filename
