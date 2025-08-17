@@ -3,9 +3,10 @@ from __future__ import annotations
 import datetime
 import enum
 import sqlite3
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Self
 
 from attrs import define
+from werkzeug.datastructures import ImmutableMultiDict
 
 from mountains.db import Repository
 
@@ -37,6 +38,21 @@ class KitItem:
     kit_type: str
     purchased_on: datetime.date
     purchase_price: float
+
+    @classmethod
+    def from_form(cls, id: int, form: ImmutableMultiDict[str, str]) -> Self:
+        return cls(
+            id=id,
+            club_id=form["club_id"],
+            description=form["description"],
+            brand=form["brand"],
+            color=form["color"],
+            size=form["size"],
+            kit_type=form["kit_type"],
+            kit_group=KitGroup(form.get("kit_group", type=int)),
+            purchased_on=datetime.date.fromisoformat(form["purchased_on"]),
+            purchase_price=float(form["purchase_price"]),
+        )
 
 
 def kit_item_repo(conn: Connection) -> Repository[KitItem]:

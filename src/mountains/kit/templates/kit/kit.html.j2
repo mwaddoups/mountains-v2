@@ -17,6 +17,7 @@
         <th scope="col">Purchase Price</th>
         <th scope="col">Status</th>
         <th scope="col"></th>
+        {% if g.current_user.is_site_admin %}<th scope="col"></th>{% endif %}
       </tr>
     </thead>
     <tbody>
@@ -28,11 +29,18 @@
           <td>{{ kit.description }}</td>
           <td>{{ kit.brand }}</td>
           <td>{{ kit.color }}</td>
-          <td>{{ kit.price }}</td>
+          <td>{{ kit.size }}</td>
           <td>{{ kit.purchased_on }}</td>
-          <td>{{ kit.purchase_price }}</td>
+          <td>{{ '£{:.2f}'.format(kit.purchase_price) }}</td>
           <td>status-placehold</td>
-          <td>Request</td>
+          <td>
+            <a class="button">Request</a>
+          </td>
+          {% if g.current_user.is_site_admin %}
+            <td>
+              <a class="button admin" href="{{ url_for('.add_kit', id=kit.id) }}">Edit</a>
+            </td>
+          {% endif %}
         </tr>
       {% endfor %}
     </tbody>
