@@ -1,0 +1,40 @@
+{% extends "platform/base.html.j2" %}
+{% block content %}
+  {% if g.current_user.is_site_admin %}
+    <a class="button admin w-full" href="{{ url_for('.add_kit') }}">Add new item</a>
+  {% endif %}
+  <table class="kit-list">
+    <thead>
+      <tr>
+        <th scope="col">Kit ID</th>
+        <th scope="col">Kit Group</th>
+        <th scope="col">Kit Type</th>
+        <th scope="col">Description</th>
+        <th scope="col">Brand</th>
+        <th scope="col">Color</th>
+        <th scope="col">Size</th>
+        <th scope="col">Purchased On</th>
+        <th scope="col">Purchase Price</th>
+        <th scope="col">Status</th>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for kit in kit_items %}
+        <tr>
+          <td>{{ kit.club_id }}</td>
+          <td>{{ kit.kit_group.name | replace('_', ' ') | lower | title }}</td>
+          <td>{{ kit.kit_type }}</td>
+          <td>{{ kit.description }}</td>
+          <td>{{ kit.brand }}</td>
+          <td>{{ kit.color }}</td>
+          <td>{{ kit.price }}</td>
+          <td>{{ kit.purchased_on }}</td>
+          <td>{{ kit.purchase_price }}</td>
+          <td>status-placehold</td>
+          <td>Request</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock content %}

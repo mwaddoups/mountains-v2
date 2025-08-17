@@ -1,0 +1,53 @@
+{% extends "platform/base.html.j2" %}
+{% block content %}
+  <a href="{{ url_for('.kit') }}">< return to Kit</a>
+  <h1>New Kit Item</h1>
+  <form method="post">
+    <label>
+      Kit ID
+      <small>Identification number or tag for the kit</small>
+      <input type="text" name="club_id" required />
+    </label>
+    <label>
+      Description
+      <input type="text" name="description" />
+    </label>
+    <label>
+      Kit Group
+      <select name="kit_group" required>
+        {% for kit_group in kit_groups %}
+          {% if form and form.kit_group == (kit_group.value | string) %}
+            <option value="{{ kit_group.value }}" selected>{{ kit_group.name | replace('_', ' ') | lower | title }}</option>
+          {% else %}
+            <option value="{{ kit_group.value }}">{{ kit_group.name | replace('_', ' ') | lower | title }}</option>
+          {% endif %}
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      Kit Type
+      <input type="text" name="kit_type" />
+    </label>
+    <label>
+      Brand
+      <input type="text" name="brand" />
+    </label>
+    <label>
+      Colour
+      <input type="text" name="color" />
+    </label>
+    <label>
+      Size
+      <input type="text" name="size" />
+    </label>
+    <label>
+      Date Purchased
+      <input type="date" name="purchased_on" />
+    </label>
+    <label>
+      Purchase Price (£)
+      <input type="number" name="purchase_price" />
+    </label>
+    <input type="submit" value="Submit" />
+  </form>
+{% endblock content %}

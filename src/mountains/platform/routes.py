@@ -12,7 +12,7 @@ from flask import (
     url_for,
 )
 
-from mountains import albums, committee, events, members
+from mountains import albums, committee, events, kit, members
 from mountains.context import current_user, db_conn
 from mountains.models.pages import latest_content
 from mountains.models.tokens import tokens_repo
@@ -150,6 +150,7 @@ def routes(blueprint: Blueprint):
     blueprint.register_blueprint(committee.blueprint, url_prefix="/committee")
     blueprint.register_blueprint(albums.blueprint, url_prefix="/albums")
     blueprint.register_blueprint(events.blueprint, url_prefix="/events")
+    blueprint.register_blueprint(kit.blueprint, url_prefix="/kit")
 
 
 def _hard_redirect(url):
