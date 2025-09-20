@@ -34,7 +34,7 @@
           <td>{{ '£{:.2f}'.format(kit.purchase_price) }}</td>
           <td>status-placehold</td>
           <td>
-            <a class="button">Request</a>
+            <a class="button" href="{{ url_for('.request_kit', id=kit.id) }}">Request</a>
           </td>
           {% if g.current_user.is_site_admin %}
             <td>

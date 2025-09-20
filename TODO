@@ -1,74 +1,30 @@
-# Missing features we NEED
+# Kit work
 
-[x] Payments around membership
-[x] Event payments
-[x] Local stripe testing
-[x] Treasurer admin
-[x] Dormant users
-[x] Dormant popup / dormant deactvation
-[x] Activity
-[x] Event templates
-[x] Mobile layout
-[x] The new pages
-[x] Email
-[x] Members only popup
-[x] HTMX event search
-[x] HTMX attendee adder
-[x] Event popup stages
-[x] Trial membership popup
-[x] Form styling for clearer labels
-[x] Make grid more centered
-[x] Up/Down arrows on attendees
-[x] Front page content - landing page
-[x] Committee Bios
-[x] Photo lazy loading
-[] Starring photos - add BI icon
-[] Height of NAV menu
-[x] Footer
-[x] Permissions audit + mid-roles (coordinator vs. committee/admin)
-[x] General styling / TODO checks
-[x] Serve HTMX locally
-[x] Deployment setup + testing (server name? other things?)
-[x] Deployment testing for slow performance
+[x] Basic editing and display
+[x] Kit requesting framework
 
-# Committe requests
-[x] Sidebar rework
-[x] On mobile, retract sidebar by default
-[] Committee sub-roles
-[x] Winter Skills
-[x] Image styling in markdown
-[x] Filters enable by default
-[x] Discord user copy
+- [x] Basic database with: user id, kit id, date start, date end, request date
+- [] Availability calendar
+- [] Good back and forth handling
 
-# Code nice to haves
+[] Kit checking and notes framework
 
-[x] Blueprint breakout for the platform
-[x] Remove create_table from repos
-[x] Look at consolidating some of the code
-[] Maybe consolidate templates with macros and get_template_string
+- Kit id
+- Condition
+- Date of check
+- Photo?
+- Notes
 
-# Nice to have before done
+[] Bulk updates for kit checks
+[] Add "kit holder" with bulk updates
 
-[] Image pasting in markdown
-[] HTMX boost main links
-[x] Image infinite scroll
-[] Breadcrumbs
-[] HTMX preload
-[] Recent payments for treasurer from stripe
-[] Event description previews
-[] Images for new pages
-[] Signup countdown
-[] Cleverer photo / profile processing (+ download original )
-[] Discord caching
-[] General notifications (maybe over websocket)
-[] Get rid of slugs?
-[] Admin Toggle
-[] Testing
+# Questions
 
-# Other Issues
+- How to do availability well?
+- How to do address etc?
 
-[] Drafts
-[] Membership rework
-[] Just-in-time repeating events
-[] is_deleted for attending users (to preseve payment)
-[] Upcoming signups section
+# Nice to haves
+
+[] Availability calendar for kit sec
+[] Requests go to discord
+[] Email nags for returning kit

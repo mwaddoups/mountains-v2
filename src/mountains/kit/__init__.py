@@ -12,7 +12,14 @@ from flask import (
 )
 
 from mountains.context import current_user, db_conn
-from mountains.models.kit import KitGroup, KitItem, kit_item_repo
+from mountains.models.kit import (
+    KitGroup,
+    KitItem,
+    KitRequest,
+    kit_item_repo,
+    kit_request_repo,
+)
+from mountains.models.users import users_repo
 from mountains.utils import req_method
 
 logger = logging.getLogger(__name__)
@@ -67,4 +74,42 @@ def add_kit(id: int | None = None):
     else:
         return render_template(
             "kit/kit.add.html.j2", kit_groups=KitGroup, kit_item=kit_item
+        )
+
+
+@blueprint.route("/<int:id>/request/", methods=["GET", "POST", "DELETE"])
+def request_kit(id: int | None = None):
+    method = req_method(request)
+
+    with db_conn() as conn:
+        kit_item = kit_item_repo(conn).get(id=id)
+        if kit_item is None:
+            abort(404)
+        current_kit_requests = kit_request_repo(conn).list_where(kit_id=kit_item.id)
+        users_db = users_repo(conn)
+        current_kit_users = {}
+        for kit_request in current_kit_requests:
+            request_user = users_db.get(id=kit_request.user_id)
+            if request_user is not None:
+                current_kit_users[kit_request.user_id] = request_user
+
+    if method == "POST":
+        with db_conn(locked=True) as conn:
+            req_db = kit_request_repo(conn)
+            kit_request = KitRequest.from_form(
+                id=req_db.next_id(),
+                kit_id=kit_item.id,
+                user_id=current_user.id,
+                form=request.form,
+            )
+            logger.info("Adding new kit request %s", kit_request)
+            req_db.insert(kit_request)
+
+        return redirect(url_for(".kit"))
+    else:
+        return render_template(
+            "kit/kit.request.html.j2",
+            kit_item=kit_item,
+            current_requests=current_kit_requests,
+            current_request_users=current_kit_users,
         )

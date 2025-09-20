@@ -1,0 +1,50 @@
+{% extends "platform/base.html.j2" %}
+{% block content %}
+  <a href="{{ url_for('.kit') }}">< return to Kit</a>
+  <h1>New Kit Borrow Request</h1>
+  <p>
+    Fill in the form below to submit a request to borrow <strong>{{ kit_item.description }} ({{ kit_item.club_id }})</strong>.
+  </p>
+  <p>Outstanding requests for the item are below. Review these to ensure there are no clashes.</p>
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Member</th>
+        <th scope="col">Pickup Date</th>
+        <th scope="col">Return Date</th>
+        <th scope="col">Approved?</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for kit_request in current_requests %}
+        <tr>
+          <td>{{ current_request_users[kit_request.user_id].full_name }}</td>
+          <td>{{ kit_request.pickup_dt.strftime("%A, %B %-d %Y") }}</td>
+          <td>{{ kit_request.return_dt.strftime("%A, %B %-d %Y") }}</td>
+          <td>{{ "Yes" if kit_request.approved else "No" }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p>
+    Once filled in, the kit sec will confirm the request works and that your pickup time is okay - you'll get an email
+    once approved.
+  </p>
+  <form method="post">
+    <label>
+      Pickup Date
+      <small>When can you pickup from the kit holder?</small>
+      <input type="datetime-local" name="pickup_dt" required />
+    </label>
+    <label>
+      Return Date
+      <small>When will you return it by?</small>
+      <input type="datetime-local" name="return_dt" />
+    </label>
+    <label>
+      Any other comments?
+      <input type="text" name="notes" />
+    </label>
+    <input type="submit" value="Submit" />
+  </form>
+{% endblock content %}
