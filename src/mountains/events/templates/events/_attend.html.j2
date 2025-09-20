@@ -31,6 +31,10 @@
       {% if "ice" in popups %}
         {{ popups['ice'] | markdown | safe }}
         <label>
+          Your Mobile Number
+          <input type="text" name="mobile" value="{{ user.mobile }}" required />
+        </label>
+        <label>
           Emergency Contact (Name and Number)
           <input type="text"
                  name="in_case_emergency"
@@ -39,10 +43,6 @@
                  title="Ensure you have a name and number"
                  pattern=".*[a-zA-Z]{2}.*\d{2}.*|.*\d{2}.*[a-zA-Z]{2}.*" />
           {# The regex here is for matching 2 letters and 2 numbers #}
-        </label>
-        <label>
-          Mobile Number
-          <input type="text" name="mobile" value="{{ user.mobile }}" required />
         </label>
       {% endif %}
       {% if "statement" in popups %}
