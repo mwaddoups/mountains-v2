@@ -3,6 +3,10 @@
   {% if g.current_user.is_site_admin %}
     <a class="button admin w-full" href="{{ url_for('.add_kit') }}">Add new item</a>
   {% endif %}
+  <h1>Kit Library</h1>
+  <p>
+    Our full kit library is below. Any item can be requested - to see open requests, click on the item you want to request.
+  </p>
   <table class="kit-list">
     <thead>
       <tr>
@@ -11,7 +15,7 @@
         <th scope="col">Kit Type</th>
         <th scope="col">Description</th>
         <th scope="col">Brand</th>
-        <th scope="col">Color</th>
+        <th scope="col">Colour</th>
         <th scope="col">Size</th>
         <th scope="col">Purchased On</th>
         <th scope="col">Purchase Price</th>
@@ -33,6 +37,9 @@
           <td>{{ kit.purchased_on }}</td>
           <td>{{ '£{:.2f}'.format(kit.purchase_price) }}</td>
           <td>status-placehold</td>
+          <td>
+            <a class="button" href="{{ url_for('.kit_details', id=kit.id) }}">Details</a>
+          </td>
           <td>
             <a class="button" href="{{ url_for('.request_kit', id=kit.id) }}">Request</a>
           </td>

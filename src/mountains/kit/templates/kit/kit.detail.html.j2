@@ -1,0 +1,46 @@
+{% extends "platform/base.html.j2" %}
+{% block content %}
+  <a href="{{ url_for('.kit') }}">< return to Kit</a>
+  <h1>Kit Details - {{ kit_item.description }}</h1>
+  <p>TODO DESCRIPTION</p>
+  <h2>Notes</h2>
+  <ul>
+    {% for detail in kit_details %}
+      {% if detail.condition %}<li>{{ detail.added_dt }} - Condition updated: {{ detail.condition }}</li>{% endif %}
+      {% if detail.note %}<li>{{ detail.added_dt }} - Note added: {{ detail.note }}</li>{% endif %}
+      {% if detail.photo_path %}
+        <li>
+          {{ detail.added_dt }} - Photo added.
+          <img src="{{ url_for('static', filename=detail.photo_path) }}"
+               alt="Kit photo"
+               height="128"
+               width="128" />
+        </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+  {% if g.current_user.is_site_admin %}
+    <h1 class="admin">Add Note</h1>
+    <p>
+      Use this for condition updates, photo updates, or any other notes that might be helpful for people to know the condition of the item.
+    </p>
+    <form method="post" enctype="multipart/form-data">
+      <label>
+        Condition of item
+        <small>(can be blank if no change)</small>
+        <input type="text" name="condition" />
+      </label>
+      <label>
+        Note or Comment
+        <small>(can be blank if other fields filled in)</small>
+        <input type="text" name="note" />
+      </label>
+      <label>
+        Photo of item
+        <small>(optional)</small>
+        <input type="file" name="photo_path" accept="image/*" />
+      </label>
+      <input type="submit" value="Submit" />
+    </form>
+  {% endif %}
+{% endblock content %}

@@ -124,3 +124,56 @@ def kit_request_repo(conn: Connection) -> Repository[KitRequest]:
     )
 
     return repo
+
+
+@define
+class KitDetail:
+    id: int
+    kit_id: int
+    user_id: int
+    added_dt: datetime.datetime = Factory(datetime.datetime.now)
+    condition: str | None = None
+    note: str | None = None
+    photo_path: str | None = None
+
+    def __attrs_post_init__(self):
+        if all(attr is None for attr in [self.condition, self.note, self.photo_path]):
+            raise Exception("Kit detail should have one of condition, note or photo.")
+
+    @classmethod
+    def from_form(
+        cls,
+        id: int,
+        user_id: int,
+        kit_id: int,
+        form: ImmutableMultiDict[str, str],
+        photo_path: str | None = None,
+    ) -> Self:
+        return cls(
+            id=id,
+            user_id=user_id,
+            kit_id=kit_id,
+            added_dt=datetime.datetime.now(),
+            condition=form["condition"],
+            note=form["note"],
+            photo_path=photo_path,
+        )
+
+
+def kit_details_repo(conn: Connection) -> Repository[KitDetail]:
+    repo = Repository(
+        conn=conn,
+        table_name="kit_details",
+        schema=[
+            "id INTEGER PRIMARY KEY",
+            "kit_id INTEGER REFERENCES kit_item(id) ON DELETE CASCADE ON UPDATE CASCADE",
+            "user_id INTEGER REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE",
+            "added_dt DATETIME NOT NULL DEFAULT current_timestamp",
+            "condition TEXT",
+            "note TEXT",
+            "photo_path TEXT",
+        ],
+        storage_cls=KitDetail,
+    )
+
+    return repo

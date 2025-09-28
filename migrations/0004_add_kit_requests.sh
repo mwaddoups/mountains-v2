@@ -1,5 +1,5 @@
 #!/bin/sh
-# Adds a new kit_item table to the DB
+# Adds a new kit_requests table to the DB
 cp $1 $1.bak
 
 QUERY="CREATE TABLE kit_requests (
