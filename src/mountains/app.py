@@ -230,6 +230,7 @@ def create_app():
 
     @app.before_request
     def current_user():
+        session.permanent = True
         # Ensure all requests have access to the current user, if logged in
         if (token_id := session.get("token_id")) is not None:
             with db_conn() as conn:
