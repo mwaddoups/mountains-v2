@@ -114,6 +114,8 @@ def member(slug: str):
             member = discord.get_member(member_id=user.discord_id)
             if member is not None:
                 discord_name = member.member_name
+            else:
+                discord_name = "<Error looking up member>"
         except ConnectionError:
             discord_name = "<Error communicating with discord>"
 
@@ -138,6 +140,10 @@ def member_discord(slug: str):
                 discord_id = None
             else:
                 discord_id = request.form["discord_id"]
+
+            logger.info(
+                "Updating user %s with discord id %s...", user.full_name, discord_id
+            )
 
             users_repo(conn).update(id=user.id, discord_id=discord_id)
 
