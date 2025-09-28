@@ -145,7 +145,7 @@ def member_dormant(user_id: int):
         if user is None:
             abort(404)
 
-        users_db.update(id=user.id, is_dormant=True)
+        users_db.update(id=user.id, is_dormant=True, discord_id=None)
 
     return redirect(
         url_for(

@@ -115,7 +115,7 @@ def member(slug: str):
             if member is not None:
                 discord_name = member.member_name
             else:
-                discord_name = "<Error looking up member>"
+                discord_name = "<On Discord, but not a member of our server?>"
         except ConnectionError:
             discord_name = "<Error communicating with discord>"
 
