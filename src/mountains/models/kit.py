@@ -103,6 +103,14 @@ class KitRequest:
             notes=form["notes"],
         )
 
+    def is_active(self) -> bool:
+        now = datetime.datetime.now()
+        return self.pickup_dt <= now <= self.return_dt and not self.is_returned
+
+    def is_in_future(self) -> bool:
+        now = datetime.datetime.now()
+        return self.pickup_dt >= now 
+
 
 def kit_request_repo(conn: Connection) -> Repository[KitRequest]:
     repo = Repository(

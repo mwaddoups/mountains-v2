@@ -15,27 +15,41 @@
           ({{ kit.kit_type }})
         {% endif %}
       </h3>
-      <small>({{ kit.club_id }})</small>
+      <div>
+        <small>({{ kit.club_id }})</small>
+        {% if kit_status[kit.id] == 'Available' %}
+          <small class="badge color-green">Available</small>
+        {% elif kit_status[kit.id] == 'Out' %}
+          <small class="badge color-red">Out</small>
+        {% elif kit_status[kit.id] == 'Requested' %}
+          <small class="badge color-amber">Requested</small>
+        {% endif %}
+      </div>
       <p>
         {%- set comma = joiner(",") -%}
         {%- if kit.brand -%}
-          {{ comma() }}{{ kit.brand }}
+          {{comma()}} Brand: {{ kit.brand }}
         {%- endif -%}
         {%- if kit.color -%}
-          {{ comma() }} {{ kit.color }}
+          {{ comma() }} Colour: {{ kit.color }}
         {%- endif -%}
         {%- if kit.size -%}
-          {{ comma() }} {{ kit.size }}
+          {{ comma() }} Size: {{ kit.size }}
         {%- endif %}
+        {% if g.current_user.is_site_admin %}
+          <small class='admin'>
+            [Purchased on {{ kit.purchased_on.strftime("%B %-d, %Y") }} for {{ "£{:.2f}".format(kit.purchase_price) }}]
+            </small>
+        {% endif %}
       </p>
 
       <div class="kit-buttons">
         <a class="button" href="{{ url_for('.kit_details', id=kit.id) }}">Details</a>
         <a class="button" href="{{ url_for('.request_kit', id=kit.id) }}">Request</a>
         {% if g.current_user.is_site_admin %}
-        <a class="button admin" href="{{ url_for('.add_kit', id=kit.id) }}">Edit</a>
+          <a class="button admin" href="{{ url_for('.add_kit', id=kit.id) }}">Edit</a>
+        {% endif %}
       </div>
-      {% endif %}
     </article>
   {% endfor %}
 {% endblock content %}

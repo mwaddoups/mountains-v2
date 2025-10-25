@@ -38,13 +38,27 @@ blueprint = Blueprint(
 @blueprint.route("/")
 def kit():
     with db_conn() as conn:
+        # Sort ensuring B2 < B10 by length first
         kit_items = sorted(
-            kit_item_repo(conn).list(), key=lambda a: (a.kit_group, a.club_id)
+            kit_item_repo(conn).list(), key=lambda a: (a.kit_group, len(a.club_id), a.club_id)
         )
+        kit_requests = kit_request_repo(conn).list()
+
+    kit_status = {}
+    for req in kit_requests:
+        if req.is_active():
+            kit_status[req.kit_id] = 'Out'
+        elif req.is_in_future():
+            kit_status[req.kit_id] = 'Requested'
+    for kit in kit_items:
+        if kit.id not in kit_status:
+            kit_status[kit.id] = 'Available'
+
 
     return render_template(
         "kit/kit.html.j2",
         kit_items=kit_items,
+        kit_status=kit_status,
     )
 
 

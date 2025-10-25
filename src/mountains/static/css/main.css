@@ -42,6 +42,9 @@
   --cmc-color-run: #eab308;
   --cmc-color-social: #ec4899;
   --cmc-color-other: #f472b6;
+  --cmc-color-green: #16a34a;
+  --cmc-color-amber: #d97706;
+  --cmc-color-red: #ec4899;
 }
 
 @layer default {
@@ -889,6 +892,15 @@
   }
   .color-discord {
     --cmc-highlight: var(--cmc-color-discord);
+  }
+  .color-green {
+    --cmc-highlight: var(--cmc-color-green);
+  }
+  .color-amber {
+    --cmc-highlight: var(--cmc-color-amber);
+  }
+  .color-red {
+    --cmc-highlight: var(--cmc-color-red);
   }
 
   .cmc-color {
