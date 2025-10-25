@@ -7,6 +7,22 @@
   <p>
     Our full kit library is below. Any item can be requested - to see open requests, click on the item you want to request.
   </p>
+  <form hx-target="#kit-list"
+        hx-select="#kit-list"
+        hx-swap="outerHTML settle:0.2s"
+        hx-push-url="true"
+        hx-trigger="change">
+    <input type="search" name="search"
+           hx-trigger="input changed delay:500ms, keyup[key=='Enter']"
+           hx-get="{{ url_for('.kit') }}"
+           placeholder="Search for a kit item..." 
+           value="{{ search if search else '' }}"
+           />
+    <noscript>
+      <input type="submit" value="Search" />
+    </noscript>
+  </form>
+  <div id="kit-list">
   {% for kit in kit_items %}
     <article class="kit drop-shadow">
       <h3>
@@ -52,4 +68,5 @@
       </div>
     </article>
   {% endfor %}
+  </div>
 {% endblock content %}

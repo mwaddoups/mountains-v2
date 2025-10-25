@@ -44,6 +44,10 @@ def kit():
         )
         kit_requests = kit_request_repo(conn).list()
 
+    search = request.args.get("search")
+    if search:
+        kit_items = [k for k in kit_items if search.lower() in k.description.lower()]
+
     kit_status = {}
     for req in kit_requests:
         if req.is_active():
@@ -59,6 +63,7 @@ def kit():
         "kit/kit.html.j2",
         kit_items=kit_items,
         kit_status=kit_status,
+        search=search,
     )
 
 
