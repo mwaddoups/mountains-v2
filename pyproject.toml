@@ -21,6 +21,8 @@ dev = [
     "mountains",
     "pytest>=8.3.4",
     "pyright",
+    "ty>=0.0.1a24",
+    "ruff>=0.14.2",
 ]
 
 [tool.uv.sources]

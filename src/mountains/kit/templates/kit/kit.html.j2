@@ -26,10 +26,12 @@
   {% for kit in kit_items %}
     <article class="kit drop-shadow">
       <h3>
-        {{ kit.description }}
-        {% if kit.kit_type %}
-          ({{ kit.kit_type }})
-        {% endif %}
+        <a href="{{ url_for('.kit_details', id=kit.id) }}">
+          {{ kit.description }}
+          {% if kit.kit_type %}
+            ({{ kit.kit_type }})
+          {% endif %}
+        </a>
       </h3>
       <div>
         <small>({{ kit.club_id }})</small>
@@ -60,8 +62,7 @@
       </p>
 
       <div class="kit-buttons">
-        <a class="button" href="{{ url_for('.kit_details', id=kit.id) }}">Details</a>
-        <a class="button" href="{{ url_for('.request_kit', id=kit.id) }}">Request</a>
+        <a class="button" href="{{ url_for('.request_kit', id=kit.id) }}">Request Borrow</a>
         {% if g.current_user.is_site_admin %}
           <a class="button admin" href="{{ url_for('.add_kit', id=kit.id) }}">Edit</a>
         {% endif %}

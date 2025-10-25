@@ -16,8 +16,11 @@
 - Notes
 
 [x] Better styling for main list
-[] Add search for main list
-[] Better styling for details
+[x] Add search for main list
+[x] Better styling for details
+[x] Kit photo sizing
+[] Actual kit groups that make sense
+[] Requests as dates only
 [] Outstanding request page
 [] Error handling / better form validation
 

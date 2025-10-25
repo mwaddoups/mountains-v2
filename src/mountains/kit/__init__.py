@@ -40,7 +40,8 @@ def kit():
     with db_conn() as conn:
         # Sort ensuring B2 < B10 by length first
         kit_items = sorted(
-            kit_item_repo(conn).list(), key=lambda a: (a.kit_group, len(a.club_id), a.club_id)
+            kit_item_repo(conn).list(),
+            key=lambda a: (a.kit_group, len(a.club_id), a.club_id),
         )
         kit_requests = kit_request_repo(conn).list()
 
@@ -51,13 +52,12 @@ def kit():
     kit_status = {}
     for req in kit_requests:
         if req.is_active():
-            kit_status[req.kit_id] = 'Out'
+            kit_status[req.kit_id] = "Out"
         elif req.is_in_future():
-            kit_status[req.kit_id] = 'Requested'
+            kit_status[req.kit_id] = "Requested"
     for kit in kit_items:
         if kit.id not in kit_status:
-            kit_status[kit.id] = 'Available'
-
+            kit_status[kit.id] = "Available"
 
     return render_template(
         "kit/kit.html.j2",
@@ -73,8 +73,15 @@ def kit_details(id: int):
         kit_item = kit_item_repo(conn).get(id=id)
         if kit_item is None:
             abort(404)
+        assert kit_item is not None
 
         kit_details = kit_details_repo(conn).list_where(kit_id=id)
+
+        # Get all users present in notes
+        user_map = {
+            u.id: u
+            for u in users_repo(conn).get_all(id=[k.user_id for k in kit_details])
+        }
 
     if request.method == "POST":
         current_user.check_authorised()
@@ -102,11 +109,22 @@ def kit_details(id: int):
             kit_detail_db.insert(kit_detail)
 
         return redirect(url_for(".kit_details", id=id))
+
+    photos = sorted(
+        [k for k in kit_details if k.photo_path is not None], key=lambda k: k.added_dt
+    )
+    if len(photos) > 0:
+        latest_photo_note = photos[-1]
+    else:
+        latest_photo_note = None
+
     return render_template(
         "kit/kit.detail.html.j2",
         kit_groups=KitGroup,
         kit_item=kit_item,
         kit_details=kit_details,
+        latest_photo_note=latest_photo_note,
+        user_map=user_map,
     )
 
 
@@ -114,7 +132,6 @@ def _upload_kit_image(
     filename: str,
     file: FileStorage,
     static_dir: Path,
-    new_width=1920,
 ) -> str:
     assert file.filename is not None, (
         "upload_profile should always have a file.filename attribute"
@@ -125,17 +142,22 @@ def _upload_kit_image(
         upload_path.parent.mkdir()
     file.save(upload_path)
 
-    with Image.open(upload_path) as im:
-        if im.width > new_width:
-            new_height = int(im.height * (new_width / im.width))
-            resized = im.resize((new_width, new_height))
-            try:
-                ImageOps.exif_transpose(resized, in_place=True)
-            except Exception as e:
-                logger.exception(
-                    "Exception while transposing newly uploaded kit image.", exc_info=e
-                )
-            resized.save(upload_path)
+    for new_width in [256, 512, 1200]:
+        with Image.open(upload_path) as im:
+            if im.width > new_width:
+                new_height = int(im.height * (new_width / im.width))
+                resized = im.resize((new_width, new_height))
+                try:
+                    ImageOps.exif_transpose(resized, in_place=True)
+                except Exception as e:
+                    logger.exception(
+                        "Exception while transposing newly uploaded kit image.",
+                        exc_info=e,
+                    )
+                target_path = upload_path.with_stem(f"{upload_path.stem}-{new_width}")
+
+                logger.info("Saving image to %s", target_path)
+                resized.save(target_path)
 
     return str(Path("kit-photos") / full_filename)
 
@@ -183,6 +205,8 @@ def request_kit(id: int):
         kit_item = kit_item_repo(conn).get(id=id)
         if kit_item is None:
             abort(404)
+        assert kit_item is not None
+
         current_kit_requests = kit_request_repo(conn).list_where(kit_id=kit_item.id)
         users_db = users_repo(conn)
         current_kit_users = {}

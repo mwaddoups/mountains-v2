@@ -27,23 +27,22 @@
     </tbody>
   </table>
   <p>
-    Once filled in, the kit sec will confirm the request works and that your pickup time is okay - you'll get an email
-    once approved.
+    Once filled in, the kit sec will reach out on Discord to confirm the request works and arrange pickup.
   </p>
   <form method="post">
     <label>
-      Pickup Date
-      <small>When can you pickup from the kit holder?</small>
-      <input type="datetime-local" name="pickup_dt" required />
+      Start Date
+      <small>When do you need the item by?</small>
+      <input type="date" name="pickup_dt" required />
     </label>
     <label>
       Return Date
       <small>When will you return it by?</small>
-      <input type="datetime-local" name="return_dt" />
+      <input type="date" name="return_dt" required/>
     </label>
     <label>
-      Any other comments?
-      <input type="text" name="notes" />
+      When can you pickup - and any other notes?
+      <textarea name="notes" required></textarea>
     </label>
     <input type="submit" value="Submit" />
   </form>

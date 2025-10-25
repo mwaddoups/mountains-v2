@@ -936,6 +936,10 @@
       border-color: var(--cmc-color-committee);
     }
 
+    &:is(h1, h2, h3, h4, h5, h6, p) {
+      color: var(--cmc-color-committee);
+    }
+
     &:is(details) {
       color: var(--cmc-color-committee);
 
@@ -1456,5 +1460,44 @@
     place-items: center;
     justify-content: space-between;
     background-color: var(--bg);
+    margin-bottom: 0.25rem;
   }
+
+  .kit-details {
+    display: grid;
+    padding: 0.5rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.25rem;
+
+    > figure {
+      display: grid;
+      gap: 0.5rem;
+      grid-template-columns: 1fr;
+      place-items: center;
+      img {
+        border-radius: var(--standard-border-radius);
+      }
+    }
+  }
+
+  .kit-note {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    align-items: center;
+    gap: 1em;
+    border-left: 1px solid var(--primary);
+    padding-left: 0.5em;
+
+    > figure {
+      display: grid;
+      justify-self: right;
+      gap: 0.5rem;
+      grid-template-columns: 1fr;
+      img {
+        border-radius: var(--standard-border-radius);
+        max-height: 10rem;
+      }
+    }
+  }
+
 }

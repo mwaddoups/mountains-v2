@@ -1,27 +1,101 @@
 {% extends "platform/base.html.j2" %}
 {% block content %}
-  <a href="{{ url_for('.kit') }}">< return to Kit</a>
-  <h1>Kit Details - {{ kit_item.description }}</h1>
-  <p>TODO DESCRIPTION</p>
-  <h2>Notes</h2>
-  <ul>
-    {% for detail in kit_details %}
-      {% if detail.condition %}<li>{{ detail.added_dt }} - Condition updated: {{ detail.condition }}</li>{% endif %}
-      {% if detail.note %}<li>{{ detail.added_dt }} - Note added: {{ detail.note }}</li>{% endif %}
-      {% if detail.photo_path %}
-        <li>
-          {{ detail.added_dt }} - Photo added.
-          <img src="{{ url_for('static', filename=detail.photo_path) }}"
-               alt="Kit photo"
-               height="128"
-               width="128" />
-        </li>
+  <a href="{{ url_for('.kit') }}">&lt; return to Kit</a>
+  <h1>{{ kit_item.description }}</h1>
+  <div class="kit-details">
+    <div>
+    <dl>
+      <dt>Club ID</dt>
+      <dd>{{ kit_item.club_id }}</dd>
+      <dt>Kit Type</dt>
+      <dd>{{ kit_item.kit_type }}</dd>
+      <dt>Description</dt>
+      <dd>{{ kit_item.description }}</dd>
+      <dt>Brand</dt>
+      {% if kit_item.brand %}
+        <dd>{{ kit_item.brand }}</dd>
+      {% else %}
+        <dd><small>No brand information</small></dd>
       {% endif %}
-    {% endfor %}
-  </ul>
+      <dt>Colour</dt>
+      {% if kit_item.color %}
+        <dd>{{ kit_item.color }}</dd>
+      {% else %}
+        <dd><small>No colour information</small></dd>
+      {% endif %}
+      <dt>Size</dt>
+      {% if kit_item.size %}
+        <dd>{{ kit_item.size }}</dd>
+      {% else %}
+        <dd><small>No size information</small></dd>
+      {% endif %}
+      {% if g.current_user.is_site_admin %}
+        <dt class="admin">Purchased On</dt>
+        <dd class="admin">{{ kit_item.purchased_on.strftime("%B %-d, %Y") }}</dd>
+        <dt class="admin">Purchase Price</dt>
+        <dd class="admin">{{ "£{:.2f}".format(kit_item.purchase_price) }}</dd>
+      {% endif %}
+    </dl>
+    <a class="button" href="{{ url_for('.request_kit', id=kit_item.id) }}">Request to Borrow</a>
+    {% if g.current_user.is_site_admin %}
+      <a class="button admin" href="{{ url_for('.add_kit', id=kit_item.id) }}">Edit Item</a>
+    {% endif %}
+    </div>
+
+    {% if latest_photo_note %}
+      <figure>
+        <img src="{{ url_for('static', filename=latest_photo_note.photo_paths()[512]) }}"
+             alt="Kit photo"
+             height="512"
+             width="512" />
+      </figure>
+    {% else %}
+      <small>No photos found.</small>
+    {% endif %}
+  </div>
+  <h2>Notes</h2>
+  {% for detail in (kit_details | sort(attribute="added_dt", reverse=True)) %}
+    {% set name = user_map[detail.user_id].full_name %}
+    {% if detail.condition %}
+      <article class="kit-note">
+        <span>
+          {{ detail.added_dt.strftime("%a, %b %-d, %Y %H:%M") }} 
+          <small>({{name}})</small>
+        </span>
+        <span><em>Condition:</em> {{ detail.condition }}</strong></span>
+      </article>
+    {% endif %}
+    {% if detail.note %}
+      <article class="kit-note">
+        <span>
+          {{ detail.added_dt.strftime("%a, %b %-d, %Y %H:%M") }} 
+          <small>({{name}})</small>
+        </span>
+        <span><em>Note:</em> {{ detail.note }}</span>
+      </article>
+    {% endif %}
+    {% if detail.photo_path %}
+      <article class="kit-note">
+        <span>
+          {{ detail.added_dt.strftime("%a, %b %-d, %Y %H:%M") }} 
+          <small>({{name}})</small>
+        </span>
+        <span><em>Photo added</em></span>
+        <figure>
+          <img src="{{ url_for('static', filename=detail.photo_paths()[256]) }}"
+               alt="Kit photo"
+               height="256"
+               width="256" />
+        </figure>
+      </article>
+    {% endif %}
+  {% else %}
+    <small>No notes found.</small>
+  {% endfor %}
   {% if g.current_user.is_site_admin %}
+  <div class="admin">
     <h1 class="admin">Add Note</h1>
-    <p>
+    <p class="admin">
       Use this for condition updates, photo updates, or any other notes that might be helpful for people to know the condition of the item.
     </p>
     <form method="post" enctype="multipart/form-data">
@@ -42,5 +116,6 @@
       </label>
       <input type="submit" value="Submit" />
     </form>
+  </div>
   {% endif %}
 {% endblock content %}

@@ -4,6 +4,7 @@ import datetime
 import enum
 import sqlite3
 from typing import TYPE_CHECKING, Self
+from pathlib import Path
 
 from attrs import Factory, define
 from werkzeug.datastructures import ImmutableMultiDict
@@ -82,8 +83,8 @@ class KitRequest:
     id: int
     user_id: int
     kit_id: int
-    pickup_dt: datetime.datetime
-    return_dt: datetime.datetime
+    pickup_dt: datetime.date
+    return_dt: datetime.date
     notes: str
     is_approved: bool = False
     is_picked_up: bool = False
@@ -98,17 +99,17 @@ class KitRequest:
             id=id,
             user_id=user_id,
             kit_id=kit_id,
-            pickup_dt=datetime.datetime.fromisoformat(form["pickup_dt"]),
-            return_dt=datetime.datetime.fromisoformat(form["return_dt"]),
+            pickup_dt=datetime.date.fromisoformat(form["pickup_dt"]),
+            return_dt=datetime.date.fromisoformat(form["return_dt"]),
             notes=form["notes"],
         )
 
     def is_active(self) -> bool:
-        now = datetime.datetime.now()
+        now = datetime.date.today()
         return self.pickup_dt <= now <= self.return_dt and not self.is_returned
 
     def is_in_future(self) -> bool:
-        now = datetime.datetime.now()
+        now = datetime.date.today()
         return self.pickup_dt >= now 
 
 
@@ -120,8 +121,8 @@ def kit_request_repo(conn: Connection) -> Repository[KitRequest]:
             "id INTEGER PRIMARY KEY",
             "user_id INTEGER REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE",
             "kit_id INTEGER REFERENCES kit_item(id) ON DELETE CASCADE ON UPDATE CASCADE",
-            "pickup_dt DATETIME NOT NULL",
-            "return_dt DATETIME NOT NULL",
+            "pickup_dt DATE NOT NULL",
+            "return_dt DATE NOT NULL",
             "notes TEXT",
             "is_approved BOOLEAN NOT NULL DEFAULT false",
             "is_picked_up BOOLEAN NOT NULL DEFAULT false",
@@ -166,6 +167,13 @@ class KitDetail:
             note=form["note"],
             photo_path=photo_path,
         )
+    
+    def photo_paths(self) -> dict[int, str]:
+        base = Path(self.photo_path)
+        return {
+            width: str(base.with_stem(base.stem + f'-{width}'))
+            for width in [256, 512, 1200]
+        }
 
 
 def kit_details_repo(conn: Connection) -> Repository[KitDetail]:
