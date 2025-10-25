@@ -24,6 +24,9 @@ stripe
 # Downloaded Datadumps
 datadump.json
 
+# Vim
+*.swp
+
 # Images (for now)
 images/
 src/mountains/static/profile

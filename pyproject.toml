@@ -20,6 +20,7 @@ dev = [
     "djlint>=1.36.3",
     "mountains",
     "pytest>=8.3.4",
+    "pyright",
 ]
 
 [tool.uv.sources]

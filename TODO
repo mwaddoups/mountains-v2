@@ -4,10 +4,10 @@
 [x] Kit requesting framework
 
 - [x] Basic database with: user id, kit id, date start, date end, request date
-- [] Availability calendar
-- [] Good back and forth handling
+- [] Availability calendar ?
+- [] Good back and forth handling ?
 
-[] Kit checking and notes framework
+[x] Kit checking and notes framework
 
 - Kit id
 - Condition
@@ -15,8 +15,10 @@
 - Photo?
 - Notes
 
-[] Bulk updates for kit checks
-[] Add "kit holder" with bulk updates
+[x] Better styling for main list
+[] Add search for main list
+[] Better styling for details
+[] Outstanding request page
 [] Error handling / better form validation
 
 # Questions
@@ -26,6 +28,9 @@
 
 # Nice to haves
 
+[] Import for existing kit
 [] Availability calendar for kit sec
+[] Bulk updates for kit checks
+[] Add "kit holder" with bulk updates
 [] Requests go to discord
 [] Email nags for returning kit

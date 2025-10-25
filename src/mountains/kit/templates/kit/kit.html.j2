@@ -7,49 +7,35 @@
   <p>
     Our full kit library is below. Any item can be requested - to see open requests, click on the item you want to request.
   </p>
-  <table class="kit-list">
-    <thead>
-      <tr>
-        <th scope="col">Kit ID</th>
-        <th scope="col">Kit Group</th>
-        <th scope="col">Kit Type</th>
-        <th scope="col">Description</th>
-        <th scope="col">Brand</th>
-        <th scope="col">Colour</th>
-        <th scope="col">Size</th>
-        <th scope="col">Purchased On</th>
-        <th scope="col">Purchase Price</th>
-        <th scope="col">Status</th>
-        <th scope="col"></th>
-        {% if g.current_user.is_site_admin %}<th scope="col"></th>{% endif %}
-      </tr>
-    </thead>
-    <tbody>
-      {% for kit in kit_items %}
-        <tr>
-          <td>{{ kit.club_id }}</td>
-          <td>{{ kit.kit_group.name | replace('_', ' ') | lower | title }}</td>
-          <td>{{ kit.kit_type }}</td>
-          <td>{{ kit.description }}</td>
-          <td>{{ kit.brand }}</td>
-          <td>{{ kit.color }}</td>
-          <td>{{ kit.size }}</td>
-          <td>{{ kit.purchased_on }}</td>
-          <td>{{ '£{:.2f}'.format(kit.purchase_price) }}</td>
-          <td>status-placehold</td>
-          <td>
-            <a class="button" href="{{ url_for('.kit_details', id=kit.id) }}">Details</a>
-          </td>
-          <td>
-            <a class="button" href="{{ url_for('.request_kit', id=kit.id) }}">Request</a>
-          </td>
-          {% if g.current_user.is_site_admin %}
-            <td>
-              <a class="button admin" href="{{ url_for('.add_kit', id=kit.id) }}">Edit</a>
-            </td>
-          {% endif %}
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  {% for kit in kit_items %}
+    <article class="kit drop-shadow">
+      <h3>
+        {{ kit.description }}
+        {% if kit.kit_type %}
+          ({{ kit.kit_type }})
+        {% endif %}
+      </h3>
+      <small>({{ kit.club_id }})</small>
+      <p>
+        {%- set comma = joiner(",") -%}
+        {%- if kit.brand -%}
+          {{ comma() }}{{ kit.brand }}
+        {%- endif -%}
+        {%- if kit.color -%}
+          {{ comma() }} {{ kit.color }}
+        {%- endif -%}
+        {%- if kit.size -%}
+          {{ comma() }} {{ kit.size }}
+        {%- endif %}
+      </p>
+
+      <div class="kit-buttons">
+        <a class="button" href="{{ url_for('.kit_details', id=kit.id) }}">Details</a>
+        <a class="button" href="{{ url_for('.request_kit', id=kit.id) }}">Request</a>
+        {% if g.current_user.is_site_admin %}
+        <a class="button admin" href="{{ url_for('.add_kit', id=kit.id) }}">Edit</a>
+      </div>
+      {% endif %}
+    </article>
+  {% endfor %}
 {% endblock content %}

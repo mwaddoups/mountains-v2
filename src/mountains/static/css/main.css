@@ -1435,4 +1435,14 @@
       text-align: center;
     }
   }
+
+  .kit {
+    display: grid;
+    padding: 0.5rem;
+    grid-template-columns: 3fr 1fr;
+    gap: 0.25rem;
+    place-items: center;
+    justify-content: space-between;
+    background-color: var(--bg);
+  }
 }
