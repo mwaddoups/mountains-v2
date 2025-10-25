@@ -25,6 +25,7 @@
   <div id="kit-list">
   {% for kit in kit_items %}
     <article class="kit drop-shadow">
+      <small>({{ kit.club_id }})</small>
       <h3>
         <a href="{{ url_for('.kit_details', id=kit.id) }}">
           {{ kit.description }}
@@ -33,16 +34,6 @@
           {% endif %}
         </a>
       </h3>
-      <div>
-        <small>({{ kit.club_id }})</small>
-        {% if kit_status[kit.id] == 'Available' %}
-          <small class="badge color-green">Available</small>
-        {% elif kit_status[kit.id] == 'Out' %}
-          <small class="badge color-red">Out</small>
-        {% elif kit_status[kit.id] == 'Requested' %}
-          <small class="badge color-amber">Requested</small>
-        {% endif %}
-      </div>
       <p>
         {%- set comma = joiner(",") -%}
         {%- if kit.brand -%}
@@ -54,12 +45,16 @@
         {%- if kit.size -%}
           {{ comma() }} Size: {{ kit.size }}
         {%- endif %}
-        {% if g.current_user.is_site_admin %}
-          <small class='admin'>
-            [Purchased on {{ kit.purchased_on.strftime("%B %-d, %Y") }} for {{ "£{:.2f}".format(kit.purchase_price) }}]
-            </small>
-        {% endif %}
       </p>
+      <div>
+        {% if kit_status[kit.id] == 'Available' %}
+          <small class="badge color-green">Available</small>
+        {% elif kit_status[kit.id] == 'Out' %}
+          <small class="badge color-red">Out</small>
+        {% elif kit_status[kit.id] == 'Requested' %}
+          <small class="badge color-amber">Requested</small>
+        {% endif %}
+      </div>
 
       <div class="kit-buttons">
         <a class="button" href="{{ url_for('.request_kit', id=kit.id) }}">Request Borrow</a>
