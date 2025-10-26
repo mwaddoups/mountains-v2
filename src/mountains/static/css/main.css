@@ -1458,10 +1458,10 @@
 
   #kit-list {
     display: grid;
-    gap-y: 0.25rem;
+    gap: 0.25rem;
     grid-template-columns: auto 1fr auto auto auto;
 
-    .kit {
+    > .kit {
       display: grid;
       padding: 0.5rem;
       grid-template-columns: subgrid;
@@ -1470,6 +1470,7 @@
       place-items: center;
       justify-content: space-between;
       background-color: var(--bg);
+      border-left: 10px solid var(--cmc-highlight);
 
       > h3 {
         justify-self: stretch;
@@ -1500,7 +1501,6 @@
     grid-template-columns: auto auto 1fr;
     align-items: center;
     gap: 1em;
-    border-left: 1px solid var(--primary);
     padding-left: 0.5em;
 
     > figure {
@@ -1515,10 +1515,10 @@
     }
   }
 
-  #kit-request-list {
+  .kit-request-list {
     display: grid;
     gap-y: 0.1rem;
-    grid-template-columns: repeat(6, auto);
+    grid-template-columns: repeat(7, auto);
     place-items: center;
 
     > .kit-request-header {
@@ -1530,10 +1530,21 @@
       padding: 0.5rem;
       grid-template-columns: subgrid;
       grid-column: 1 / -1;
+      grid-row: span 2;
       gap: 0.25rem;
       place-items: center;
       justify-content: space-between;
       background-color: var(--bg);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+
+      .kit-request-note {
+      	white-space: wrap;
+	grid-column: 2 / -1;
+	justify-self: left;
+	padding-left: 1.5em;
+	border-left: 2px solid gray;
+      }
     }
   }
 

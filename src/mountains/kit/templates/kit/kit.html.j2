@@ -10,6 +10,7 @@
   <form hx-target="#kit-list"
         hx-select="#kit-list"
         hx-swap="outerHTML settle:0.2s"
+        hx-get="{{ url_for('.kit') }}"
         hx-push-url="true"
         hx-trigger="change">
     <input type="search" name="search"
@@ -18,51 +19,73 @@
            placeholder="Search for a kit item..." 
            value="{{ search if search else '' }}"
            />
+    <label>
+      Kit Groups
+      <fieldset>
+        {% for kit_group in kit_groups %}
+	<label class="event-filter {{ kit_group.as_color_class() }}">
+	    {{ kit_group.name | title }}
+            {% if kit_group in selected_kit_groups %}
+              <input type="checkbox"
+                     name="kit_group"
+                     value="{{ kit_group.value }}"
+                     checked />
+            {% else %}
+              <input type="checkbox" name="kit_group" value="{{ kit_group.value }}" />
+            {% endif %}
+          </label>
+        {% endfor %}
+      </fieldset>
+    </label>
     <noscript>
       <input type="submit" value="Search" />
     </noscript>
   </form>
   <div id="kit-list">
   {% for kit in kit_items %}
-    <article class="kit drop-shadow">
-      <small>({{ kit.club_id }})</small>
-      <div>
-        {% if kit_status[kit.id] == 'Available' %}
-          <small class="badge color-green">Available</small>
-        {% elif kit_status[kit.id] == 'Out' %}
-          <small class="badge color-red">Out</small>
-        {% elif kit_status[kit.id] == 'Requested' %}
-          <small class="badge color-amber">Requested</small>
-        {% endif %}
-      </div>
-      <h3>
-        <a href="{{ url_for('.kit_details', id=kit.id) }}">
-          {{ kit.description }}
-          {% if kit.kit_type %}
-            ({{ kit.kit_type }})
-          {% endif %}
-        </a>
-      </h3>
-      <p>
-        {%- set comma = joiner(",") -%}
-        {%- if kit.brand -%}
-          {{comma()}} Brand: {{ kit.brand }}
-        {%- endif -%}
-        {%- if kit.color -%}
-          {{ comma() }} Colour: {{ kit.color }}
-        {%- endif -%}
-        {%- if kit.size -%}
-          {{ comma() }} Size: {{ kit.size }}
-        {%- endif %}
-      </p>
+  {% if not selected_kit_groups or kit.kit_group in selected_kit_groups %}
+      <article class="kit drop-shadow {{ kit.kit_group.as_color_class() }}">
+	<small>({{ kit.club_id }})</small>
+	<div>
+	  {% if kit_status[kit.id] == 'Available' %}
+	    <small class="badge color-green">Available</small>
+	  {% elif kit_status[kit.id] == 'Out' %}
+	    <small class="badge color-red">Out</small>
+	  {% elif kit_status[kit.id] == 'Requested' %}
+	    <small class="badge color-amber">Requested</small>
+	  {% endif %}
+	</div>
+	<h3>
+	  <a href="{{ url_for('.kit_details', id=kit.id) }}">
+	    {{ kit.description }}
+	    {% if kit.kit_type %}
+	      ({{ kit.kit_type }})
+	    {% endif %}
+	  </a>
+	</h3>
+	<p>
+	  {%- set comma = joiner(",") -%}
+	  {%- if kit.brand -%}
+	    {{comma()}} Brand: {{ kit.brand }}
+	  {%- endif -%}
+	  {%- if kit.color -%}
+	    {{ comma() }} Colour: {{ kit.color }}
+	  {%- endif -%}
+	  {%- if kit.size -%}
+	    {{ comma() }} Size: {{ kit.size }}
+	  {%- endif %}
+	</p>
 
-      <div class="kit-buttons">
-        <a class="button" href="{{ url_for('.request_kit', id=kit.id) }}">Request Borrow</a>
-        {% if g.current_user.is_site_admin %}
-          <a class="button admin" href="{{ url_for('.add_kit', id=kit.id) }}">Edit</a>
-        {% endif %}
-      </div>
-    </article>
+	<div class="kit-buttons">
+	  <a class="button" href="{{ url_for('.request_kit', id=kit.id) }}">Request Borrow</a>
+	  {% if g.current_user.is_site_admin %}
+	    <a class="button admin" href="{{ url_for('.add_kit', id=kit.id) }}">Edit</a>
+	  {% endif %}
+	</div>
+      </article>
+    {% endif %}
+  {% else %}
+  <p role="status">No kit found - are you using filters?</p>
   {% endfor %}
   </div>
 {% endblock content %}

@@ -21,12 +21,16 @@
 [x] Kit photo sizing
 [x] Requests as dates only
 [x] Outstanding request page
-[] Actual kit groups that make sense
+[x] Import for existing kit
+[x] Actual kit groups that make sense
+[x] Import kit groups
+[x] Show request time
+[x] Add to main nav (committee-only for now)
 [] Show notes on request page
-[] Requests separate public reason / private notes
 [] Error handling / better form validation
-[] Import for existing kit
 [] Emails or discord on new requests
+[] Request multiple items in one request
+[] Text control by committee?
 
 # Questions
 
@@ -35,7 +39,6 @@
 
 # Nice to haves
 
-[] Request multiple items in one request
 [] Availability calendar for kit sec
 [] Bulk updates for kit checks
 [] Add "kit holder" with bulk updates

@@ -15,13 +15,31 @@ if TYPE_CHECKING:
     from sqlite3 import Connection
 
 
-class KitGroup(enum.Enum):
+class KitGroup(enum.IntEnum):
     GENERAL = 1
     MAPS = 2
     BOOKS = 3
     HELMETS = 4
     CLIMBING = 5
     WINTER = 6
+    
+    def as_color_class(self) -> str:
+        """Returns the color class for this"""
+        match self:
+            case KitGroup.GENERAL:
+                return "color-cmc"
+            case KitGroup.MAPS:
+                return "color-summer-day-walk"
+            case KitGroup.BOOKS:
+                return "color-social"
+            case KitGroup.HELMETS:
+                return "color-summer-weekend"
+            case KitGroup.CLIMBING:
+                return "color-outdoor-climbing"
+            case KitGroup.WINTER:
+                return "color-winter-weekend"
+            case _:
+                return ""
 
 
 sqlite3.register_adapter(KitGroup, lambda x: x.value)

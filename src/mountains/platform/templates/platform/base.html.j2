@@ -59,6 +59,14 @@
           <span>Kit Library</span>
         </a>
       </li>
+      {% if g.current_user.is_committee or g.current_user.is_admin %}
+	{% call nav_link('platform.kit.kit', 'Kit Library', icon=bi.bi_tools) %}
+	  <ul>
+	    {{ nav_link('platform.kit.kit', 'Kit List') }}
+	    {{ nav_link('platform.kit.requests', 'Requests') }}
+	  </ul>
+	{% endcall %}
+      {% endif %}
       {{ nav_link('platform.resources', 'Resources', icon=bi.bi_info_square) }}
       {{ nav_link('platform.feedback', 'Feedback', icon=bi.bi_envelope_paper_fill) }}
       <li>

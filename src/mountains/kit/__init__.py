@@ -49,6 +49,12 @@ def kit():
     if search:
         kit_items = [k for k in kit_items if search.lower() in k.description.lower()]
 
+    try:
+        selected_kit_groups = [KitGroup(int(x)) for x in request.args.getlist("kit_group")]
+    except KeyError:
+        # Empty means use all
+        selected_kit_groups = []
+
     kit_status = {}
     for req in kit_requests:
         if req.is_active():
@@ -63,6 +69,8 @@ def kit():
         "kit/kit.html.j2",
         kit_items=kit_items,
         kit_status=kit_status,
+        kit_groups=KitGroup,
+        selected_kit_groups=selected_kit_groups,
         search=search,
     )
 
