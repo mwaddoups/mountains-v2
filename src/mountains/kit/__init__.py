@@ -235,3 +235,62 @@ def request_kit(id: int):
             current_requests=current_kit_requests,
             current_request_users=current_kit_users,
         )
+
+
+@blueprint.route("/requests")
+def requests():
+    with db_conn() as conn:
+        kit_requests = kit_request_repo(conn).list()
+        kit_requests = sorted(
+            [k for k in kit_requests if k.is_active() or k.is_in_future()],
+            key=lambda k: k.pickup_dt,
+        )
+
+        kit_item_map = {
+            k.id: k
+            for k in kit_item_repo(conn).get_all(id=[r.kit_id for r in kit_requests])
+        }
+        user_map = {
+            u.id: u
+            for u in users_repo(conn).get_all(id=[r.user_id for r in kit_requests])
+        }
+
+    return render_template(
+        "kit/requests.html.j2",
+        kit_requests=kit_requests,
+        kit_item_map=kit_item_map,
+        user_map=user_map,
+    )
+
+
+@blueprint.route("/requests/<int:id>", methods=["POST", "PATCH", "DELETE"])
+def update_request(id: int):
+    method = req_method(request)
+
+    with db_conn() as conn:
+        kit_request = kit_request_repo(conn).get(id=id)
+        if kit_request is None:
+            abort(404)
+        assert kit_request is not None
+
+    current_user.check_authorised(kit_request.user_id)
+
+    if method == "PATCH":
+        print(request.form, kit_request)
+        with db_conn(locked=True) as conn:
+            req_db = kit_request_repo(conn)
+
+            if "is_approved" in request.form:
+                req_db.update(id=id, is_approved=True)
+
+            # TODO: EMAIL
+
+        return redirect(url_for(".requests"))
+    elif method == "DELETE":
+        # TODO: EMAIL?
+        with db_conn(locked=True) as conn:
+            req_db = kit_request_repo(conn)
+            req_db.delete_where(id=id)
+        return redirect(url_for(".requests"))
+    else:
+        abort(403)

@@ -1,0 +1,63 @@
+
+{% extends "platform/base.html.j2" %}
+{% block content %}
+  <h1>Kit Requests</h1>
+  <p>All upcoming approved kit requests are visible below.</p>
+
+  {% macro request_card(kit_request, user, kit_item, status, badge_class) -%}
+    <article class="kit-request">
+      <span class="badge {{ badge_class }}">
+	{{ status }}
+      </span>
+      <a href="{{ url_for("platform.members.member", slug=user.slug) }}">
+	{{ user.full_name }}
+      </a>
+      <a href="{{ url_for(".kit_details", id=kit_item.id) }}">
+	{{ kit_item.description }}
+      </a>
+      <span>
+	{{ kit_request.pickup_dt.strftime("%b %-d, %Y") }}
+      </span>
+      <span>
+	{{ kit_request.return_dt.strftime("%b %-d, %Y") }}
+      </span> 
+      <span class="flex">
+      {% if g.current_user.is_site_admin %}
+	<form method="POST" action="{{ url_for(".update_request", id=kit_request.id) }}">
+	  <input type="hidden" name="method" value="PATCH" />
+	  <input type="hidden" name="is_approved" value="true" />
+	  <input class="admin" type="submit" value="Approve" />
+	</form>
+      {% endif %}
+      {% if g.current_user.is_authorised(kit_request.user_id) %}
+	<form method="POST" action="{{ url_for(".update_request", id=kit_request.id) }}">
+	  <input type="hidden" name="method" value="DELETE" />
+	  <input class="{{ 'admin' if g.current_user.id != kit_request.user_id else '' }}" type="submit" value="Cancel" />
+	</form>
+      {% endif %}
+      </span>
+    </article>
+  {%- endmacro %}
+
+  <section id="kit-request-list">
+    <span class="kit-request-header">Status</span>
+    <span class="kit-request-header">Requester</span>
+    <span class="kit-request-header">Kit</span>
+    <span class="kit-request-header">Start Date</span>
+    <span class="kit-request-header">Return Date</span>
+    {% for request in kit_requests | sort(attribute="is_approved") %}
+      {% if not request.is_approved %}
+	{{ request_card(request, user_map[request.user_id], kit_item_map[request.kit_id], "Unapproved", "color-grey") }}
+      {% elif request.is_overdue() %}
+	{{ request_card(request, user_map[request.user_id], kit_item_map[request.kit_id], "Overdue", "color-red") }}
+      {% elif request.is_active() %}
+	{{ request_card(request, user_map[request.user_id], kit_item_map[request.kit_id], "Active", "color-amber") }}
+      {% elif request.is_returned %}
+	{{ request_card(request, user_map[request.user_id], kit_item_map[request.kit_id], "Returned", "color-green") }}
+      {% else %}
+	{{ request_card(request, user_map[request.user_id], kit_item_map[request.kit_id], "Upcoming", "color-member") }}
+      {% endif %}
+    {% endfor %}
+  </section>
+
+{% endblock %}

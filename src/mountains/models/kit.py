@@ -106,11 +106,17 @@ class KitRequest:
 
     def is_active(self) -> bool:
         now = datetime.date.today()
-        return self.pickup_dt <= now <= self.return_dt and not self.is_returned
+        past_pickup = self.pickup_dt <= now
+
+        return (past_pickup or self.is_picked_up) and not self.is_returned
+
+    def is_overdue(self) -> bool:
+        now = datetime.date.today()
+        return self.return_dt < now and not self.is_returned
 
     def is_in_future(self) -> bool:
         now = datetime.date.today()
-        return self.pickup_dt >= now 
+        return self.pickup_dt > now
 
 
 def kit_request_repo(conn: Connection) -> Repository[KitRequest]:
@@ -167,11 +173,11 @@ class KitDetail:
             note=form["note"],
             photo_path=photo_path,
         )
-    
+
     def photo_paths(self) -> dict[int, str]:
         base = Path(self.photo_path)
         return {
-            width: str(base.with_stem(base.stem + f'-{width}'))
+            width: str(base.with_stem(base.stem + f"-{width}"))
             for width in [256, 512, 1200]
         }
 

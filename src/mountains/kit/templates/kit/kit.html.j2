@@ -26,6 +26,15 @@
   {% for kit in kit_items %}
     <article class="kit drop-shadow">
       <small>({{ kit.club_id }})</small>
+      <div>
+        {% if kit_status[kit.id] == 'Available' %}
+          <small class="badge color-green">Available</small>
+        {% elif kit_status[kit.id] == 'Out' %}
+          <small class="badge color-red">Out</small>
+        {% elif kit_status[kit.id] == 'Requested' %}
+          <small class="badge color-amber">Requested</small>
+        {% endif %}
+      </div>
       <h3>
         <a href="{{ url_for('.kit_details', id=kit.id) }}">
           {{ kit.description }}
@@ -46,15 +55,6 @@
           {{ comma() }} Size: {{ kit.size }}
         {%- endif %}
       </p>
-      <div>
-        {% if kit_status[kit.id] == 'Available' %}
-          <small class="badge color-green">Available</small>
-        {% elif kit_status[kit.id] == 'Out' %}
-          <small class="badge color-red">Out</small>
-        {% elif kit_status[kit.id] == 'Requested' %}
-          <small class="badge color-amber">Requested</small>
-        {% endif %}
-      </div>
 
       <div class="kit-buttons">
         <a class="button" href="{{ url_for('.request_kit', id=kit.id) }}">Request Borrow</a>
