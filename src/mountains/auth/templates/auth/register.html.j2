@@ -54,6 +54,14 @@
         I agree with the usage of my data in accordance with the <a href="{{ url_for('privacy_policy') }}">Privacy Policy</a>
         <input type="checkbox" required />
       </label>
+      <label>
+        What is the tallest mountain in Scotland?
+	<small>(To deter bots)</small>
+        <input type="text"
+               name='bot_question'
+               required
+               value="" />
+      </label>
       <input type="submit" value="Register" />
     </form>
   {% endif %}

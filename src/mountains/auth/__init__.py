@@ -162,6 +162,10 @@ def _register_new_user(db_name: str, form: Mapping[str, str]):
     # Check the password matches and generate a hash
     if form["password"] != form["confirm_password"]:
         raise MountainException("Passwords do not match!")
+    
+    if form["bot_question"].lower() not in ('ben nevis', 'nevis', 'the ben'):
+        raise MountainException("Incorrect answer to security question!")
+
     password_hash = generate_password_hash(form["password"])
 
     # Lock the DB so we can generate a new user ID and insert

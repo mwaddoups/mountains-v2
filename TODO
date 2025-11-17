@@ -26,11 +26,14 @@
 [x] Import kit groups
 [x] Show request time
 [x] Add to main nav (committee-only for now)
-[] Show notes on request page
+[x] Show notes on request page
 [] Error handling / better form validation
+[] Request submitted alert
+[] Requests in details page
 [] Emails or discord on new requests
 [] Request multiple items in one request
 [] Text control by committee?
+
 
 # Questions
 
