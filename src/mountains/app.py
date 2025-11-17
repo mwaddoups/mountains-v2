@@ -147,10 +147,11 @@ def create_app():
             )
             return Response(status=200)
 
-        with db_conn() as conn:
+        with db_conn(locked=True) as conn:
             if metadata.get("payment_for") == "event":
                 # It's an event, lets set them as paid
                 event_payment = EventPaymentMetadata.from_metadata(metadata)
+                logger.info(f"Got event payment: {event_payment}")
                 attendees_repo(conn).update(
                     _where=dict(
                         user_id=event_payment.user_id, event_id=event_payment.event_id
@@ -160,6 +161,7 @@ def create_app():
             elif metadata.get("payment_for") == "membership":
                 # It's a membership payment, lets set member and email the treasurer
                 payment = MembershipPaymentMetadata.from_metadata(metadata)
+                logger.info(f"Got membership payment: {payment}")
                 user_db = users_repo(conn)
 
                 user = user_db.get_or_404(id=payment.user_id)
