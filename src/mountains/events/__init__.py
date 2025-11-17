@@ -65,7 +65,13 @@ def events(event_id: int | None = None):
             search=search,
         )
 
-        event_attendees, event_members = _events_attendees(conn, events)
+        if event is not None:
+            events_for_metadata = events + [event]
+        else:
+            events_for_metadata = events
+
+
+        event_attendees, event_members = _events_attendees(conn, events_for_metadata)
 
     if event is not None:
         # Single event display
