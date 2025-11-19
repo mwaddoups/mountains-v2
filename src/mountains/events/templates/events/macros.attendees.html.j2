@@ -42,6 +42,7 @@
               hx-post="{{ url_for('.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}"
               hx-target="closest .attending-user"
               hx-swap="outerHTML"
+	      hx-confirm="Are you sure you want to toggle payment for {{ user.full_name }}?"
               action="{{ url_for('.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
           <input type="hidden" name="method" value="PUT" />
           <input type="hidden"
