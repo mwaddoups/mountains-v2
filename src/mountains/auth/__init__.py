@@ -163,7 +163,7 @@ def _register_new_user(db_name: str, form: Mapping[str, str]):
     if form["password"] != form["confirm_password"]:
         raise MountainException("Passwords do not match!")
     
-    if form["bot_question"].lower() not in ('ben nevis', 'nevis', 'the ben'):
+    if form["bot_question"].lower().strip() not in ('ben nevis', 'nevis', 'the ben'):
         raise MountainException("Incorrect answer to security question!")
 
     password_hash = generate_password_hash(form["password"])
