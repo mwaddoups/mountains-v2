@@ -292,6 +292,8 @@ def update_request(id: int):
             abort(404)
         assert kit_request is not None
 
+        kit_request_user = users_repo(conn).get(id=kit_request.user_id)
+
     current_user.check_authorised(kit_request.user_id)
 
     if method == "PATCH":
@@ -300,12 +302,21 @@ def update_request(id: int):
 
             if "is_approved" in request.form:
                 req_db.update(id=id, is_approved=True)
+            elif "is_picked_up" in request.form:
+                req_db.update(id=id, is_picked_up=True)
+            elif "is_returned" in request.form:
+                req_db.update(id=id, is_picked_up=True, is_returned=True)
 
-            # TODO: EMAIL
+                # TODO: EMAIL for survey.
+                # if kit_request_user is not None:
+                #     send_mail(
+                #         to=[kit_request_user.email],
+                #         subject='Kit returned - survey',
+                #         msg_markdown="TODO!"
+                #     )
 
         return redirect(url_for(".requests"))
     elif method == "DELETE":
-        # TODO: EMAIL?
         with db_conn(locked=True) as conn:
             req_db = kit_request_repo(conn)
             req_db.delete_where(id=id)
