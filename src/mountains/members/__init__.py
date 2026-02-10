@@ -101,7 +101,7 @@ def member(slug: str):
 
     num_attended = request.args.get("num_attended", type=int, default=20)
     attended = sorted(
-        [e for e in attended if e is not None and not e.is_upcoming()],
+        [e for e in attended if e is not None],
         key=lambda e: e.event_dt,
         reverse=True,
     )

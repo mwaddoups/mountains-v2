@@ -93,6 +93,9 @@
           text-align: right;
         }
       }
+      .member-attended-event-upcoming {
+        font-style: italic;
+      }
     }
 
     > form :is(input, button) {
