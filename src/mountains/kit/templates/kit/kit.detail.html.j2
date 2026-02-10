@@ -1,50 +1,80 @@
 {% extends "platform/base.html.j2" %}
 {% block content %}
   <a href="{{ url_for('.kit') }}">&lt; return to Kit</a>
-  <h1>{{ kit_item.description }}</h1>
+  <h1>
+    {% if kit_status == 'Available' %}
+      <small class="badge color-green">Available</small>
+    {% elif kit_status == 'Out' %}
+      <small class="badge color-red">Out</small>
+    {% elif kit_status == 'Requested' %}
+      <small class="badge color-amber">Requested</small>
+    {% endif %}
+    {{ kit_item.description }}
+  </h1>
   <div class="kit-details">
     <div>
-    <dl>
-      <dt>Club ID</dt>
-      <dd>{{ kit_item.club_id }}</dd>
-      <dt>Kit Type</dt>
-      <dd>{{ kit_item.kit_type }}</dd>
-      <dt>Description</dt>
-      <dd>{{ kit_item.description }}</dd>
-      <dt>Brand</dt>
-      {% if kit_item.brand %}
-        <dd>{{ kit_item.brand }}</dd>
-      {% else %}
-        <dd><small>No brand information</small></dd>
-      {% endif %}
-      <dt>Colour</dt>
-      {% if kit_item.color %}
-        <dd>{{ kit_item.color }}</dd>
-      {% else %}
-        <dd><small>No colour information</small></dd>
-      {% endif %}
-      <dt>Size</dt>
-      {% if kit_item.size %}
-        <dd>{{ kit_item.size }}</dd>
-      {% else %}
-        <dd><small>No size information</small></dd>
-      {% endif %}
+      <dl>
+        <dt>Club ID</dt>
+        <dd>
+          {{ kit_item.club_id }}
+        </dd>
+        <dt>Kit Type</dt>
+        <dd>
+          {{ kit_item.kit_type }}
+        </dd>
+        <dt>Description</dt>
+        <dd>
+          {{ kit_item.description }}
+        </dd>
+        <dt>Brand</dt>
+        {% if kit_item.brand %}
+          <dd>
+            {{ kit_item.brand }}
+          </dd>
+        {% else %}
+          <dd>
+            <small>No brand information</small>
+          </dd>
+        {% endif %}
+        <dt>Colour</dt>
+        {% if kit_item.color %}
+          <dd>
+            {{ kit_item.color }}
+          </dd>
+        {% else %}
+          <dd>
+            <small>No colour information</small>
+          </dd>
+        {% endif %}
+        <dt>Size</dt>
+        {% if kit_item.size %}
+          <dd>
+            {{ kit_item.size }}
+          </dd>
+        {% else %}
+          <dd>
+            <small>No size information</small>
+          </dd>
+        {% endif %}
+        {% if g.current_user.is_site_admin %}
+          <dt class="admin">Purchased On</dt>
+          <dd class="admin">
+            {{ kit_item.purchased_on.strftime("%B %-d, %Y") }}
+          </dd>
+          <dt class="admin">Purchase Price</dt>
+          <dd class="admin">
+            {{ "£{:.2f}".format(kit_item.purchase_price) }}
+          </dd>
+        {% endif %}
+      </dl>
+      <a class="button" href="{{ url_for('.request_kit', id=kit_item.id) }}">Request to Borrow</a>
       {% if g.current_user.is_site_admin %}
-        <dt class="admin">Purchased On</dt>
-        <dd class="admin">{{ kit_item.purchased_on.strftime("%B %-d, %Y") }}</dd>
-        <dt class="admin">Purchase Price</dt>
-        <dd class="admin">{{ "£{:.2f}".format(kit_item.purchase_price) }}</dd>
+        <a class="button admin" href="{{ url_for('.add_kit', id=kit_item.id) }}">Edit Item</a>
       {% endif %}
-    </dl>
-    <a class="button" href="{{ url_for('.request_kit', id=kit_item.id) }}">Request to Borrow</a>
-    {% if g.current_user.is_site_admin %}
-      <a class="button admin" href="{{ url_for('.add_kit', id=kit_item.id) }}">Edit Item</a>
-    {% endif %}
     </div>
-
     {% if latest_photo_note %}
       <figure>
-        <img src="{{ url_for('static', filename=latest_photo_note.photo_paths()[512]) }}"
+        <img src="{{ url_for('static', filename=latest_photo_note.photo_paths()[512] ) }}"
              alt="Kit photo"
              height="512"
              width="512" />
@@ -59,17 +89,17 @@
     {% if detail.condition %}
       <article class="kit-note">
         <span>
-          {{ detail.added_dt.strftime("%a, %b %-d, %Y %H:%M") }} 
-          <small>({{name}})</small>
+          {{ detail.added_dt.strftime("%a, %b %-d, %Y %H:%M") }}
+          <small>({{ name }})</small>
         </span>
-        <span><em>Condition:</em> {{ detail.condition }}</strong></span>
+        <span><em>Condition:</em> {{ detail.condition }}</span>
       </article>
     {% endif %}
     {% if detail.note %}
       <article class="kit-note">
         <span>
-          {{ detail.added_dt.strftime("%a, %b %-d, %Y %H:%M") }} 
-          <small>({{name}})</small>
+          {{ detail.added_dt.strftime("%a, %b %-d, %Y %H:%M") }}
+          <small>({{ name }})</small>
         </span>
         <span><em>Note:</em> {{ detail.note }}</span>
       </article>
@@ -77,12 +107,12 @@
     {% if detail.photo_path %}
       <article class="kit-note">
         <span>
-          {{ detail.added_dt.strftime("%a, %b %-d, %Y %H:%M") }} 
-          <small>({{name}})</small>
+          {{ detail.added_dt.strftime("%a, %b %-d, %Y %H:%M") }}
+          <small>({{ name }})</small>
         </span>
         <span><em>Photo added</em></span>
         <figure>
-          <img src="{{ url_for('static', filename=detail.photo_paths()[256]) }}"
+          <img src="{{ url_for('static', filename=detail.photo_paths()[256] ) }}"
                alt="Kit photo"
                height="256"
                width="256" />
@@ -93,29 +123,29 @@
     <small>No notes found.</small>
   {% endfor %}
   {% if g.current_user.is_site_admin %}
-  <div class="admin">
-    <h1 class="admin">Add Note</h1>
-    <p class="admin">
-      Use this for condition updates, photo updates, or any other notes that might be helpful for people to know the condition of the item.
-    </p>
-    <form method="post" enctype="multipart/form-data">
-      <label>
-        Condition of item
-        <small>(can be blank if no change)</small>
-        <input type="text" name="condition" />
-      </label>
-      <label>
-        Note or Comment
-        <small>(can be blank if other fields filled in)</small>
-        <input type="text" name="note" />
-      </label>
-      <label>
-        Photo of item
-        <small>(optional)</small>
-        <input type="file" name="photo_path" accept="image/*" />
-      </label>
-      <input type="submit" value="Submit" />
-    </form>
-  </div>
+    <div class="admin">
+      <h1 class="admin">Add Note</h1>
+      <p class="admin">
+        Use this for condition updates, photo updates, or any other notes that might be helpful for people to know the condition of the item.
+      </p>
+      <form method="post" enctype="multipart/form-data">
+        <label>
+          Condition of item
+          <small>(can be blank if no change)</small>
+          <input type="text" name="condition" />
+        </label>
+        <label>
+          Note or Comment
+          <small>(can be blank if other fields filled in)</small>
+          <input type="text" name="note" />
+        </label>
+        <label>
+          Photo of item
+          <small>(optional)</small>
+          <input type="file" name="photo_path" accept="image/*" />
+        </label>
+        <input type="submit" value="Submit" />
+      </form>
+    </div>
   {% endif %}
 {% endblock content %}

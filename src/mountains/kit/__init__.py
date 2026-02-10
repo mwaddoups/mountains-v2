@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import Literal
 
 from flask import (
     Blueprint,
@@ -50,20 +51,16 @@ def kit():
         kit_items = [k for k in kit_items if search.lower() in k.description.lower()]
 
     try:
-        selected_kit_groups = [KitGroup(int(x)) for x in request.args.getlist("kit_group")]
+        selected_kit_groups = [
+            KitGroup(int(x)) for x in request.args.getlist("kit_group")
+        ]
     except KeyError:
         # Empty means use all
         selected_kit_groups = []
 
-    kit_status = {}
-    for req in kit_requests:
-        if req.is_active():
-            kit_status[req.kit_id] = "Out"
-        elif req.is_in_future():
-            kit_status[req.kit_id] = "Requested"
-    for kit in kit_items:
-        if kit.id not in kit_status:
-            kit_status[kit.id] = "Available"
+    kit_status = _kit_status(
+        kit_ids=[k.id for k in kit_items], kit_requests=kit_requests
+    )
 
     return render_template(
         "kit/kit.html.j2",
@@ -84,6 +81,7 @@ def kit_details(id: int):
         assert kit_item is not None
 
         kit_details = kit_details_repo(conn).list_where(kit_id=id)
+        kit_requests = kit_request_repo(conn).list_where(kit_id=id)
 
         # Get all users present in notes
         user_map = {
@@ -126,10 +124,13 @@ def kit_details(id: int):
     else:
         latest_photo_note = None
 
+    kit_status = _kit_status([kit_item.id], kit_requests)[kit_item.id]
+
     return render_template(
         "kit/kit.detail.html.j2",
         kit_groups=KitGroup,
         kit_item=kit_item,
+        kit_status=kit_status,
         kit_details=kit_details,
         latest_photo_note=latest_photo_note,
         user_map=user_map,
@@ -302,3 +303,28 @@ def update_request(id: int):
         return redirect(url_for(".requests"))
     else:
         abort(403)
+
+
+def _kit_status(
+    kit_ids: list[int], kit_requests: list[KitRequest]
+) -> dict[int, Literal["Out", "Requested", "Available"]]:
+    """
+    Helper for getting kit status from request list.
+
+    Returns a dictionary from kit ID to status as text
+
+    :param kit_ids: list of wanted keys in the dictionary
+    :param kit_requests: list of requests covering all those ids
+    """
+
+    kit_status = {}
+    for req in kit_requests:
+        if req.is_active():
+            kit_status[req.kit_id] = "Out"
+        elif req.is_in_future():
+            kit_status[req.kit_id] = "Requested"
+    for kit_id in kit_ids:
+        if kit_id not in kit_status:
+            kit_status[kit_id] = "Available"
+
+    return kit_status
