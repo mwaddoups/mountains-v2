@@ -16,7 +16,7 @@ from flask import (
 from PIL import Image, ImageOps
 from werkzeug.datastructures import FileStorage
 
-from mountains.context import current_user, db_conn
+from mountains.context import current_user, db_conn, send_mail
 from mountains.models.kit import (
     KitDetail,
     KitGroup,
@@ -235,6 +235,16 @@ def request_kit(id: int):
             )
             logger.info("Adding new kit request %s", kit_request)
             req_db.insert(kit_request)
+            send_mail(
+                to=["kitsec@clydemc.org"],
+                subject=f"Kit request - {current_user.full_name} for {kit_item.description}",
+                msg_markdown="\n\n".join([
+                    "# New Kit Request",
+                    f"{current_user.full_name} requested the item {kit_item.description}. They wrote:",
+                    kit_request.notes,
+                    f"[For more details and to approve see the requests page]({url_for('.requests', _external=True)})",
+                ]),
+            )
 
         return redirect(url_for(".kit"))
     else:
@@ -285,7 +295,6 @@ def update_request(id: int):
     current_user.check_authorised(kit_request.user_id)
 
     if method == "PATCH":
-        print(request.form, kit_request)
         with db_conn(locked=True) as conn:
             req_db = kit_request_repo(conn)
 
