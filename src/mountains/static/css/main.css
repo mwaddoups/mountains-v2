@@ -1517,35 +1517,41 @@
 
   .kit-request-list {
     display: grid;
-    gap-y: 0.1rem;
-    grid-template-columns: repeat(7, auto);
+    row-gap: 0.5rem;
+    grid-template-columns: repeat(6, auto);
     place-items: center;
 
     > .kit-request-header {
       font-weight: bold;
-    }	
+    }
 
     > .kit-request {
       display: grid;
       padding: 0.5rem;
       grid-template-columns: subgrid;
       grid-column: 1 / -1;
-      grid-row: span 2;
+      grid-row: span 3;
       gap: 0.25rem;
       place-items: center;
       justify-content: space-between;
       background-color: var(--bg);
       white-space: nowrap;
       text-overflow: ellipsis;
+      filter: var(--standard-drop-shadow);
+      border-radius: var(--standard-border-radius);
 
       .kit-request-note {
-      	white-space: wrap;
-	grid-column: 2 / -1;
-	justify-self: left;
-	padding-left: 1.5em;
-	border-left: 2px solid gray;
+        white-space: wrap;
+        grid-column: 2 / -1;
+        justify-self: left;
+        padding-left: 1.5em;
+        border-left: 2px solid gray;
+      }
+
+      .kit-request-controls {
+        grid-column: 2 / -1;
+        justify-self: left;
       }
     }
   }
-
 }

@@ -3,8 +3,8 @@ from __future__ import annotations
 import datetime
 import enum
 import sqlite3
-from typing import TYPE_CHECKING, Self
 from pathlib import Path
+from typing import TYPE_CHECKING, Self
 
 from attrs import Factory, define
 from werkzeug.datastructures import ImmutableMultiDict
@@ -22,7 +22,7 @@ class KitGroup(enum.IntEnum):
     HELMETS = 4
     CLIMBING = 5
     WINTER = 6
-    
+
     def as_color_class(self) -> str:
         """Returns the color class for this"""
         match self:
@@ -193,6 +193,7 @@ class KitDetail:
         )
 
     def photo_paths(self) -> dict[int, str]:
+        assert self.photo_path is not None
         base = Path(self.photo_path)
         return {
             width: str(base.with_stem(base.stem + f"-{width}"))

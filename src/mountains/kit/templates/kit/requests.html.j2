@@ -2,48 +2,63 @@
 {% block content %}
   <h1>Kit Requests</h1>
   <p>All upcoming approved kit requests are visible below.</p>
-
   {% macro request_card(kit_request, user, kit_item, status, badge_class) -%}
     <article class="kit-request">
-      <span class="badge {{ badge_class }}">
-	{{ status }}
-      </span>
-      <span>
-	{{ kit_request.request_created_dt.strftime("%b %-d, %Y %H:%M") }}
-      </span>
-      <a href="{{ url_for("platform.members.member", slug=user.slug) }}">
-	{{ user.full_name }}
-      </a>
-      <a href="{{ url_for(".kit_details", id=kit_item.id) }}">
-	{{ kit_item.description }}
-      </a>
-      <span>
-	{{ kit_request.pickup_dt.strftime("%b %-d, %Y") }}
-      </span>
-      <span>
-	{{ kit_request.return_dt.strftime("%b %-d, %Y") }}
-      </span> 
-      <span class="flex">
-      {% if g.current_user.is_site_admin and not kit_request.is_approved %}
-	<form method="POST" action="{{ url_for(".update_request", id=kit_request.id) }}">
-	  <input type="hidden" name="method" value="PATCH" />
-	  <input type="hidden" name="is_approved" value="true" />
-	  <input class="admin" type="submit" value="Approve" />
-	</form>
-      {% endif %}
-      {% if g.current_user.is_authorised(kit_request.user_id) %}
-	<form method="POST" action="{{ url_for(".update_request", id=kit_request.id) }}">
-	  <input type="hidden" name="method" value="DELETE" />
-	  <input class="{{ 'admin' if g.current_user.id != kit_request.user_id else '' }}" type="submit" value="Cancel" />
-	</form>
-      {% endif %}
-      </span>
+      <span class="badge {{ badge_class }}">{{ status }}</span>
+      <span>{{ kit_request.request_created_dt.strftime("%b %-d, %Y %H:%M") }}</span>
+      <a href="{{ url_for('platform.members.member', slug=user.slug) }}">{{ user.full_name }}</a>
+      <a href="{{ url_for('.kit_details', id=kit_item.id) }}">{{ kit_item.description }}</a>
+      <span>{{ kit_request.pickup_dt.strftime("%b %-d, %Y") }}</span>
+      <span>{{ kit_request.return_dt.strftime("%b %-d, %Y") }}</span>
       {% if not kit_request.is_approved %}
-      <p class="kit-request-note"><em>{{ kit_request.notes }}</em></p>
+        <p class="kit-request-note">
+          <em>{{ kit_request.notes }}</em>
+        </p>
       {% endif %}
+      <span class="flex kit-request-controls">
+        {% if g.current_user.is_site_admin %}
+          {% if not kit_request.is_approved %}
+            <form method="post"
+                  action="{{ url_for('.update_request', id=kit_request.id) }}">
+              <input type="hidden" name="method" value="PATCH" />
+              <input type="hidden" name="is_approved" value="true" />
+              <input class="admin" type="submit" value="Approve" />
+            </form>
+          {% else %}
+            {% if not kit_request.is_picked_up %}
+              <form method="post"
+                    action="{{ url_for('.update_request', id=kit_request.id) }}">
+                <input type="hidden" name="method" value="PATCH" />
+                <input type="hidden" name="is_picked_up" value="true" />
+                <input class="admin" type="submit" value="Mark Picked Up" />
+              </form>
+            {% else %}
+              <span class="badge color-green">Picked Up</span>
+            {% endif %}
+            {% if not kit_request.is_returned %}
+              <form method="post"
+                    action="{{ url_for('.update_request', id=kit_request.id) }}">
+                <input type="hidden" name="method" value="PATCH" />
+                <input type="hidden" name="is_returned" value="true" />
+                <input class="admin" type="submit" value="Mark Returned" />
+              </form>
+            {% else %}
+              <span class="badge">Picked Up</span>
+            {% endif %}
+          {% endif %}
+        {% endif %}
+        {% if g.current_user.is_authorised(kit_request.user_id) %}
+          <form method="post"
+                action="{{ url_for('.update_request', id=kit_request.id) }}">
+            <input type="hidden" name="method" value="DELETE" />
+            <input class="{{ 'admin' if g.current_user.id != kit_request.user_id else '' }}"
+                   type="submit"
+                   value="Cancel" />
+          </form>
+        {% endif %}
+      </span>
     </article>
   {%- endmacro %}
-
   {% set unapproved = kit_requests | selectattr("is_approved", "false")  | list %}
   {% if unapproved %}
     <h2>Unapproved Requests</h2>
@@ -56,7 +71,7 @@
       <span class="kit-request-header">Start Date</span>
       <span class="kit-request-header">Return Date</span>
       {% for request in unapproved | sort(attribute="request_created_dt", reverse=True) %}
-	{{ request_card(request, user_map[request.user_id], kit_item_map[request.kit_id], "Unapproved", "color-grey") }}
+        {{ request_card(request, user_map[request.user_id], kit_item_map[request.kit_id], "Unapproved", "color-grey") }}
       {% endfor %}
     </section>
   {% endif %}
@@ -70,17 +85,17 @@
     <span class="kit-request-header">Start Date</span>
     <span class="kit-request-header">Return Date</span>
     {% for request in kit_requests | sort(attribute="request_created_dt", reverse=True) %}
-      {% if  request.is_approved %}
-	{% if request.is_overdue() %}
-	  {{ request_card(request, user_map[request.user_id], kit_item_map[request.kit_id], "Overdue", "color-red") }}
-	{% elif request.is_active() %}
-	  {{ request_card(request, user_map[request.user_id], kit_item_map[request.kit_id], "Active", "color-amber") }}
-	{% elif request.is_returned %}
-	  {{ request_card(request, user_map[request.user_id], kit_item_map[request.kit_id], "Returned", "color-green") }}
-	{% else %}
-	  {{ request_card(request, user_map[request.user_id], kit_item_map[request.kit_id], "Upcoming", "color-member") }}
-	{% endif %}
+      {% if request.is_approved %}
+        {% if request.is_overdue() %}
+          {{ request_card(request, user_map[request.user_id], kit_item_map[request.kit_id], "Overdue", "color-red") }}
+        {% elif request.is_active() %}
+          {{ request_card(request, user_map[request.user_id], kit_item_map[request.kit_id], "Active", "color-amber") }}
+        {% elif request.is_returned %}
+          {{ request_card(request, user_map[request.user_id], kit_item_map[request.kit_id], "Returned", "color-green") }}
+        {% else %}
+          {{ request_card(request, user_map[request.user_id], kit_item_map[request.kit_id], "Upcoming", "color-member") }}
+        {% endif %}
       {% endif %}
     {% endfor %}
-
-{% endblock %}
+  </section>
+{% endblock content %}
