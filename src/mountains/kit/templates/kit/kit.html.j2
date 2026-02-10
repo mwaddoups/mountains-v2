@@ -4,6 +4,9 @@
     <a class="button admin w-full" href="{{ url_for('.add_kit') }}">Add new item</a>
   {% endif %}
   <h1>Kit Library</h1>
+  <section>
+    {{ kit_page | markdown | safe }}
+  </section>
   <p>
     Our full kit library is below. Any item can be requested - to see open requests, click on the item you want to request.
   </p>
@@ -70,17 +73,17 @@
               {{ comma() }} Colour: {{ kit.color }}
             {%- endif -%}
             {%- if kit.size -%}{{ comma() }} Size: {{ kit.size }}{%- endif %}
-          </p>
-          <div class="kit-buttons">
-            <a class="button" href="{{ url_for('.request_kit', id=kit.id) }}">Request Borrow</a>
-            {% if g.current_user.is_site_admin %}
-              <a class="button admin" href="{{ url_for('.add_kit', id=kit.id) }}">Edit</a>
-            {% endif %}
-          </div>
-        </article>
-      {% endif %}
-    {% else %}
-      <p role="status">No kit found - are you using filters?</p>
-    {% endfor %}
-  </div>
-{% endblock content %}
+            </p>
+            <div class="kit-buttons">
+              <a class="button" href="{{ url_for('.request_kit', id=kit.id) }}">Request Borrow</a>
+              {% if g.current_user.is_site_admin %}
+                <a class="button admin" href="{{ url_for('.add_kit', id=kit.id) }}">Edit</a>
+              {% endif %}
+            </div>
+          </article>
+        {% endif %}
+      {% else %}
+        <p role="status">No kit found - are you using filters?</p>
+      {% endfor %}
+    </div>
+  {% endblock content %}

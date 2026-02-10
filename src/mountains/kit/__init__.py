@@ -26,6 +26,7 @@ from mountains.models.kit import (
     kit_item_repo,
     kit_request_repo,
 )
+from mountains.models.pages import latest_content
 from mountains.models.users import users_repo
 from mountains.utils import req_method
 
@@ -46,6 +47,8 @@ def kit():
         )
         kit_requests = kit_request_repo(conn).list()
 
+        kit_page_content = latest_content(conn, "kit-requests")
+
     search = request.args.get("search")
     if search:
         kit_items = [k for k in kit_items if search.lower() in k.description.lower()]
@@ -64,6 +67,7 @@ def kit():
 
     return render_template(
         "kit/kit.html.j2",
+        kit_page=kit_page_content,
         kit_items=kit_items,
         kit_status=kit_status,
         kit_groups=KitGroup,
