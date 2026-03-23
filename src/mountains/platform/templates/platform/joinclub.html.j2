@@ -17,6 +17,12 @@
     {{ join_page | markdown | safe }}
   </section>
   <section>
+    <h2>Membership Closed</h2>
+    <p>Membership is currently closed whilst we prepare for renewals - it should reopen in early April 2026. Keep an eye on the discord for an announcement!</p>
+  </section>
+  {#
+  Commented out - can revert once we have membership
+  <section>
     <h2>Become a Member (Expiring {{ membership_expiry.strftime("%b %-d, %Y") }})</h2>
     {% if g.current_user.discord_id %}
       <form method="post">
@@ -79,4 +85,5 @@
          href="{{ url_for('platform.members.member_discord', slug=g.current_user.slug) }}">Set Discord Username</a>
     {% endif %}
   </section>
+  #}
 {% endblock content %}
