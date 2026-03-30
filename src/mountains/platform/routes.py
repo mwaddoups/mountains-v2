@@ -14,6 +14,7 @@ from flask import (
 
 from mountains import albums, committee, events, kit, members
 from mountains.context import current_user, db_conn
+from mountains.errors import MountainException
 from mountains.models.pages import latest_content
 from mountains.models.tokens import tokens_repo
 from mountains.models.users import users_repo
@@ -122,6 +123,13 @@ def routes(blueprint: Blueprint):
                 mobile_number=request.form["mobile_number"],
                 ms_number=request.form["ms_number"],
             )
+            try:
+                metadata.validate(request.form["existing_ms"])  # type: ignore - literal is fine
+            except MountainException as e:
+                logger.error(
+                    f"Error validating join form with metadata {metadata}", exc_info=e
+                )
+                return redirect(url_for(".join", error=str(e)))
 
             checkout_url = stripe_api.create_checkout(
                 request.form["price_id"],
@@ -142,6 +150,7 @@ def routes(blueprint: Blueprint):
                 join_page=page,
                 join_success="success" in request.args,
                 join_cancel="cancel" in request.args,
+                error=request.args.get("error", None),
                 membership_expiry=active_expiry,
                 membership_prices=membership_prices,
             )

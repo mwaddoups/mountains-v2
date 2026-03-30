@@ -12,16 +12,22 @@
       Your membership purchase was cancelled. If this was intentional, you can submit the form again to make payment and join when you like.
       If payment has been taken and you don't have membership, check with the treasurer (treasurer@clydemc.org) to get your membership confirmed manually.
     </p>
+  {% elif error %}
+    <p role="alert">
+      There was an issue with your form: {{ error }}
+      Please check and try again, or contact the treasurer (treasurer@clydemc.org) if any issues persist.
+    </p>
   {% endif %}
   <section>
     {{ join_page | markdown | safe }}
   </section>
   <section>
     <h2>Membership Closed</h2>
-    <p>Membership is currently closed whilst we prepare for renewals - it should reopen in early April 2026. Keep an eye on the discord for an announcement!</p>
+    <p>
+      Membership is currently closed whilst we prepare for renewals - it should reopen in early April 2026. Keep an eye on the discord for an announcement!
+    </p>
   </section>
   {#
-  Commented out - can revert once we have membership
   <section>
     <h2>Become a Member (Expiring {{ membership_expiry.strftime("%b %-d, %Y") }})</h2>
     {% if g.current_user.discord_id %}
@@ -31,7 +37,7 @@
           <input type="date" name="date_of_birth" required />
         </label>
         <label>
-          Address
+          Full Address
           <small>(Mountaineering Scotland need this)</small>
           <input type="text" name="address" required />
         </label>
@@ -42,6 +48,13 @@
         <label>
           Mobile Number
           <input type="text" name="mobile_number" required />
+        </label>
+        <label>
+          Are you an existing Mountainering Scotland member?
+          <select name="existing_ms" required>
+            <option value="no">No</option>
+            <option value="yes">Yes (and I will select existing MS membership)</option>
+          </select>
         </label>
         <label>
           Membership Type
@@ -70,9 +83,7 @@
           <input type="checkbox" required />
         </label>
         <label>
-          <span>I agree to follow the <a href="https://drive.google.com/file/d/1SZBMa6yRvDpmk1u4cnRTcrVG7r9ly-Wz/view?usp=sharing"
-    target="_blank"
-    rel="noreferrer">Club Code of Conduct.</a></span>
+          <span>I agree to follow the <a href="https://drive.google.com/file/d/1SZBMa6yRvDpmk1u4cnRTcrVG7r9ly-Wz/view?usp=sharing" target="_blank" rel="noreferrer">Club Code of Conduct.</a></span>
           <input type="checkbox" required />
         </label>
         <input type="submit" value="Proceed to Payment">
@@ -81,8 +92,7 @@
       <p>
         Your account doesn't have a Discord username associated with it yet! You need to join Discord in order to join the club.
       </p>
-      <a class="button"
-         href="{{ url_for('platform.members.member_discord', slug=g.current_user.slug) }}">Set Discord Username</a>
+      <a class="button" href="{{ url_for('platform.members.member_discord', slug=g.current_user.slug) }}">Set Discord Username</a>
     {% endif %}
   </section>
   #}

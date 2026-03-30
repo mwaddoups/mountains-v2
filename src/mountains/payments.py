@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import stripe
 from attrs import define
@@ -42,6 +42,28 @@ class MembershipPaymentMetadata:
     postcode: str
     mobile_number: str
     ms_number: str
+
+    def validate(self, are_existing: Literal["yes", "no"]) -> None:
+        """
+        Raises a MountainException on any incorrect fields
+
+        :param are_existing: should be either 'yes' or 'no'
+        """
+        now = datetime.date.today()
+        try:
+            dob = datetime.date.fromisoformat(self.date_of_birth)
+        except Exception:
+            raise MountainException("Date of birth not valid!")
+        if (now - dob).days < 17 * 365:
+            raise MountainException(
+                f"Date of birth {self.date_of_birth} would make you younger than 18 - the club is only open to over 18s."
+            )
+        if len(self.address) < 8:
+            raise MountainException("Address looks too short.")
+        if are_existing == "yes" and len(self.ms_number) < 3:
+            raise MountainException(
+                "Please provide your existing MS number if you are already a member."
+            )
 
     def to_metadata(self) -> dict[str, str]:
         return {
