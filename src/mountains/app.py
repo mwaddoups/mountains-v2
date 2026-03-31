@@ -51,7 +51,7 @@ def create_app():
 
     app.config.update(
         # Update this each year
-        CMC_MEMBERSHIP_EXPIRY=datetime.date(2026, 3, 31),
+        CMC_MEMBERSHIP_EXPIRY=datetime.date(2027, 3, 31),
         CMC_MAX_TRIAL_EVENTS=4,
     )
 
