@@ -19,10 +19,7 @@
     <h2>Stripe Transactions</h2>
     {% if g.current_user.is_admin or g.current_user.is_executive_committee() %}
       {% if details %}<p role="status">{{ details }}</p>{% endif %}
-      <p>
-        This shows all recent transactions in Stripe, and how they relate to activity on the site.
-        A CSV can be exported for use in accounts - make sure update is pressed before export.
-      </p>
+      <p>This shows all recent transactions in Stripe, and how they relate to activity on the site.</p>
       <form method="post">
         <input type="submit" name="stripe" value="Fetch newer transactions" />
       </form>
@@ -36,6 +33,7 @@
       <p>
         Found {{ stripe_trans | length }} transactions in DB. This should match the Stripe total balance transactions (in Transactions -> All Activity)
       </p>
+      <a href="{{ url_for('.transactions_csv') }}">Download CSV for use in accounts sheet</a>
       <ul>
         {% for t in stripe_trans[:num_trans] %}
           <li>

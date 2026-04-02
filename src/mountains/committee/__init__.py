@@ -1,11 +1,14 @@
+import csv
 import logging
 from collections import defaultdict
+from io import StringIO
 from pathlib import Path
 
 from flask import (
     Blueprint,
     abort,
     current_app,
+    make_response,
     redirect,
     render_template,
     request,
@@ -231,6 +234,62 @@ def treasurer():
             num_trans=request.args.get("num_trans", 10, type=int),
             details=request.args.get("details"),
         )
+
+
+@blueprint.route("/treasurer/transactions")
+def transactions_csv():
+    with db_conn() as conn:
+        stripe_trans = sorted(
+            stripe_transactions_repo(conn).list(),
+            key=lambda x: x.dt_utc,
+            reverse=True,
+        )
+        user_map = {u.id: u for u in users_repo(conn).list()}
+        event_map = {e.id: e for e in events_repo(conn).list()}
+
+    output = StringIO()
+    csv_w = csv.DictWriter(
+        output,
+        [
+            "trans_id",
+            "date",
+            "category",
+            "stripe_type",
+            "net",
+            "gross",
+            "fee",
+            "user_id",
+            "user_full_name",
+            "event_id",
+            "event_title",
+        ],
+    )
+    csv_w.writeheader()
+    csv_w.writerows([
+        {
+            "trans_id": t.id,
+            "date": t.dt_utc,
+            "category": t.category(),
+            "stripe_type": t.stripe_type,
+            "net": t.net(),
+            "gross": t.gross(),
+            "fee": t.stripe_fee(),
+            "user_id": t.user_id,
+            "user_full_name": user_map[t.user_id].full_name
+            if t.user_id in user_map
+            else "",
+            "event_id": t.event_id,
+            "event_title": event_map[t.event_id].title
+            if t.event_id in event_map
+            else "",
+        }
+        for t in stripe_trans
+    ])
+
+    output = make_response(output.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=transactions.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output
 
 
 @blueprint.route("/pages/", methods=["GET", "POST"])
