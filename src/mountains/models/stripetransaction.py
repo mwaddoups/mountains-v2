@@ -44,9 +44,9 @@ class StripeTransaction:
                 return "Payout"
             case "payment" | "charge":
                 if self.payment_type == "membership":
-                    return "Membership Payment"
+                    return "Membership"
                 else:
-                    return "Event Payment"
+                    return "Event"
             case "refund" | "payment_refund":
                 return "Refund"
             case "stripe_fee":

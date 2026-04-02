@@ -17,42 +17,50 @@
   </section>
   <section>
     <h2>Stripe Transactions</h2>
-    {% if details %}<p role="status">{{ details }}</p>{% endif %}
-    <p>
-      This shows all recent transactions in Stripe, and how they relate to activity on the site.
-      A CSV can be exported for use in accounts - make sure update is pressed before export.
-    </p>
-    <form method="post">
-      <input type="submit" name="stripe" value="Fetch newer transactions" />
-    </form>
-    <details>
-      <summary>Advanced - check with website admin if unsure!</summary>
+    {% if g.current_user.is_admin or g.current_user.is_executive_committee() %}
+      {% if details %}<p role="status">{{ details }}</p>{% endif %}
+      <p>
+        This shows all recent transactions in Stripe, and how they relate to activity on the site.
+        A CSV can be exported for use in accounts - make sure update is pressed before export.
+      </p>
       <form method="post">
-        <input type="submit" name="stripe_older" value="Fetch older transactions" />
-        <input type="submit" name="stripe_remove" value="Remove all transactions" />
+        <input type="submit" name="stripe" value="Fetch newer transactions" />
       </form>
-    </details>
-    <p>
-      Found {{ stripe_trans | length }} transactions in DB. This should match the Stripe total balance transactions (in Transactions -> All Activity)
-    </p>
-    <ul>
-      {% for t in stripe_trans %}
-        <li>
-          {{ t.dt_utc.strftime("%d %b %H:%M") }} ({{ t.category() }})
-          {% if t.net() < 0.0 %}
-            Received £{{ -t.net() }} (£{{ -t.gross() }} - £{{ t.stripe_fee() }} fee)
-          {% else %}
-            {% if t.user_id %}
-              {{ user_map[t.user_id].full_name }}
+      <details>
+        <summary>Advanced - check with website admin if unsure!</summary>
+        <form method="post">
+          <input type="submit" name="stripe_older" value="Fetch older transactions" />
+          <input type="submit" name="stripe_remove" value="Remove all transactions" />
+        </form>
+      </details>
+      <p>
+        Found {{ stripe_trans | length }} transactions in DB. This should match the Stripe total balance transactions (in Transactions -> All Activity)
+      </p>
+      <ul>
+        {% for t in stripe_trans[:num_trans] %}
+          <li>
+            <b>{{ t.dt_utc.strftime("%d %b %H:%M") }}</b>
+            <small>{{ t.category() }}</small>
+            {% if t.user_id %}{{ user_map[t.user_id].full_name if t.user_id in user_map else '[unknown user]' }}{% endif %}
+            {% if t.net() < 0.0 %}
+              received £{{ -t.net() }} (£{{ -t.gross() }} - £{{ t.stripe_fee() }} fee)
             {% else %}
-              Unknown
+              paid £{{ t.net() }} (£{{ t.gross() }} - £{{ t.stripe_fee() }} fee)
             {% endif %}
-            paid £{{ t.net() }} (£{{ t.gross() }} - £{{ t.stripe_fee() }} fee)
             {% if t.event_id %}for {{ event_map[t.event_id].title if t.event_id in event_map else '[unknown event]' }}{% endif %}
-          {% endif %}
-        </li>
-      {% endfor %}
-    </ul>
+          </li>
+        {% endfor %}
+      </ul>
+      {% if num_trans < stripe_trans | length %}
+        <form method="get">
+          {% set next_val = ([num_trans * 3, stripe_trans | length] | min) %}
+          <input type="hidden" name="num_trans" value="{{ next_val }}" />
+          <input type="submit" value="Show more (showing {{ next_val }})" />
+        </form>
+      {% endif %}
+    {% else %}
+      <p role="alert">This section is only visible to executive committee members and the website admin.</p>
+    {% endif %}
   </section>
   <section>
     <h2>Membership Payments</h2>

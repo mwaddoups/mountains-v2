@@ -80,6 +80,14 @@ class User:
     def is_site_admin(self) -> bool:
         return self.is_coordinator or self.is_committee or self.is_admin
 
+    def is_executive_committee(self) -> bool:
+        return self.committee_role in [
+            CommitteeRole.CHAIR,
+            CommitteeRole.VICE_CHAIR,
+            CommitteeRole.SECRETARY,
+            CommitteeRole.TREASURER,
+        ]
+
     @property
     def missing_profile_color(self) -> str:
         # map a -> z to a number between 0 and 360

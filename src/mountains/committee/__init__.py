@@ -191,7 +191,7 @@ def treasurer():
                 all_trans = trans_repo.list()
                 for t in all_trans:
                     trans_repo.delete_where(id=t.id)
-                details = f"Removed {len(all_trans)} older transactions."
+                details = f"Removed {len(all_trans)} transactions."
 
         return redirect(url_for(".treasurer", details=details))
     else:
@@ -214,7 +214,11 @@ def treasurer():
                 event_map[e_id] for e_id in set(a.event_id for a in unpaid_attendees)
             ]
 
-            stripe_trans = stripe_transactions_repo(conn).list()
+            stripe_trans = sorted(
+                stripe_transactions_repo(conn).list(),
+                key=lambda x: x.dt_utc,
+                reverse=True,
+            )
 
         return render_template(
             "committee/treasurer.html.j2",
@@ -224,6 +228,7 @@ def treasurer():
             unpaid_events=unpaid_events,
             unpaid_attendees=unpaid_attendees,
             stripe_trans=stripe_trans,
+            num_trans=request.args.get("num_trans", 10, type=int),
             details=request.args.get("details"),
         )
 

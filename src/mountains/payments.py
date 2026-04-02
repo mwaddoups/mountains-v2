@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import logging
 from typing import TYPE_CHECKING, Literal
 
 import stripe
@@ -11,6 +12,8 @@ from mountains.models.stripetransaction import StripeTransaction
 
 if TYPE_CHECKING:
     from flask import Flask, Request
+
+logger = logging.getLogger(__name__)
 
 
 class MountainsStripeError(MountainException):
@@ -280,12 +283,13 @@ class StripeAPI:
                                     stripe_type=trans_type,
                                     payment_type="event",
                                     user_id=int(metadata["user_id"]),
-                                    event_id=int(metadata["user_id"]),
+                                    event_id=int(metadata["event_id"]),
                                 )
                             )
                         else:
                             raise MountainException(f"Unknown metadata: {metadata}")
-                    except Exception:
+                    except Exception as e:
+                        logger.error("Error handling transaction", exc_info=e)
                         trans.append(
                             StripeTransaction(
                                 id=b.id,
