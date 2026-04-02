@@ -73,7 +73,7 @@ class User:
         else:
             return (
                 self.membership_expiry
-                > datetime.datetime.now(tz=datetime.UTC).replace(tzinfo=None).date()
+                >= datetime.datetime.now(tz=datetime.UTC).replace(tzinfo=None).date()
             )
 
     @property
