@@ -35,6 +35,30 @@
 [] Text control by committee?
 
 
+# Accounts work
+
+Create table for tracking all stripe balance transactions
+Store balance trans id, date created, gross, fee, net, type, event_id, user_id, is_membership
+Split into payments, refunds, payouts, bank-related charges
+Add button for loading these from stripe
+
+Create table for all BoS transactions with:
+date, reference, amount
+Add flow for CSV import
+
+Create table for accounting ledger with
+date, account_id, bos_or_stripe, amount
+
+Create table for id, account, subaccount, is_closed
+Make add account form
+Allow closing for say old trip accounts
+Accounts for Kit, every trip, membership
+
+Add reconciliation flow
+
+OR - just create a way to map transaction IDs to event / user IDs and event / user names, or to membership - this only requires the first table.
+
+
 # Questions
 
 - How to do availability well?
