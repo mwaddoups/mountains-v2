@@ -16,6 +16,45 @@
     </dl>
   </section>
   <section>
+    <h2>Stripe Transactions</h2>
+    {% if details %}<p role="status">{{ details }}</p>{% endif %}
+    <p>
+      This shows all recent transactions in Stripe, and how they relate to activity on the site.
+      A CSV can be exported for use in accounts - make sure update is pressed before export.
+    </p>
+    <form method="post">
+      <input type="submit" name="stripe" value="Fetch newer transactions" />
+    </form>
+    <details>
+      <summary>Advanced - check with website admin if unsure!</summary>
+      <form method="post">
+        <input type="submit" name="stripe_older" value="Fetch older transactions" />
+        <input type="submit" name="stripe_remove" value="Remove all transactions" />
+      </form>
+    </details>
+    <p>
+      Found {{ stripe_trans | length }} transactions in DB. This should match the Stripe total balance transactions (in Transactions -> All Activity)
+    </p>
+    <ul>
+      {% for t in stripe_trans %}
+        <li>
+          {{ t.dt_utc.strftime("%d %b %H:%M") }} ({{ t.category() }})
+          {% if t.net() < 0.0 %}
+            Received £{{ -t.net() }} (£{{ -t.gross() }} - £{{ t.stripe_fee() }} fee)
+          {% else %}
+            {% if t.user_id %}
+              {{ user_map[t.user_id].full_name }}
+            {% else %}
+              Unknown
+            {% endif %}
+            paid £{{ t.net() }} (£{{ t.gross() }} - £{{ t.stripe_fee() }} fee)
+            {% if t.event_id %}for {{ event_map[t.event_id].title if t.event_id in event_map else '[unknown event]' }}{% endif %}
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+  <section>
     <h2>Membership Payments</h2>
     <p>
       Membership is managed via Stripe. When you create a new membership product (which should only happen once a year), you have to ensure that two things are present in the metadata for that product:

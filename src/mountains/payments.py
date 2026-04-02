@@ -7,6 +7,7 @@ import stripe
 from attrs import define
 
 from mountains.errors import MountainException
+from mountains.models.stripetransaction import StripeTransaction
 
 if TYPE_CHECKING:
     from flask import Flask, Request
@@ -201,3 +202,157 @@ class StripeAPI:
             metadata = session.metadata
 
         return line_items, metadata
+
+    def fetch_balance_transactions(
+        self,
+        since: StripeTransaction | None = None,
+        before: StripeTransaction | None = None,
+    ) -> list[StripeTransaction]:
+        """
+        Fetches all balance transactions from stripe, linking these with ids and members.
+
+        :param since: if passed, find all transactions after this transaction
+        """
+        if since:
+            balances = stripe.BalanceTransaction.list(
+                api_key=self.api_key,
+                ending_before=since.id,
+                expand=["data.source"],
+                limit=100,
+            )
+        elif before:
+            balances = stripe.BalanceTransaction.list(
+                api_key=self.api_key,
+                starting_after=before.id,
+                expand=["data.source"],
+                limit=100,
+            )
+        else:
+            balances = stripe.BalanceTransaction.list(
+                api_key=self.api_key,
+                expand=["data.source"],
+                limit=100,
+            )
+
+        trans: list[StripeTransaction] = []
+
+        for b in balances:
+            dt = datetime.datetime.fromtimestamp(b.created)
+            amount = b.amount
+            fee = b.fee
+            net = b.net
+            trans_type = b.type
+            match b.type:
+                case "payment" | "charge":
+                    try:
+                        # Payments either for events or membership, can be accounted for via metadata
+                        payment_intent_id = b.source.payment_intent  # type: ignore
+                        checkout_sessions = stripe.checkout.Session.list(
+                            payment_intent=payment_intent_id,  # type: ignore
+                            api_key=self.api_key,  # type: ignore
+                        )
+                        # There is always exactly one checkout session unless we start using subscriptions
+                        checkout_session = checkout_sessions.data[0]
+                        metadata = checkout_session.metadata
+                        assert metadata is not None
+
+                        if metadata["payment_for"] == "membership":
+                            trans.append(
+                                StripeTransaction(
+                                    id=b.id,
+                                    dt_utc=dt,
+                                    gross_p=amount,
+                                    stripe_fee_p=fee,
+                                    net_p=net,
+                                    stripe_type=trans_type,
+                                    payment_type="membership",
+                                    user_id=int(metadata["user_id"]),
+                                )
+                            )
+                        elif metadata["payment_for"] == "event":
+                            trans.append(
+                                StripeTransaction(
+                                    id=b.id,
+                                    dt_utc=dt,
+                                    gross_p=amount,
+                                    stripe_fee_p=fee,
+                                    net_p=net,
+                                    stripe_type=trans_type,
+                                    payment_type="event",
+                                    user_id=int(metadata["user_id"]),
+                                    event_id=int(metadata["user_id"]),
+                                )
+                            )
+                        else:
+                            raise MountainException(f"Unknown metadata: {metadata}")
+                    except Exception:
+                        trans.append(
+                            StripeTransaction(
+                                id=b.id,
+                                dt_utc=dt,
+                                gross_p=amount,
+                                stripe_fee_p=fee,
+                                net_p=net,
+                                stripe_type=trans_type,
+                                payment_type="unknown",
+                            )
+                        )
+                case "refund" | "payment_refund":
+                    try:
+                        # Link this back to the checkout session for the refund
+                        refund_charge = b.source.charge  # type: ignore
+                        charge = stripe.Charge.retrieve(
+                            api_key=self.api_key,
+                            id=refund_charge,  # type: ignore
+                        )
+                        payment_intent_id = charge.payment_intent
+                        checkout_sessions = stripe.checkout.Session.list(
+                            payment_intent=charge.payment_intent,  # type: ignore
+                            api_key=self.api_key,  # type: ignore
+                        )
+                        # There is always exactly one checkout session unless we start using subscriptions
+                        checkout_session = checkout_sessions.data[0]
+                        metadata = checkout_session.metadata
+                        assert metadata is not None
+                        trans.append(
+                            StripeTransaction(
+                                id=b.id,
+                                dt_utc=dt,
+                                gross_p=amount,
+                                stripe_fee_p=fee,
+                                net_p=net,
+                                stripe_type=trans_type,
+                                payment_type="refund",
+                                event_id=int(metadata["event_id"])
+                                if "event_id" in metadata
+                                else None,
+                                user_id=int(metadata["user_id"])
+                                if "user_id" in metadata
+                                else None,
+                            )
+                        )
+                    except Exception:
+                        trans.append(
+                            StripeTransaction(
+                                id=b.id,
+                                dt_utc=dt,
+                                gross_p=amount,
+                                stripe_fee_p=fee,
+                                net_p=net,
+                                stripe_type=trans_type,
+                                payment_type="unknown refund",
+                            )
+                        )
+                case _:
+                    trans.append(
+                        StripeTransaction(
+                            id=b.id,
+                            dt_utc=dt,
+                            gross_p=amount,
+                            stripe_fee_p=fee,
+                            net_p=net,
+                            stripe_type=trans_type,
+                        )
+                    )
+
+        return trans

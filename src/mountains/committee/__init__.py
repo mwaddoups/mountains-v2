@@ -18,7 +18,9 @@ from mountains.discord import DiscordAPI
 from mountains.models.activity import activity_repo
 from mountains.models.events import attendees_repo, events_repo
 from mountains.models.pages import Page, latest_page, pages_repo
+from mountains.models.stripetransaction import stripe_transactions_repo
 from mountains.models.users import users_repo
+from mountains.payments import StripeAPI
 from mountains.utils import now_utc, slugify
 
 logger = logging.getLogger(__name__)
@@ -156,34 +158,74 @@ def member_dormant(user_id: int):
     )
 
 
-@blueprint.route("/treasurer/")
+@blueprint.route("/treasurer/", methods=["GET", "POST"])
 def treasurer():
-    with db_conn() as conn:
-        # Get these for sharing data
-        user_map = {u.id: u for u in users_repo(conn).list()}
-        event_map = {e.id: e for e in events_repo(conn).list()}
+    if request.method == "POST":
+        details = ""
+        if "stripe" in request.form:
+            api = StripeAPI.from_app(current_app)
+            with db_conn() as conn:
+                current_trans = stripe_transactions_repo(conn).list()
+                last_trans = max(current_trans, key=lambda x: x.dt_utc, default=None)
+            transactions = api.fetch_balance_transactions(since=last_trans)
+            with db_conn() as conn:
+                trans_repo = stripe_transactions_repo(conn)
+                for t in transactions:
+                    trans_repo.insert(t)
+            details = f"Inserted {len(transactions)} newer transactions."
+        elif "stripe_older" in request.form:
+            api = StripeAPI.from_app(current_app)
+            with db_conn() as conn:
+                current_trans = stripe_transactions_repo(conn).list()
+                last_trans = min(current_trans, key=lambda x: x.dt_utc, default=None)
+            transactions = api.fetch_balance_transactions(before=last_trans)
+            with db_conn() as conn:
+                trans_repo = stripe_transactions_repo(conn)
+                for t in transactions:
+                    trans_repo.insert(t)
+            details = f"Inserted {len(transactions)} older transactions."
+        else:
+            logger.info("Deleting all transactions from stripe DB!")
+            with db_conn() as conn:
+                trans_repo = stripe_transactions_repo(conn)
+                all_trans = trans_repo.list()
+                for t in all_trans:
+                    trans_repo.delete_where(id=t.id)
+                details = f"Removed {len(all_trans)} older transactions."
 
-        # Get unpaid users
-        attendees = attendees_repo(conn).list_where(
-            is_trip_paid=False, is_waiting_list=False
+        return redirect(url_for(".treasurer", details=details))
+    else:
+        with db_conn() as conn:
+            # Get these for sharing data
+            user_map = {u.id: u for u in users_repo(conn).list()}
+            event_map = {e.id: e for e in events_repo(conn).list()}
+
+            # Get unpaid users
+            attendees = attendees_repo(conn).list_where(
+                is_trip_paid=False, is_waiting_list=False
+            )
+            unpaid_attendees = [
+                a
+                for a in attendees
+                if event_map[a.event_id].price_id
+                and event_map[a.event_id].is_upcoming()
+            ]
+            unpaid_events = [
+                event_map[e_id] for e_id in set(a.event_id for a in unpaid_attendees)
+            ]
+
+            stripe_trans = stripe_transactions_repo(conn).list()
+
+        return render_template(
+            "committee/treasurer.html.j2",
+            active_expiry=current_app.config["CMC_MEMBERSHIP_EXPIRY"],
+            user_map=user_map,
+            event_map=event_map,
+            unpaid_events=unpaid_events,
+            unpaid_attendees=unpaid_attendees,
+            stripe_trans=stripe_trans,
+            details=request.args.get("details"),
         )
-        unpaid_attendees = [
-            a
-            for a in attendees
-            if event_map[a.event_id].price_id and event_map[a.event_id].is_upcoming()
-        ]
-        unpaid_events = [
-            event_map[e_id] for e_id in set(a.event_id for a in unpaid_attendees)
-        ]
-
-    return render_template(
-        "committee/treasurer.html.j2",
-        active_expiry=current_app.config["CMC_MEMBERSHIP_EXPIRY"],
-        user_map=user_map,
-        event_map=event_map,
-        unpaid_events=unpaid_events,
-        unpaid_attendees=unpaid_attendees,
-    )
 
 
 @blueprint.route("/pages/", methods=["GET", "POST"])
