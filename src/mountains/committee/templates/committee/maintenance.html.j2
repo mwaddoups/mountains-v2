@@ -108,7 +108,10 @@
             {{ u.full_name }} [Committee - {{ u.committee_role.name | replace('_', ' ') | title }}]
           </li>
         {% elif u.is_site_admin %}
-          <li class="color-coordinator cmc-color">{{ u.full_name }} [Coordinator]</li>
+          <li class="color-coordinator cmc-color">
+            <span class="color-coordinator cmc-color">{{ u.full_name }} [Coordinator]</span>
+            <a href="{{ url_for('platform.members.member', slug=u.slug) }}">&lt;Go to Profile&gt;</a>
+          </li>
         {% endif %}
       {% endfor %}
     </ul>
