@@ -18,6 +18,7 @@ from requests.exceptions import ConnectionError
 
 from mountains.context import current_user, db_conn
 from mountains.discord import DiscordAPI
+from mountains.events import EventType
 from mountains.models.activity import activity_repo
 from mountains.models.events import attendees_repo, events_repo
 from mountains.models.pages import Page, latest_page, pages_repo
@@ -207,15 +208,7 @@ def treasurer():
             attendees = attendees_repo(conn).list_where(
                 is_trip_paid=False, is_waiting_list=False
             )
-            unpaid_attendees = [
-                a
-                for a in attendees
-                if event_map[a.event_id].price_id
-                and event_map[a.event_id].is_upcoming()
-            ]
-            unpaid_events = [
-                event_map[e_id] for e_id in set(a.event_id for a in unpaid_attendees)
-            ]
+            unpaid_attendees = [a for a in attendees if event_map[a.event_id].price_id]
 
             stripe_trans = sorted(
                 stripe_transactions_repo(conn).list(),
@@ -223,12 +216,29 @@ def treasurer():
                 reverse=True,
             )
 
+        # All paid events, or historic ones where users still haven't paid
+        upcoming_paid_events = [
+            e
+            for e in event_map.values()
+            if (e.is_upcoming() and e.price_id)
+            or (e.id in set(a.event_id for a in unpaid_attendees))
+        ]
+
+        upcoming_weekends_without_prices = [
+            e
+            for e in event_map.values()
+            if e.is_upcoming()
+            and e.event_type in (EventType.SUMMER_WEEKEND, EventType.WINTER_WEEKEND)
+            and not e.price_id
+        ]
+
         return render_template(
             "committee/treasurer.html.j2",
             active_expiry=current_app.config["CMC_MEMBERSHIP_EXPIRY"],
             user_map=user_map,
             event_map=event_map,
-            unpaid_events=unpaid_events,
+            upcoming_paid_events=upcoming_paid_events,
+            upcoming_weekends_without_prices=upcoming_weekends_without_prices,
             unpaid_attendees=unpaid_attendees,
             stripe_trans=stripe_trans,
             num_trans=request.args.get("num_trans", 10, type=int),

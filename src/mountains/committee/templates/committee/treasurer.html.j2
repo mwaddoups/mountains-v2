@@ -2,18 +2,36 @@
 {% block content %}
   <h1>Treasurer Overview</h1>
   <section>
-    <h2>Unpaid Users</h2>
-    <p>This shows anyone who has signed up to an event with an attached price but hasn't paid yet.</p>
+    <h2>Event Overview</h2>
+    <h3>Upcoming Paid Events</h3>
+    <p>This shows a summary of upcoming paid events and lists any unpaid attendees on events (including past events).</p>
     <dl>
-      {% for event in unpaid_events | sort(attribute='event_dt') %}
+      {% for event in upcoming_paid_events | sort(attribute='event_dt') %}
         <dt>{{ event.title }} ({{ event.event_dt.strftime("%b %d, %Y") }})</dt>
         {% for attendee in unpaid_attendees | selectattr("event_id", "equalto", event.id) %}
           <dd>
             {{ user_map[attendee.user_id].full_name }}
           </dd>
+        {% else %}
+          <dd>
+            All paid!
+          </dd>
         {% endfor %}
       {% endfor %}
     </dl>
+    <h3>Upcoming Hut Weekends</h3>
+    <p>This shows any upcoming hut weekends without prices.</p>
+    {% if upcoming_weekends_without_prices %}
+      <ul>
+        {% for event in upcoming_weekends_without_prices %}
+          <li>
+            <a href="{{ url_for('platform.events.event', id=event.id) }}">{{ event.title }}</a> ({{ event.event_dt.strftime("%b %d, %Y") }})
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p role="status">All upcoming weekends have prices!</p>
+    {% endif %}
   </section>
   <section>
     <h2>Stripe Transactions</h2>
