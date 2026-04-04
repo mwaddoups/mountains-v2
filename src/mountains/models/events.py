@@ -76,7 +76,7 @@ class Event:
         )
 
     def is_upcoming(self) -> bool:
-        return self.is_upcoming_on(now_utc().date())
+        return self.is_upcoming_on(now_utc().date()) and not self.is_deleted
 
     def is_happening_on(self, dt: datetime.date) -> bool:
         if self.event_end_dt is None:
