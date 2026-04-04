@@ -14,7 +14,7 @@
           </dd>
         {% else %}
           <dd>
-            All paid!
+            <em>All paid!</em>
           </dd>
         {% endfor %}
       {% endfor %}
@@ -77,6 +77,73 @@
     {% else %}
       <p role="alert">This section is only visible to executive committee members and the website admin.</p>
     {% endif %}
+  </section>
+  <section>
+    <h2>Trip Price Calculator</h2>
+    <form id="trip-calculator">
+      <label>
+        How many nights?
+        <input name="num_nights" type="number" min="0" step="1" value="2" />
+      </label>
+      <label>
+        How much per night (£)?
+        <input name="cost_per_night"
+               type="number"
+               min="0.00"
+               step="0.01"
+               value="20.00" />
+      </label>
+      <label>
+        How many nights of food budget?
+        <input name="food_nights" type="number" min="0" step="1" value="1" />
+      </label>
+      <label>
+        How much per night per person for food (usually £4)?
+        <input name="food_cost" type="number" min="0.00" step="0.01" value="4.00" />
+      </label>
+      <label>
+        Any other fixed costs per person (e.g. coins for radiators)?
+        <input name="fixed_costs" type="number" min="0.00" step="0.01" value="0.00" />
+      </label>
+      <label>
+        Stripe fees / markup
+        <small>This is 1.5% + 20p in most cases, but we use 2% usually.</small>
+        <input name="stripe_pct"
+               type="number"
+               min="0.00"
+               step="0.01"
+               max="100.00"
+               value="2.00" />
+      </label>
+      <label>
+        Calculated Cost Per Person
+        <output name="result">
+        </output>
+      </label>
+    </form>
+    <script>
+      const form = document.getElementById("trip-calculator");
+
+      function updateResult() {
+        const num_nights = form.elements["num_nights"].valueAsNumber;
+        const cost_per_night = form.elements["cost_per_night"].valueAsNumber;
+        const food_nights = form.elements["food_nights"].valueAsNumber;
+        const food_cost = form.elements["food_cost"].valueAsNumber;
+        const fixed_costs = form.elements["fixed_costs"].valueAsNumber;
+        const stripe_pct = form.elements["stripe_pct"].valueAsNumber;
+
+        const gross_cost = num_nights * cost_per_night + food_nights * food_cost + fixed_costs;
+
+        const total_cost = gross_cost * (100 + stripe_pct) / 100;
+
+        const result = form.elements['result'];
+
+        result.value = `£${total_cost.toFixed(2)}`
+      }
+
+      updateResult();
+      form.addEventListener("input", updateResult)
+    </script>
   </section>
   <section>
     <h2>Membership Payments</h2>
