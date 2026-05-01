@@ -143,6 +143,27 @@ def maintenance():
     )
 
 
+@blueprint.route("/maintenance/removediscord/<int:user_id>/", methods=["POST"])
+def remove_discord_member(user_id: int):
+    with db_conn() as conn:
+        users_db = users_repo(conn)
+        user = users_db.get(id=user_id)
+        if user is None:
+            abort(404)
+
+    if user.discord_id is not None:
+        discord = DiscordAPI.from_app(current_app)
+        discord.remove_member_role(user.discord_id)
+
+    return redirect(
+        url_for(
+            ".maintenance",
+            _anchor="membership-discord",
+            message=f"Removed Member role from {user.full_name}!",
+        )
+    )
+
+
 @blueprint.route("/dormant/<int:user_id>/", methods=["POST"])
 def member_dormant(user_id: int):
     with db_conn() as conn:

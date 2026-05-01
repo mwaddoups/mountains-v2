@@ -85,6 +85,12 @@
                 <strong role="alert">No</strong>
               </td>
             {% endif %}
+            <td>
+              <form method="post"
+                    action="{{ url_for('.remove_discord_member', user_id=member.user.id) }}">
+                <input type="submit" value="Remove Discord Member Role" />
+              </form>
+            </td>
           </tr>
         {% endfor %}
       </tbody>
