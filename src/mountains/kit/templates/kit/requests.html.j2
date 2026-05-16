@@ -116,7 +116,7 @@
       <span class="kit-request-header">Return Date</span>
       {% for request in past_kit_requests | sort(attribute="request_created_dt", reverse=True) %}
         {% if request.user_id in user_map and request.kit_id in kit_item_map %}
-          {{ request_card(request, user_map.get[request.user_id] , kit_item_map[request.kit_id], "Past", "color-grey") }}
+          {{ request_card(request, user_map[request.user_id] , kit_item_map[request.kit_id], "Past", "color-grey") }}
         {% endif %}
       {% endfor %}
     </section>
