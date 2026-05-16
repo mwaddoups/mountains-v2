@@ -9,30 +9,30 @@
   {% if current_requests %}
     <table>
       <thead>
-	<tr>
-	  <th scope="col">Member</th>
-	  <th scope="col">Pickup Date</th>
-	  <th scope="col">Return Date</th>
-	  <th scope="col">Approved?</th>
-	</tr>
+        <tr>
+          <th scope="col">Member</th>
+          <th scope="col">Pickup Date</th>
+          <th scope="col">Return Date</th>
+          <th scope="col">Approved?</th>
+        </tr>
       </thead>
       <tbody>
-	{% for kit_request in current_requests %}
-	  <tr>
-	    <td>{{ current_request_users[kit_request.user_id].full_name }}</td>
-	    <td>{{ kit_request.pickup_dt.strftime("%A, %B %-d %Y") }}</td>
-	    <td>{{ kit_request.return_dt.strftime("%A, %B %-d %Y") }}</td>
-	    <td>{{ "Yes" if kit_request.approved else "No" }}</td>
-	  </tr>
-	{% endfor %}
+        {% for kit_request in current_requests %}
+          <tr>
+            <td>{{ current_request_users[kit_request.user_id].full_name if g.current_user.is_committee else '[name hidden]' }}</td>
+            <td>{{ kit_request.pickup_dt.strftime("%A, %B %-d %Y") }}</td>
+            <td>{{ kit_request.return_dt.strftime("%A, %B %-d %Y") }}</td>
+            <td>{{ "Yes" if kit_request.approved else "No" }}</td>
+          </tr>
+        {% endfor %}
       </tbody>
     </table>
   {% else %}
-  <p><small>No current requests!</small></p>
+    <p>
+      <small>No current requests!</small>
+    </p>
   {% endif %}
-  <p>
-    Once filled in, the kit sec will reach out on Discord to confirm the request works and arrange pickup.
-  </p>
+  <p>Once filled in, the kit sec will reach out on Discord to confirm the request works and arrange pickup.</p>
   <form method="post">
     <label>
       Start Date
@@ -42,7 +42,7 @@
     <label>
       Return Date
       <small>When will you return it by?</small>
-      <input type="date" name="return_dt" required/>
+      <input type="date" name="return_dt" required />
     </label>
     <label>
       When can you pickup - and any other notes?

@@ -42,8 +42,14 @@
                 <input type="hidden" name="is_returned" value="true" />
                 <input class="admin" type="submit" value="Mark Returned" />
               </form>
+              <form method="post"
+                    action="{{ url_for('.update_request', id=kit_request.id) }}">
+                <input type="hidden" name="method" value="PATCH" />
+                <input type="hidden" name="is_returned_and_survey" value="true" />
+                <input class="admin" type="submit" value="Mark Returned and Survey" />
+              </form>
             {% else %}
-              <span class="badge">Picked Up</span>
+              <span class="badge">Returned</span>
             {% endif %}
           {% endif %}
         {% endif %}
@@ -98,4 +104,23 @@
       {% endif %}
     {% endfor %}
   </section>
+  {% if g.current_user.is_committee or g.current_user.is_admin %}
+    <h2 class="admin">Past Requests</h2>
+    <p class="admin">This lists all historic requests</p>
+    <section class="kit-request-list">
+      <span class="kit-request-header">Status</span>
+      <span class="kit-request-header">Requested On</span>
+      <span class="kit-request-header">Requester</span>
+      <span class="kit-request-header">Kit</span>
+      <span class="kit-request-header">Start Date</span>
+      <span class="kit-request-header">Return Date</span>
+      {% for request in past_kit_requests | sort(attribute="request_created_dt", reverse=True) %}
+        {{ request_card(request, user_map.get(request.user_id, "[missing user]") , kit_item_map.get(request.kit_id, "[missing item]"), "Past", "color-grey") }}
+      {% endfor %}
+    </section>
+    <form method="get">
+      <input type="hidden" name="limit" value="{{ current_limit * 10 }}" />
+      <input type="submit" value="Show more (showing {{ current_limit }})" />
+    </form>
+  {% endif %}
 {% endblock content %}

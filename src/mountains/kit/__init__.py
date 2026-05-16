@@ -263,9 +263,14 @@ def request_kit(id: int):
 @blueprint.route("/requests")
 def requests():
     with db_conn() as conn:
-        kit_requests = kit_request_repo(conn).list()
+        all_kit_requests = kit_request_repo(conn).list()
+        past_kit_requests = sorted(
+            [k for k in all_kit_requests if not (k.is_active() or k.is_in_future())],
+            key=lambda k: k.request_created_dt,
+            reverse=True,
+        )
         kit_requests = sorted(
-            [k for k in kit_requests if k.is_active() or k.is_in_future()],
+            [k for k in all_kit_requests if k.is_active() or k.is_in_future()],
             key=lambda k: k.pickup_dt,
         )
 
@@ -278,9 +283,17 @@ def requests():
             for u in users_repo(conn).get_all(id=[r.user_id for r in kit_requests])
         }
 
+    if not (current_user.is_admin or current_user.is_committee):
+        # Only show them their requests
+        kit_requests = [k for k in kit_requests if k.user_id == current_user.id]
+
+    current_limit = request.args.get("limit", 10, type=int)
+
     return render_template(
         "kit/requests.html.j2",
         kit_requests=kit_requests,
+        past_kit_requests=past_kit_requests[:current_limit],
+        current_limit=current_limit,
         kit_item_map=kit_item_map,
         user_map=user_map,
     )
@@ -310,14 +323,23 @@ def update_request(id: int):
                 req_db.update(id=id, is_picked_up=True)
             elif "is_returned" in request.form:
                 req_db.update(id=id, is_picked_up=True, is_returned=True)
+            elif "is_returned_and_survey" in request.form:
+                req_db.update(id=id, is_picked_up=True, is_returned=True)
 
-                # TODO: EMAIL for survey.
-                # if kit_request_user is not None:
-                #     send_mail(
-                #         to=[kit_request_user.email],
-                #         subject='Kit returned - survey',
-                #         msg_markdown="TODO!"
-                #     )
+                if kit_request_user is not None:
+                    send_mail(
+                        to=[kit_request_user.email],
+                        subject="Kit returned - survey",
+                        msg_markdown="\n".join([
+                            "# Kit Survey",
+                            "",
+                            "It would be very helpful if you could fill out this short survey about the kit below.",
+                            "",
+                            "https://forms.gle/ci58t7raJcte3pcHA",
+                            "",
+                            "Thank you!",
+                        ]),
+                    )
 
         return redirect(url_for(".requests"))
     elif method == "DELETE":
