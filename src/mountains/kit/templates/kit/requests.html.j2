@@ -16,7 +16,7 @@
         </p>
       {% endif %}
       <span class="flex kit-request-controls">
-        {% if g.current_user.is_site_admin %}
+        {% if g.current_user.is_site_admin and status != 'Past' %}
           {% if not kit_request.is_approved %}
             <form method="post"
                   action="{{ url_for('.update_request', id=kit_request.id) }}">
@@ -53,7 +53,7 @@
             {% endif %}
           {% endif %}
         {% endif %}
-        {% if g.current_user.is_authorised(kit_request.user_id) %}
+        {% if g.current_user.is_authorised(kit_request.user_id) and status != 'Past' %}
           <form method="post"
                 action="{{ url_for('.update_request', id=kit_request.id) }}">
             <input type="hidden" name="method" value="DELETE" />
@@ -117,6 +117,8 @@
       {% for request in past_kit_requests | sort(attribute="request_created_dt", reverse=True) %}
         {% if request.user_id in user_map and request.kit_id in kit_item_map %}
           {{ request_card(request, user_map[request.user_id] , kit_item_map[request.kit_id], "Past", "color-grey") }}
+        {% else %}
+          {{ request }}
         {% endif %}
       {% endfor %}
     </section>

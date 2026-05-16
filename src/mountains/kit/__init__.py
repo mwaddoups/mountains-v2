@@ -276,11 +276,13 @@ def requests():
 
         kit_item_map = {
             k.id: k
-            for k in kit_item_repo(conn).get_all(id=[r.kit_id for r in kit_requests])
+            for k in kit_item_repo(conn).get_all(
+                id=[r.kit_id for r in all_kit_requests]
+            )
         }
         user_map = {
             u.id: u
-            for u in users_repo(conn).get_all(id=[r.user_id for r in kit_requests])
+            for u in users_repo(conn).get_all(id=[r.user_id for r in all_kit_requests])
         }
 
     if not (current_user.is_admin or current_user.is_committee):
