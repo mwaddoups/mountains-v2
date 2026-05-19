@@ -51,22 +51,12 @@
       {{ nav_link('platform.members.members', 'Members', icon=bi.bi_people_fill) }}
       {{ nav_link('platform.albums.albums', 'Photos', icon=bi.bi_images) }}
       {{ nav_link('platform.join', 'Join the Club', icon=bi.bi_pencil_square) }}
-      <li>
-        <a target="_blank"
-           rel="noreferrer"
-           href="https://docs.google.com/spreadsheets/d/1__K5wAU1Cw9k2pcbia1crBqj7HAUX6f1UOEd-X1lU8c/edit?usp=drivesdk">
-          {{ bi.bi_tools() }}
-          <span>Kit Library</span>
-        </a>
-      </li>
-      {% if g.current_user.is_committee or g.current_user.is_admin %}
-	{% call nav_link('platform.kit.kit', 'Kit Library', icon=bi.bi_tools) %}
-	  <ul>
-	    {{ nav_link('platform.kit.kit', 'Kit List') }}
-	    {{ nav_link('platform.kit.requests', 'Requests') }}
-	  </ul>
-	{% endcall %}
-      {% endif %}
+      {% call nav_link('platform.kit.kit', 'Kit Library', icon=bi.bi_tools) %}
+        <ul>
+          {{ nav_link('platform.kit.kit', 'Kit List') }}
+          {{ nav_link('platform.kit.requests', 'Requests') }}
+        </ul>
+      {% endcall %}
       {{ nav_link('platform.resources', 'Resources', icon=bi.bi_info_square) }}
       {{ nav_link('platform.feedback', 'Feedback', icon=bi.bi_envelope_paper_fill) }}
       <li>
