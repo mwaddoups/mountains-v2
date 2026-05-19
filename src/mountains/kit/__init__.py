@@ -176,7 +176,7 @@ def _upload_kit_image(
 
 
 @blueprint.route("/add/", methods=["GET", "POST"])
-@blueprint.route("/<int:id>/edit/", methods=["GET", "POST", "PUT"])
+@blueprint.route("/<int:id>/edit/", methods=["GET", "POST", "PUT", "DELETE"])
 def add_kit(id: int | None = None):
     current_user.check_authorised()
     method = req_method(request)
@@ -200,6 +200,9 @@ def add_kit(id: int | None = None):
                 kit_item = KitItem.from_form(id=kit_item.id, form=request.form)
                 kit_db.delete_where(id=kit_item.id)
                 kit_db.insert(kit_item)
+            elif method == "DELETE" and kit_item is not None:
+                logger.info(f"Deleting kit item {kit_item}...")
+                kit_db.delete_where(id=kit_item.id)
             else:
                 abort(405)
 

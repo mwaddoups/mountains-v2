@@ -70,6 +70,14 @@
       <a class="button" href="{{ url_for('.request_kit', id=kit_item.id) }}">Request to Borrow</a>
       {% if g.current_user.is_site_admin %}
         <a class="button admin" href="{{ url_for('.add_kit', id=kit_item.id) }}">Edit Item</a>
+        <form method="post"
+              hx-boost="true"
+              hx-confirm="Are you sure you want to delete?"
+              action="{{ url_for('.add_kit', id=kit_item.id) }}"
+              class="admin">
+          <input type="hidden" name="method" value="DELETE" />
+          <input type="submit" value="Delete Item" />
+        </form>
       {% endif %}
     </div>
     {% if latest_photo_note %}
