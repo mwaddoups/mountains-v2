@@ -15,7 +15,7 @@ from mountains.payments import (
     StripeAPI,
 )
 
-from . import auth, platform
+from . import auth, platform, ics
 from .models.events import attendees_repo, events_repo
 from .models.pages import latest_content
 from .models.photos import photos_repo
@@ -57,6 +57,7 @@ def create_app():
 
     app.register_blueprint(platform.blueprint)
     app.register_blueprint(auth.blueprint)
+    app.register_blueprint(ics.blueprint)
 
     @app.template_filter("markdown")
     def convert_markdown(s: str) -> str:
