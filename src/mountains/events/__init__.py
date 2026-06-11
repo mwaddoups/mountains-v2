@@ -582,7 +582,13 @@ def discord_names(event_id: int):
 
 @blueprint.route("/subscribe/")
 def subscribe():
-    token = _ics_token()
+    with db_conn(locked=True) as conn:
+        tokens_ics_db = tokens_ics_repo(conn)
+        ics_token = tokens_ics_db.get(user_id=current_user.id)
+        if not ics_token:
+            ics_token = ICSToken.from_id(current_user.id)
+            tokens_ics_db.insert(ics_token)
+        token = ics_token.id
     all_ics_url = url_for("ics.calendar", _external=True, token=token)
     user_ics_url = url_for("ics.user_calendar", _external=True, token=token)
     all_webcal_url= _webcal_url(ics_url=all_ics_url)
@@ -594,16 +600,6 @@ def subscribe():
         all_webcal_url=all_webcal_url,
         user_webcal_url=user_webcal_url,
     )
-
-
-def _ics_token():
-    with db_conn(locked=True) as conn:
-        tokens_ics_db = tokens_ics_repo(conn)
-        ics_token = tokens_ics_db.get(user_id=current_user.id)
-        if not ics_token:
-            ics_token = ICSToken.from_id(current_user.id)
-            tokens_ics_db.insert(ics_token)
-        return ics_token.id
 
 
 def _webcal_url(ics_url):
