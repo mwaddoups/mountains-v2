@@ -1,4 +1,5 @@
 import datetime
+import secrets
 import sqlite3
 import uuid
 
@@ -38,4 +39,34 @@ def tokens_repo(conn: sqlite3.Connection) -> Repository[AuthToken]:
             "FOREIGN KEY(user_id) REFERENCES users(id)",
         ],
         storage_cls=AuthToken,
+    )
+
+
+@define
+class ICSToken:
+    """
+    Used for calendar subscription functionality.
+    """
+
+    id: str
+    user_id: int
+
+    @classmethod
+    def from_id(cls, id: int):
+        return cls(
+            id=secrets.token_urlsafe(32),
+            user_id=id,
+        )
+
+
+def tokens_ics_repo(conn: sqlite3.Connection) -> Repository[ICSToken]:
+    return Repository(
+        conn=conn,
+        table_name="tokens_ics",
+        schema=[
+            "id TEXT PRIMARY KEY",
+            "user_id INTEGER",
+            "FOREIGN KEY(user_id) REFERENCES users(id)",
+        ],
+        storage_cls=ICSToken,
     )

@@ -1,0 +1,23 @@
+{% extends "platform/base.html.j2" %}
+{% block content %}
+  <h1>Subscribe</h1>
+  <p>
+    Add CMC events to your digital calendar. These subscription links are unique to your account, so please don’t share them.
+  </p>
+
+  <h2>All Events</h2>
+  <p>
+    Subscribe to see all CMC events in your calendar.
+  </p>
+  <a class="button" href="{{ all_webcal_url }}" style="width: fit-content;">Subscribe</a>
+  <p>Or copy and paste this URL into your calendar app:</p>
+  <input type="text" value="{{ all_ics_url }}" readonly/>
+
+  <h2>Your Events</h2>
+  <p>
+    Subscribe to see only the events you’ve joined or been waitlisted for.
+  </p>
+  <a class="button" href="{{ user_webcal_url }}" style="width: fit-content;">Subscribe</a>
+  <p>Or copy and paste this URL into your calendar app:</p>
+  <input type="text" value="{{ user_ics_url }}" readonly/>
+{% endblock content %}

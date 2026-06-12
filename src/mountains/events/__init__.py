@@ -27,6 +27,7 @@ from mountains.models.events import (
     events_repo,
 )
 from mountains.models.pages import latest_content, latest_page, pages_repo
+from mountains.models.tokens import ICSToken, tokens_ics_repo
 from mountains.models.users import User, users_repo
 from mountains.payments import EventPaymentMetadata, StripeAPI
 from mountains.utils import now_utc, req_method, str_to_bool
@@ -69,7 +70,6 @@ def events(event_id: int | None = None):
             events_for_metadata = events + [event]
         else:
             events_for_metadata = events
-
 
         event_attendees, event_members = _events_attendees(conn, events_for_metadata)
 
@@ -577,6 +577,30 @@ def discord_names(event_id: int):
             users=users,
             event=event,
         )
+
+
+@blueprint.route("/subscribe/")
+def subscribe_calendar():
+    with db_conn(locked=True) as conn:
+        tokens_ics_db = tokens_ics_repo(conn)
+        ics_token = tokens_ics_db.get(user_id=current_user.id)
+        if not ics_token:
+            ics_token = ICSToken.from_id(current_user.id)
+            tokens_ics_db.insert(ics_token)
+        token = ics_token.id
+    all_ics_url = url_for("ics.calendar", _external=True, token=token)
+    user_ics_url = url_for("ics.user_calendar", _external=True, token=token)
+
+    # Webcal only supports https, so we replace the protocol here only if present
+    all_webcal_url = all_ics_url.replace("https://", "webcal://", 1)
+    user_webcal_url = user_ics_url.replace("https://", "webcal://", 1)
+    return render_template(
+        "events/subscribe.html.j2",
+        all_ics_url=all_ics_url,
+        user_ics_url=user_ics_url,
+        all_webcal_url=all_webcal_url,
+        user_webcal_url=user_webcal_url,
+    )
 
 
 def _get_sorted_filtered_events(

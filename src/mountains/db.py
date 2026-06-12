@@ -164,16 +164,31 @@ class Repository[T]:
         return [structure(dict(row), self.storage_cls) for row in rows]
 
     def list_where(self, **kwargs) -> typing.List[T]:
+        """
+        This expects kwargs to be of the form `col_name = (operator, value)`
+
+        If you use `col_name=value`, that is short for `col_name=('=', value)`.
+        """
+        conditions = []
+        params = {}
+
+        for key, op_value in kwargs.items():
+            if not isinstance(op_value, tuple):
+                # Shorthand for equals
+                op_value = ("=", op_value)
+            op, value = op_value
+            conditions.append(f"{key} {op} :{key}")
+            params[key] = value
+
         cur = self._try_execute(
             f"""
-            SELECT {",".join(self._field_names)} 
+            SELECT {",".join(self._field_names)}
             FROM {self.table_name}
-            WHERE {" AND ".join([f"{k} = :{k}" for k in kwargs])}
-        """,
-            kwargs,
+            WHERE {" AND ".join(conditions)}
+            """,
+            params,
         )
         rows = cur.fetchall()
-
         return [structure(dict(row), self.storage_cls) for row in rows]
 
     def delete_where(self, **kwargs):
