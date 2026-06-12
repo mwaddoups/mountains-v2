@@ -72,6 +72,7 @@ def routes(blueprint: Blueprint):
             "hut-weekends": "info-hut-weekends",
             "climbing": "info-climbing",
             "running": "info-running",
+            "club-policies": "info-club-policies",
         }
         if page is None:
             with db_conn() as conn:
