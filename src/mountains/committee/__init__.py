@@ -374,7 +374,7 @@ def page_editor():
                             message = f"File name {file_name} already exists!"
                         else:
                             file.save(CONTENT_PATH / file_name)
-                            message = f"Image {file_name} uploaded successfully."
+                            message = f"File {file_name} uploaded successfully."
 
             if message is not None:
                 return redirect(url_for(".page_editor", message=message))
@@ -389,7 +389,27 @@ def page_editor():
             key=lambda p: p.description,
         )
 
-    image_paths = [Path("content") / f.name for f in CONTENT_PATH.glob("*")]
+    all_files = [Path("content") / f.name for f in CONTENT_PATH.glob("*")]
+    image_paths = [
+        p
+        for p in all_files
+        if p.suffix
+        in [
+            ".apng",
+            ".png",
+            ".avif",
+            ".gif",
+            ".jpg",
+            ".jpeg",
+            ".jfif",
+            ".pjpeg",
+            ".pjp",
+            ".png",
+            ".svg",
+            ".webp",
+        ]
+    ]
+    other_paths = [p for p in all_files if p not in image_paths]
 
     # Get images
     return render_template(
@@ -398,4 +418,5 @@ def page_editor():
         preview=preview,
         message=message,
         image_paths=image_paths,
+        other_paths=other_paths,
     )

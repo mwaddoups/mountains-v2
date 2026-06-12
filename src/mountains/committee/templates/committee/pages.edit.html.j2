@@ -5,7 +5,7 @@
   {% if message %}<p role="alert">{{ message }}</p>{% endif %}
   <p>
     You can edit any of the text on club pages below.
-    To upload images for use in this, use the image uploader section below to get the appropriate markdown.
+    To upload images or files for use in this, use the uploader section below to get the appropriate markdown.
   </p>
   {% for page in pages %}
     <details {{ 'open' if preview and preview.name == page.name }}>
@@ -35,25 +35,25 @@
       </form>
     </details>
   {% endfor %}
-  <h2>Image Upload</h2>
+  <h2>Image or File Upload</h2>
   <p>
-    This form can be used to upload images, or to find an existing uploaded image to generate markdown for use in page content.
+    This form can be used to upload images or files, or to find an existing uploaded image or file to generate markdown for use in page content.
   </p>
   <details>
-    <summary>Upload Images for use in pages</summary>
+    <summary>Upload images or files for use in pages</summary>
     <form method="post" enctype="multipart/form-data">
       <label>
-        Image Name
+        Name
         <small>(Not that important, just for reference)</small>
         <input type="text" name="name" required />
       </label>
       <label>
-        Image Upload
-        <small>Should be a reasonable size to occupy 75% of the width of the page</small>
-        <input type="file" name="image_file" accept="image/*" required />
+        Upload
+        <small>If an image, should be a reasonable size to occupy 75% of the width of the page</small>
+        <input type="file" name="image_file" accept="*/*" required />
       </label>
       <strong>Please make sure the image is sized to an appropriate size!</strong>
-      <input type="submit" name="add_image" value="Add Image" />
+      <input type="submit" name="add_image" value="Add" />
     </form>
     <section id="uploaded-images">
       <h3>Available Images</h3>
@@ -71,6 +71,22 @@
               &lt;figcaption&gt;Credits go here&lt;/figcaption&gt;
               <br />
               &lt;/figure&gt;
+            </code>
+          </p>
+        </figure>
+      {% endfor %}
+      <h3>Available Files</h3>
+      {% for file_path in other_paths %}
+        {% set file_url = url_for('static', filename=file_path) %}
+        <figure class="card">
+          <h4>{{ file_path.stem }}</h4>
+          <p>
+            <a href="{{ file_url }}">{{ file_path.name }}</a>
+          </p>
+          <p>To use this in a page, copy the markdown.</p>
+          <p>
+            <code>
+              [File description goes here]({{ file_url }})
             </code>
           </p>
         </figure>
