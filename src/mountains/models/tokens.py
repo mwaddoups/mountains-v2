@@ -41,8 +41,13 @@ def tokens_repo(conn: sqlite3.Connection) -> Repository[AuthToken]:
         storage_cls=AuthToken,
     )
 
+
 @define
 class ICSToken:
+    """
+    Used for calendar subscription functionality.
+    """
+
     id: str
     user_id: int
 
@@ -52,6 +57,7 @@ class ICSToken:
             id=secrets.token_urlsafe(32),
             user_id=id,
         )
+
 
 def tokens_ics_repo(conn: sqlite3.Connection) -> Repository[ICSToken]:
     return Repository(

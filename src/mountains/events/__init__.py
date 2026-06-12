@@ -71,7 +71,6 @@ def events(event_id: int | None = None):
         else:
             events_for_metadata = events
 
-
         event_attendees, event_members = _events_attendees(conn, events_for_metadata)
 
     if event is not None:
@@ -581,7 +580,7 @@ def discord_names(event_id: int):
 
 
 @blueprint.route("/subscribe/")
-def subscribe():
+def subscribe_calendar():
     with db_conn(locked=True) as conn:
         tokens_ics_db = tokens_ics_repo(conn)
         ics_token = tokens_ics_db.get(user_id=current_user.id)
@@ -591,8 +590,10 @@ def subscribe():
         token = ics_token.id
     all_ics_url = url_for("ics.calendar", _external=True, token=token)
     user_ics_url = url_for("ics.user_calendar", _external=True, token=token)
-    all_webcal_url= _webcal_url(ics_url=all_ics_url)
-    user_webcal_url= _webcal_url(ics_url=user_ics_url)
+
+    # Webcal only supports https, so we replace the protocol here only if present
+    all_webcal_url = all_ics_url.replace("https://", "webcal://", 1)
+    user_webcal_url = user_ics_url.replace("https://", "webcal://", 1)
     return render_template(
         "events/subscribe.html.j2",
         all_ics_url=all_ics_url,
@@ -600,13 +601,6 @@ def subscribe():
         all_webcal_url=all_webcal_url,
         user_webcal_url=user_webcal_url,
     )
-
-
-def _webcal_url(ics_url):
-    # Note! Webcal only supports https!
-    if ics_url.startswith("https://"):
-        return "webcal://" + ics_url[8:]
-    return ics_url
 
 
 def _get_sorted_filtered_events(
