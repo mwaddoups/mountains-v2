@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 from flask import (
@@ -146,6 +147,13 @@ def routes(blueprint: Blueprint):
             except Exception:
                 logger.exception("Error while fetching membership options from stripe!")
                 membership_prices = []
+
+            # Close membership for renewal if we have more than 1 month to go
+            current_date = datetime.date.today()
+            closed_for_renewals = current_date > active_expiry - datetime.timedelta(
+                days=30
+            )
+
             return render_template(
                 "platform/joinclub.html.j2",
                 join_page=page,
@@ -154,6 +162,7 @@ def routes(blueprint: Blueprint):
                 error=request.args.get("error", None),
                 membership_expiry=active_expiry,
                 membership_prices=membership_prices,
+                closed_for_renewals=closed_for_renewals,
             )
 
     blueprint.register_blueprint(members.blueprint, url_prefix="/members")
