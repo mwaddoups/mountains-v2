@@ -114,8 +114,8 @@
       <textarea name="description" required>{{ form.description }}</textarea>
     </label>
     <label>
-      Lock signup forever?
-      <small>Usually no, unless it's a draft</small>
+      Lock signup FOREVER - this will mean nobody can ever sign up (even when event opens!)
+      <small>This is only usually useful when you want to close an event near the time</small>
       {% if form.is_locked %}
         <input type="checkbox" name="is_locked" checked />
       {% else %}
