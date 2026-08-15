@@ -67,7 +67,8 @@
           </dd>
         {% endif %}
       </dl>
-      <a class="button" href="{{ url_for('.request_kit', id=kit_item.id) }}">Request to Borrow</a>
+      <a class="button"
+         href="{{ url_for('.request_kit', kit_id=kit_item.id) }}">Request to Borrow</a>
       {% if g.current_user.is_site_admin %}
         <a class="button admin" href="{{ url_for('.add_kit', id=kit_item.id) }}">Edit Item</a>
         <form method="post"

@@ -2,9 +2,14 @@
 {% block content %}
   <a href="{{ url_for('.kit') }}">< return to Kit</a>
   <h1>New Kit Borrow Request</h1>
-  <p>
-    Fill in the form below to submit a request to borrow <strong>{{ kit_item.description }} ({{ kit_item.club_id }})</strong>.
-  </p>
+  <p>Fill in the form below to submit a request to borrow:</p>
+  <ul>
+    {% for kit_item in kit_items %}
+      <li>
+        <strong>{{ kit_item.description }} ({{ kit_item.club_id }})</strong>.
+      </li>
+    {% endfor %}
+  </ul>
   <p>Outstanding requests for the item are below. Review these to ensure there are no clashes.</p>
   {% if current_requests %}
     <table>

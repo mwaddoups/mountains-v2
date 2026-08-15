@@ -1468,7 +1468,7 @@
     }
   }
 
-  #kit-list {
+  .kit-list {
     display: grid;
     gap: 0.25rem;
     grid-template-columns: auto 1fr auto auto auto;

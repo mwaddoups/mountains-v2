@@ -27,7 +27,7 @@ from mountains.models.kit import (
     kit_request_repo,
 )
 from mountains.models.pages import latest_content
-from mountains.models.users import users_repo
+from mountains.models.users import User, users_repo
 from mountains.utils import req_method
 
 logger = logging.getLogger(__name__)
@@ -38,7 +38,8 @@ blueprint = Blueprint(
 
 
 @blueprint.route("/")
-def kit():
+@blueprint.route("/cart/<int:cart_id>")
+def kit(cart_id: int | None = None):
     with db_conn() as conn:
         # Sort ensuring B2 < B10 by length first
         kit_items = sorted(
@@ -65,6 +66,13 @@ def kit():
         kit_ids=[k.id for k in kit_items], kit_requests=kit_requests
     )
 
+    kit_item_lookup = {kit_item.id: kit_item for kit_item in kit_items}
+    cart_ids = set(request.args.getlist("cart_kit_id", type=int))
+    if cart_id is not None:
+        cart_ids.add(cart_id)
+
+    current_cart: list[KitItem] = [kit_item_lookup[kit_id] for kit_id in cart_ids]
+
     return render_template(
         "kit/kit.html.j2",
         kit_page=kit_page_content,
@@ -73,6 +81,7 @@ def kit():
         kit_groups=KitGroup,
         selected_kit_groups=selected_kit_groups,
         search=search,
+        current_cart=current_cart,
     )
 
 
@@ -213,52 +222,73 @@ def add_kit(id: int | None = None):
         )
 
 
-@blueprint.route("/<int:id>/request/", methods=["GET", "POST", "DELETE"])
-def request_kit(id: int):
+@blueprint.route("/request-kit/", methods=["GET", "POST"])
+def request_kit():
     method = req_method(request)
+    kit_ids = set(request.args.getlist("kit_id", type=int))
+
+    if len(kit_ids) == 0:
+        return redirect(url_for(".kit"))
+
+    kit_items: list[KitItem] = []
+    kit_requests: list[KitRequest] = []
+    current_kit_users: dict[int, User] = {}
 
     with db_conn() as conn:
-        kit_item = kit_item_repo(conn).get(id=id)
-        if kit_item is None:
-            abort(404)
-        assert kit_item is not None
+        for kit_id in kit_ids:
+            kit_item = kit_item_repo(conn).get(id=kit_id)
+            if kit_item is None:
+                abort(404)
+            assert kit_item is not None
 
-        current_kit_requests = kit_request_repo(conn).list_where(kit_id=kit_item.id)
-        users_db = users_repo(conn)
-        current_kit_users = {}
-        for kit_request in current_kit_requests:
-            request_user = users_db.get(id=kit_request.user_id)
-            if request_user is not None:
-                current_kit_users[kit_request.user_id] = request_user
+            current_kit_requests = kit_request_repo(conn).list_where(kit_id=kit_item.id)
+            current_kit_requests = [k for k in current_kit_requests if k.is_in_future()]
+            users_db = users_repo(conn)
+            for kit_request in current_kit_requests:
+                if kit_request.user_id not in current_kit_users:
+                    request_user = users_db.get(id=kit_request.user_id)
+                    if request_user is not None:
+                        current_kit_users[kit_request.user_id] = request_user
+
+            kit_items.append(kit_item)
+            kit_requests.extend(current_kit_requests)
 
     if method == "POST":
         with db_conn(locked=True) as conn:
             req_db = kit_request_repo(conn)
-            kit_request = KitRequest.from_form(
-                id=req_db.next_id(),
-                kit_id=kit_item.id,
-                user_id=current_user.id,
-                form=request.form,
-            )
-            logger.info("Adding new kit request %s", kit_request)
-            req_db.insert(kit_request)
+
+            all_requests = []
+            for kit_item in kit_items:
+                kit_request = KitRequest.from_form(
+                    id=req_db.next_id(),
+                    kit_id=kit_item.id,
+                    user_id=current_user.id,
+                    form=request.form,
+                )
+                logger.info("Adding new kit request %s", kit_request)
+                req_db.insert(kit_request)
+                all_requests.append(kit_request)
+
             send_mail(
                 to=["kitsec@clydemc.org"],
-                subject=f"Kit request - {current_user.full_name} for {kit_item.description}",
-                msg_markdown="\n\n".join([
-                    "# New Kit Request",
-                    f"{current_user.full_name} requested the item {kit_item.description}. They wrote:",
-                    kit_request.notes,
-                    f"[For more details and to approve see the requests page]({url_for('.requests', _external=True)})",
-                ]),
+                subject=f"Kit request - {current_user.full_name} for {len(all_requests)} items",
+                msg_markdown="\n\n".join(
+                    ["# New Kit Request", f"{current_user.full_name} requested:\n\n"]
+                    + [f"- {kit_item.description}\n" for kit_item in kit_items]
+                    + [
+                        "\nThey wrote:\n",
+                        all_requests[0].notes,
+                        f"[For more details and to approve see the requests page]({url_for('.requests', _external=True)})",
+                    ]
+                ),
             )
 
         return redirect(url_for(".kit"))
     else:
         return render_template(
             "kit/kit.request.html.j2",
-            kit_item=kit_item,
-            current_requests=current_kit_requests,
+            kit_items=kit_items,
+            current_requests=kit_requests,
             current_request_users=current_kit_users,
         )
 
