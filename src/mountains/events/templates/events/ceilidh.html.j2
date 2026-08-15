@@ -1,0 +1,41 @@
+{% extends "platform/base.html.j2" %}
+{% block content %}
+  <h1>Ceilidh 2026</h1>
+  <section>
+    <header class="admin">
+      {% if g.current_user.is_site_admin and needs_updating %}
+        <h2 class="admin">Event Administration</h2>
+        <p class="admin">The following users have paid a deposit but not been added to both events.</p>
+        <ul>
+          {% for att in attendees %}
+            {% if att.needs_updating() %}<li class="admin">{{ att.user.full_name }}</li>{% endif %}
+          {% endfor %}
+        </ul>
+        <form method="post" class="admin">
+          <input type="submit" value="Add all to events" />
+        </form>
+      {% endif %}
+    </header>
+    <h3>Attendee Summary</h3>
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Member</th>
+          <th scope="col">Paid Deposit?</th>
+          <th scope="col">Meal payment?</th>
+          <th scope="col">Ceilidh only payment?</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for att in attendees %}
+          <tr>
+            <td>{{ att.user.full_name }}</td>
+            <td>{{ 'Yes' if att.paid_deposit else 'NO!' }}</td>
+            <td>{{ 'Yes' if att.paid_ceilidh_only else '' }}</td>
+            <td>{{ 'Yes' if att.paid_ceilidh_and_meal else '' }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endblock content %}

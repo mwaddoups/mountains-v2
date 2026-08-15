@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import logging
+from dataclasses import dataclass
 from pathlib import Path
 from sqlite3 import Connection
 
@@ -600,6 +601,86 @@ def subscribe_calendar():
         user_ics_url=user_ics_url,
         all_webcal_url=all_webcal_url,
         user_webcal_url=user_webcal_url,
+    )
+
+
+@dataclass(slots=True)
+class _CeilidhAttendee:
+    user: User
+    paid_deposit: bool
+    added_to_only_event: bool
+    paid_ceilidh_only: bool
+    added_to_meal_event: bool
+    paid_ceilidh_and_meal: bool
+
+    def needs_updating(self) -> bool:
+        return self.paid_deposit and not (
+            self.added_to_meal_event and self.added_to_only_event
+        )
+
+
+@blueprint.route("/ceilidh-2026/", methods=["GET", "POST"])
+def ceilidh_2026():
+    """
+    Special route for 2026 ceilidh - can be removed afterwards
+    """
+    # Hardcoded event IDs
+    ceilidh_event_id = 868
+    ceilidh_only_final_id = 882
+    ceilidh_and_meal_final_id = 883
+    with db_conn() as conn:
+        attendees_db = attendees_repo(conn)
+        events_db = events_repo(conn)
+        ceilidh_attendees = attendees_db.list_where(event_id=ceilidh_event_id)
+        only_final_map = {
+            a.user_id: a
+            for a in attendees_db.list_where(event_id=ceilidh_only_final_id)
+        }
+        meal_final_map = {
+            a.user_id: a
+            for a in attendees_db.list_where(event_id=ceilidh_and_meal_final_id)
+        }
+        user_map = {user.id: user for user in users_repo(conn).list()}
+        ev_ceilidh_only_final = events_db.get_or_404(id=ceilidh_only_final_id)
+        ev_ceilidh_meal_final = events_db.get_or_404(id=ceilidh_and_meal_final_id)
+
+    ceilidh_atts: list[_CeilidhAttendee] = []
+    for att in ceilidh_attendees:
+        ceilidh_atts.append(
+            _CeilidhAttendee(
+                user=user_map[att.user_id],
+                paid_deposit=att.is_trip_paid,
+                added_to_only_event=att.user_id in only_final_map,
+                paid_ceilidh_only=only_final_map[att.user_id].is_trip_paid
+                if att.user_id in only_final_map
+                else False,
+                added_to_meal_event=att.user_id in meal_final_map,
+                paid_ceilidh_and_meal=meal_final_map[att.user_id].is_trip_paid
+                if att.user_id in meal_final_map
+                else False,
+            )
+        )
+
+    if request.method == "POST":
+        current_user.check_authorised()
+        for attendee in ceilidh_atts:
+            if attendee.paid_deposit:
+                if not attendee.added_to_only_event:
+                    logger.info(
+                        f"Adding {attendee.user.full_name} to ceilidh-only event..."
+                    )
+                    _add_user_to_event(ev_ceilidh_only_final, attendee.user.id)
+                if not attendee.added_to_meal_event:
+                    logger.info(
+                        f"Adding {attendee.user.full_name} to ceilidh+meal event..."
+                    )
+                    _add_user_to_event(ev_ceilidh_meal_final, attendee.user.id)
+        return redirect(url_for(".ceilidh_2026"))
+
+    return render_template(
+        "events/ceilidh.html.j2",
+        attendees=ceilidh_atts,
+        needs_updating=any(a.needs_updating() for a in ceilidh_atts),
     )
 
 
