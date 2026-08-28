@@ -274,6 +274,8 @@ def edit_event(id: int | None = None):
 
             if copy_event is not None:
                 event_form = copy_event.to_form()
+                # Manually remove the price_id to avoid charging for different events
+                event_form["price_id"] = ""
             else:
                 error = "Event not found for attempted copy, using default values..."
                 logger.error("Attempt to copy with a missing event ID %s", copy_id)
