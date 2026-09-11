@@ -165,8 +165,8 @@ def events_calendar(year: int | None = None, month: int | None = None):
     else:
         end = datetime.datetime(year, month + 1, 1)
     end -= datetime.timedelta(days=1)
-    ## Push forward to next sunday
-    end += datetime.timedelta(days=6 - end.weekday())
+    ## Push forward to next sunday, including the day itself (so technically next monday)
+    end += datetime.timedelta(days=7 - end.weekday())
 
     # Get all events between both days
     with db_conn() as conn:
