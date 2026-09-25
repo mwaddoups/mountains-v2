@@ -38,6 +38,13 @@ logger = logging.getLogger(__name__)
 blueprint = Blueprint("events", __name__, template_folder="templates")
 
 
+@dataclass(kw_only=True)
+class UserWithEventMetadata:
+    user: User
+    num_events: int
+    attended_event_types: set[EventType]
+
+
 @blueprint.route("/upcoming/")
 @blueprint.route("/")
 @blueprint.route("/<int:event_id>/")
@@ -523,14 +530,7 @@ def attendee(event_id: int, user_id: int):
                     _where=dict(event_id=event.id, user_id=user_id),
                     is_trip_paid=str_to_bool(request.form["is_trip_paid"]),
                 )
-                attendee = attendees_db.get_or_404(event_id=event.id, user_id=user.id)
 
-                if request.headers.get("HX-Request"):
-                    return render_template(
-                        "events/event._attendee.html.j2",
-                        attendee=attendee,
-                        user=user,
-                    )
         return redirect(url_for(".events", event_id=event.id))
     elif method == "DELETE":
         with db_conn() as conn:
@@ -719,23 +719,42 @@ def _get_sorted_filtered_events(
 
 def _events_attendees(
     conn: Connection, events: list[Event]
-) -> tuple[dict[int, list[Attendee]], dict[int, User]]:
+) -> tuple[dict[int, list[Attendee]], dict[int, UserWithEventMetadata]]:
     attendees_db = attendees_repo(conn)
     users_db = users_repo(conn)
+    events_db = events_repo(conn)
+    event_map = {e.id: e for e in events_db.list()}
     event_attendees: dict[int, list[Attendee]] = {}
-    event_members: dict[int, User] = {}
+    event_members: dict[int, UserWithEventMetadata] = {}
     for event in events:
         evt_attendees = attendees_db.list_where(event_id=event.id)
         for att_user in evt_attendees:
             if att_user.user_id not in event_members:
+                # First time seeing this user, fetch the user details
                 user = users_db.get(id=att_user.user_id)
 
                 if user is not None:
-                    event_members[user.id] = user
+                    # Compute the event-related statistics
+                    attended_events = [
+                        event_map[au.event_id]
+                        for au in attendees_db.list_where(user_id=user.id)
+                    ]
+                    attended_events = [
+                        e for e in attended_events if not e.is_upcoming()
+                    ]
+                    event_members[user.id] = UserWithEventMetadata(
+                        user=user,
+                        num_events=len([
+                            e for e in attended_events if e.is_part_of_trial()
+                        ]),
+                        attended_event_types=set(e.event_type for e in attended_events),
+                    )
+
                 else:
                     logger.warning(
                         "Event %s has unknown user id %s", event, att_user.user_id
                     )
+
         event_attendees[event.id] = evt_attendees
 
     return event_attendees, event_members

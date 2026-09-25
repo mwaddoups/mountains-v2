@@ -1,6 +1,7 @@
-{% from 'macros/bi.html.j2' import bi_cash_coin, bi_layer_backward, bi_layer_forward, bi_x_square_fill %}
+{% from 'macros/bi.html.j2' import bi_cash_coin, bi_layer_backward, bi_layer_forward, bi_x_square_fill, bi_tree_fill %}
 {% from 'macros/profile.html.j2' import profile_picture %}
-{% macro attending_user(att_user, user) %}
+{% macro _attending_user(att_user, user_with_event, event) %}
+  {% set user = user_with_event.user %}
   <li class="attending-user">
     {{ profile_picture(user, '32') }}
     {% if user.is_committee %}
@@ -15,6 +16,11 @@
     <span class="attendee-name {{ color }}">
       <a href="{{ url_for('platform.members.member', slug=user.slug) }}">{{ user.full_name }}</a>
       {% if att_user.is_trip_paid %}<span class="trip-paid">{{ bi_cash_coin() }}</span>{% endif %}
+      {% if user_with_event.num_events == 0 %}
+        <span class="first-event">{{ bi_tree_fill() }}</span>
+      {% elif event.event_type not in user_with_event.attended_event_types %}
+        <span class="first-event-type">{{ bi_tree_fill() }}</span>
+      {% endif %}
     </span>
     {% if g.current_user.is_site_admin %}
       <span class="admin">
@@ -40,9 +46,10 @@
         </form>
         <form method="post"
               hx-post="{{ url_for('.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}"
-              hx-target="closest .attending-user"
-              hx-swap="outerHTML"
-	      hx-confirm="Are you sure you want to toggle payment for {{ user.full_name }}?"
+              hx-swap="outerHTML settle:0.5s"
+              hx-target="closest .event-all-attendees"
+              hx-select=".event-all-attendees"
+              hx-confirm="Are you sure you want to toggle payment for {{ user.full_name }}?"
               action="{{ url_for('.attendee', event_id=att_user.event_id, user_id=att_user.user_id) }}">
           <input type="hidden" name="method" value="PUT" />
           <input type="hidden"
@@ -74,7 +81,7 @@
       {% endif %}
       <div class="attendees-summary">
         {% for attendee in attendees %}
-          {{ profile_picture(user_map[attendee.user_id], '32') }}
+          {{ profile_picture(user_map[attendee.user_id].user, '32') }}
         {% else %}
           <small>No attendees yet!</small>
         {% endfor %}
@@ -82,7 +89,7 @@
     </summary>
     <ul>
       {% for attendee in attendees %}
-        {{ attending_user(attendee, user_map[attendee.user_id]) }}
+        {{ _attending_user(attendee, user_map[attendee.user_id], event) }}
       {% else %}
         <li>
           <small>No attendees yet!</small>

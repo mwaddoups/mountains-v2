@@ -1241,6 +1241,22 @@
           }
         }
 
+        .first-event {
+          svg {
+            color: yellowgreen;
+            width: 1em;
+            height: 1em;
+          }
+        }
+
+        .first-event-type {
+          svg {
+            color: gold;
+            width: 1em;
+            height: 1em;
+          }
+        }
+
         .profile-picture {
           grid-area: profile;
         }
