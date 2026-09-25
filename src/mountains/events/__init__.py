@@ -744,9 +744,7 @@ def _events_attendees(
                     ]
                     event_members[user.id] = UserWithEventMetadata(
                         user=user,
-                        num_events=len([
-                            e for e in attended_events if e.is_part_of_trial()
-                        ]),
+                        num_events=len([e for e in attended_events]),
                         attended_event_types=set(e.event_type for e in attended_events),
                     )
 

@@ -17,9 +17,10 @@
       <a href="{{ url_for('platform.members.member', slug=user.slug) }}">{{ user.full_name }}</a>
       {% if att_user.is_trip_paid %}<span class="trip-paid">{{ bi_cash_coin() }}</span>{% endif %}
       {% if user_with_event.num_events == 0 %}
-        <span class="first-event">{{ bi_tree_fill() }}</span>
+        <span class="first-event" data-tooltip="First event!">{{ bi_tree_fill() }}</span>
       {% elif event.event_type not in user_with_event.attended_event_types %}
-        <span class="first-event-type">{{ bi_tree_fill() }}</span>
+        <span class="first-event-type"
+              data-tooltip="First {{ event.event_type.name | replace('_', ' ') | lower | title }} event!">{{ bi_tree_fill() }}</span>
       {% endif %}
     </span>
     {% if g.current_user.is_site_admin %}
