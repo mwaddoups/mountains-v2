@@ -61,33 +61,16 @@ def events(event_id: int | None = None):
     else:
         event_types = [t for t in EventType]
 
-    with db_conn() as conn:
-        if event_id is not None:
-            event = events_repo(conn).get_or_404(id=event_id)
-        else:
-            event = None
-
-        # TODO: Eventually page this (e.g. at least <x> more )
-        events = _get_sorted_filtered_events(
-            conn,
-            event_types=event_types,
-            search=search,
-        )
-
-        if event is not None:
-            events_for_metadata = events + [event]
-        else:
-            events_for_metadata = events
-
-        event_attendees, event_members = _events_attendees(conn, events_for_metadata)
-
-    if event is not None:
+    if event_id is not None:
         # Single event display
+        with db_conn() as conn:
+            event = events_repo(conn).get_or_404(id=event_id)
+            event_attendees, event_members = _events_attendees(conn, [event])
+
         if request.headers.get("HX-Target") == event.slug:
             return render_template(
                 "events/_event.html.j2",
                 event=event,
-                events=events,
                 attendees=event_attendees[event.id],
                 members=event_members,
             )
@@ -95,39 +78,41 @@ def events(event_id: int | None = None):
             return render_template(
                 "events/event.html.j2",
                 event=event,
-                events=events,
                 attendees=event_attendees[event.id],
                 members=event_members,
             )
     else:
-        if request.headers.get("HX-Target") == "show-more-events":
-            # Infinite scroll
-            after_id = int(request.args["after"])
-            after_ix = [e.id for e in events].index(after_id)
-            return render_template(
-                "events/_event.list.html.j2",
-                events=events,
-                event_type_set=EventType,
-                event_attendees=event_attendees,
-                members=event_members,
-                search=search,
-                offset=after_ix + 1,
-                limit=limit,
+        with db_conn() as conn:
+            # Fetch all events initially
+            events = _get_sorted_filtered_events(
+                conn,
                 event_types=event_types,
-                filters_enabled=filters_enabled,
-            )
-        else:
-            return render_template(
-                "events/events.html.j2",
-                events=events,
-                event_type_set=EventType,
-                event_attendees=event_attendees,
-                members=event_members,
                 search=search,
-                limit=limit,
-                event_types=event_types,
-                filters_enabled=filters_enabled,
             )
+            # Now, filter the events before calculating attendees to save ourselves some time!
+            if request.headers.get("HX-Target") == "show-more-events":
+                # Infinite scroll
+                after_id = int(request.args["after"])
+                after_ix = [e.id for e in events].index(after_id)
+                events = events[after_ix + 1 :]
+                template = "events/_event.list.html.j2"
+            else:
+                template = "events/events.html.j2"
+
+            # And ensure we only pass a minimal set of events into events_attendees, as this is slow
+            events = events[:limit]
+            event_attendees, event_members = _events_attendees(conn, events)
+        return render_template(
+            template,
+            events=events,
+            event_type_set=EventType,
+            event_attendees=event_attendees,
+            members=event_members,
+            search=search,
+            event_types=event_types,
+            filters_enabled=filters_enabled,
+            limit=limit,
+        )
 
 
 @blueprint.route("/<id>/", methods=["POST"])

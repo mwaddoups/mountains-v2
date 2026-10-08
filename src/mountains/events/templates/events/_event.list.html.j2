@@ -1,9 +1,6 @@
 {# these are in ascending order for future, followed by descending for past #}
-{% if not offset %}
-  {% set offset = 0 %}
-{% endif %}
-{% for event in events[offset:offset+limit] %}
-  {% if not event.is_upcoming() and events[offset + loop.index0 - 1].is_upcoming() %}<h1>Past Events</h1>{% endif %}
+{% for event in events %}
+  {% if not event.is_upcoming() and events[loop.index0 - 1].is_upcoming() %}<h1>Past Events</h1>{% endif %}
   {% with attendees = event_attendees[event.id], members=members %}
     {% include "events/_event.html.j2" %}
   {% endwith %}
