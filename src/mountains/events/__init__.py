@@ -671,9 +671,12 @@ def ceilidh_2026():
             )
             if ev_ceilidh_meal_final.price_id is None:
                 abort(500)
+
+            form_url = "https://docs.google.com/forms/d/e/1FAIpQLSeqe--u17_fvXk75ZvnoFb2cbyuqGkev34Tmlktd2nV1RWelg/viewform"
             checkout_url = stripe_api.create_checkout(
                 ev_ceilidh_meal_final.price_id,
-                success_url=url_for(".ceilidh_2026", _external=True),
+                # Redirect users to the meal selection form after payment
+                success_url=form_url,
                 cancel_url=url_for(".ceilidh_2026", _external=True),
                 metadata=metadata,
             )
