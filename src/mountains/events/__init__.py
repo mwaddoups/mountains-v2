@@ -673,8 +673,8 @@ def ceilidh_2026():
                 abort(500)
             checkout_url = stripe_api.create_checkout(
                 ev_ceilidh_meal_final.price_id,
-                success_url=url_for(".ceilidh-2026", _external=True),
-                cancel_url=url_for(".ceilidh-2026", _external=True),
+                success_url=url_for(".ceilidh_2026", _external=True),
+                cancel_url=url_for(".ceilidh_2026", _external=True),
                 metadata=metadata,
             )
 
@@ -689,8 +689,8 @@ def ceilidh_2026():
                 abort(500)
             checkout_url = stripe_api.create_checkout(
                 ev_ceilidh_only_final.price_id,
-                success_url=url_for(".ceilidh-2026", _external=True),
-                cancel_url=url_for(".ceilidh-2026", _external=True),
+                success_url=url_for(".ceilidh_2026", _external=True),
+                cancel_url=url_for(".ceilidh_2026", _external=True),
                 metadata=metadata,
             )
 
