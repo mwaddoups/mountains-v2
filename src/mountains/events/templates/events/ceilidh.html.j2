@@ -33,9 +33,9 @@
             {% if att.user.id == g.current_user.id %}
               <td class="badge color-coordinator">{{ att.user.full_name }}</td>
               <td>{{ 'Yes' if att.paid_deposit else 'NO!' }}</td>
-              {% if att.paid_ceilidh_only %}
+              {% if att.paid_ceilidh_and_meal %}
                 <td>Yes</td>
-              {% elif att.paid_ceilidh_and_meal %}
+              {% elif att.paid_ceilidh_only %}
                 <td></td>
               {% else %}
                 <td>
@@ -45,9 +45,9 @@
                   </form>
                 </td>
               {% endif %}
-              {% if att.paid_ceilidh_and_meal %}
+              {% if att.paid_ceilidh_only %}
                 <td>Yes</td>
-              {% elif att.paid_ceilidh_only %}
+              {% elif att.paid_ceilidh_and_meal %}
                 <td></td>
               {% else %}
                 <td>
@@ -60,8 +60,8 @@
             {% else %}
               <td>{{ att.user.full_name }}</td>
               <td>{{ 'Yes' if att.paid_deposit else 'NO!' }}</td>
-              <td>{{ 'Yes' if att.paid_ceilidh_only else '' }}</td>
               <td>{{ 'Yes' if att.paid_ceilidh_and_meal else '' }}</td>
+              <td>{{ 'Yes' if att.paid_ceilidh_only else '' }}</td>
             {% endif %}
           </tr>
         {% endfor %}
