@@ -649,25 +649,61 @@ def ceilidh_2026():
         )
 
     if request.method == "POST":
-        current_user.check_authorised()
-        for attendee in ceilidh_atts:
-            if attendee.paid_deposit:
-                if not attendee.added_to_only_event:
-                    logger.info(
-                        f"Adding {attendee.user.full_name} to ceilidh-only event..."
-                    )
-                    _add_user_to_event(ev_ceilidh_only_final, attendee.user.id)
-                if not attendee.added_to_meal_event:
-                    logger.info(
-                        f"Adding {attendee.user.full_name} to ceilidh+meal event..."
-                    )
-                    _add_user_to_event(ev_ceilidh_meal_final, attendee.user.id)
+        if request.form["req_type"] == "admin_refresh":
+            current_user.check_authorised()
+            for attendee in ceilidh_atts:
+                if attendee.paid_deposit:
+                    if not attendee.added_to_only_event:
+                        logger.info(
+                            f"Adding {attendee.user.full_name} to ceilidh-only event..."
+                        )
+                        _add_user_to_event(ev_ceilidh_only_final, attendee.user.id)
+                    if not attendee.added_to_meal_event:
+                        logger.info(
+                            f"Adding {attendee.user.full_name} to ceilidh+meal event..."
+                        )
+                        _add_user_to_event(ev_ceilidh_meal_final, attendee.user.id)
+        elif request.form["req_type"] == "buy_meal":
+            logger.info(f"Ceilidh meal purchase started by {current_user.full_name}...")
+            stripe_api = StripeAPI.from_app(current_app)
+            metadata = EventPaymentMetadata(
+                user_id=current_user.id, event_id=ceilidh_and_meal_final_id
+            )
+            if ev_ceilidh_meal_final.price_id is None:
+                abort(500)
+            checkout_url = stripe_api.create_checkout(
+                ev_ceilidh_meal_final.price_id,
+                success_url=url_for(".ceilidh-2026", _external=True),
+                cancel_url=url_for(".ceilidh-2026", _external=True),
+                metadata=metadata,
+            )
+
+            return redirect(checkout_url)
+        elif request.form["req_type"] == "buy_ceilidh":
+            logger.info(f"Ceilidh only purchase started by {current_user.full_name}...")
+            stripe_api = StripeAPI.from_app(current_app)
+            metadata = EventPaymentMetadata(
+                user_id=current_user.id, event_id=ceilidh_only_final_id
+            )
+            if ev_ceilidh_only_final.price_id is None:
+                abort(500)
+            checkout_url = stripe_api.create_checkout(
+                ev_ceilidh_only_final.price_id,
+                success_url=url_for(".ceilidh-2026", _external=True),
+                cancel_url=url_for(".ceilidh-2026", _external=True),
+                metadata=metadata,
+            )
+
+            return redirect(checkout_url)
+
         return redirect(url_for(".ceilidh_2026"))
 
     return render_template(
         "events/ceilidh.html.j2",
         attendees=ceilidh_atts,
         needs_updating=any(a.needs_updating() for a in ceilidh_atts),
+        ceilidh_only_final_id=ceilidh_only_final_id,
+        ceilidh_and_meal_final_id=ceilidh_and_meal_final_id,
     )
 
 

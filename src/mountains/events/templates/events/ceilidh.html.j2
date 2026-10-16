@@ -12,6 +12,7 @@
           {% endfor %}
         </ul>
         <form method="post" class="admin">
+          <input type="hidden" name="req_type" value="admin_refresh" />
           <input type="submit" value="Add all to events" />
         </form>
       {% endif %}
@@ -22,17 +23,46 @@
         <tr>
           <th scope="col">Member</th>
           <th scope="col">Paid Deposit?</th>
-          <th scope="col">Meal payment?</th>
+          <th scope="col">Meal + Ceilidh payment?</th>
           <th scope="col">Ceilidh only payment?</th>
         </tr>
       </thead>
       <tbody>
         {% for att in attendees %}
           <tr>
-            <td>{{ att.user.full_name }}</td>
-            <td>{{ 'Yes' if att.paid_deposit else 'NO!' }}</td>
-            <td>{{ 'Yes' if att.paid_ceilidh_only else '' }}</td>
-            <td>{{ 'Yes' if att.paid_ceilidh_and_meal else '' }}</td>
+            {% if att.user.id == g.current_user.id %}
+              <td class="badge color-coordinator">{{ att.user.full_name }}</td>
+              <td>{{ 'Yes' if att.paid_deposit else 'NO!' }}</td>
+              {% if att.paid_ceilidh_only %}
+                <td>Yes</td>
+              {% elif att.paid_ceilidh_and_meal %}
+                <td></td>
+              {% else %}
+                <td>
+                  <form method="post">
+                    <input type="hidden" name="req_type" value="buy_meal" />
+                    <input type="submit" value="Buy Meal+Ceilidh (£43)" />
+                  </form>
+                </td>
+              {% endif %}
+              {% if att.paid_ceilidh_and_meal %}
+                <td>Yes</td>
+              {% elif att.paid_ceilidh_only %}
+                <td></td>
+              {% else %}
+                <td>
+                  <form method="post">
+                    <input type="hidden" name="req_type" value="buy_ceilidh" />
+                    <input type="submit" value="Buy Ceilidh Only (£3)" />
+                  </form>
+                </td>
+              {% endif %}
+            {% else %}
+              <td>{{ att.user.full_name }}</td>
+              <td>{{ 'Yes' if att.paid_deposit else 'NO!' }}</td>
+              <td>{{ 'Yes' if att.paid_ceilidh_only else '' }}</td>
+              <td>{{ 'Yes' if att.paid_ceilidh_and_meal else '' }}</td>
+            {% endif %}
           </tr>
         {% endfor %}
       </tbody>
