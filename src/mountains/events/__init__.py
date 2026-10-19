@@ -618,7 +618,9 @@ def ceilidh_2026():
     with db_conn() as conn:
         attendees_db = attendees_repo(conn)
         events_db = events_repo(conn)
-        ceilidh_attendees = attendees_db.list_where(event_id=ceilidh_event_id)
+        ceilidh_attendees = attendees_db.list_where(
+            event_id=ceilidh_event_id, is_waiting_list=False
+        )
         only_final_map = {
             a.user_id: a
             for a in attendees_db.list_where(event_id=ceilidh_only_final_id)
