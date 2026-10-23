@@ -27,7 +27,7 @@
             <td>{{ current_request_users[kit_request.user_id].full_name if g.current_user.is_committee else '[name hidden]' }}</td>
             <td>{{ kit_request.pickup_dt.strftime("%A, %B %-d %Y") }}</td>
             <td>{{ kit_request.return_dt.strftime("%A, %B %-d %Y") }}</td>
-            <td>{{ "Yes" if kit_request.approved else "No" }}</td>
+            <td>{{ "Yes" if kit_request.is_approved else "No" }}</td>
           </tr>
         {% endfor %}
       </tbody>
