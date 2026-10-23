@@ -40,7 +40,6 @@
           {{ nav_link('platform.home', 'Hut Trips', page='hut-weekends') }}
           {{ nav_link('platform.home', 'Climbing', page='climbing') }}
           {{ nav_link('platform.home', 'Trail Running', page='running') }}
-          {{ nav_link('platform.home', 'Policies', page='club-policies') }}
         </ul>
       {% endcall %}
       {% call nav_link('platform.events.events', 'Events', icon=bi.bi_calendar) %}
@@ -60,6 +59,12 @@
       {% endcall %}
       {{ nav_link('platform.resources', 'Resources', icon=bi.bi_info_square) }}
       {{ nav_link('platform.feedback', 'Feedback', icon=bi.bi_envelope_paper_fill) }}
+      {% call nav_link('platform.home', 'Committee', page='club-policies', icon=bi.bi_briefcase) %}
+        <ul>
+          {{ nav_link('platform.home', 'Policies', page='club-policies') }}
+          {{ nav_link('platform.home', 'Minutes', page='club-minutes') }}
+        </ul>
+      {% endcall %}
       <li>
         <a target="_blank" rel="noreferrer" href="https://discord.gg/98K3CafRxk">
           {{ bi.bi_discord() }}
@@ -75,7 +80,7 @@
         </a>
       </li>
       {% if g.current_user.is_committee or g.current_user.is_admin %}
-        {% call nav_link('platform.committee.overview', 'Committee', class="admin", icon=bi.bi_person_fill_lock) %}
+        {% call nav_link('platform.committee.overview', 'Admin', class="admin", icon=bi.bi_person_fill_lock) %}
           <ul>
             {{ nav_link('platform.committee.overview', 'Overview') }}
             {{ nav_link('platform.committee.maintenance', 'Maintenance') }}
