@@ -19,6 +19,7 @@ from flask import (
 from mountains.context import current_user, db_conn
 from mountains.discord import DiscordAPI
 from mountains.errors import MountainException
+from mountains.members import MemberCategory
 from mountains.models.activity import Activity, activity_repo
 from mountains.models.events import (
     Attendee,
@@ -430,21 +431,12 @@ def attend_event(event_id: int):
                 users_repo(conn).update(id=current_user.id, finished_trial=True)
 
         new_current_user = users_repo(conn).get_or_404(id=current_user.id)
-        if request.args.get("trial") != "skip" and not new_current_user.is_member:
-            if new_current_user.finished_trial:
-                # We need to re-request past events here again, to make sure we
-                # can display them to the end user
-                attending = attendees_repo(conn).list_where(
-                    user_id=current_user.id, is_waiting_list=False
-                )
-                past_events = [
-                    e
-                    for e in events_repo(conn).get_all(
-                        id=set(a.event_id for a in attending)
-                    )
-                    if not e.is_upcoming() and e.is_part_of_trial()
-                ]
-                popup_names = ["trial"]
+        print(new_current_user.member_category())
+        if new_current_user.member_category() not in (
+            MemberCategory.MEMBER,
+            MemberCategory.TRIAL,
+        ):
+            popup_names = ["trial"]
 
         popups = {name: latest_content(conn, pages[name]) for name in popup_names}
 
@@ -454,7 +446,6 @@ def attend_event(event_id: int):
             event=event,
             popups=popups,
             user=new_current_user,
-            past_events=past_events,
         )
     else:
         return render_template(
@@ -462,7 +453,6 @@ def attend_event(event_id: int):
             event=event,
             popups=popups,
             user=new_current_user,
-            past_events=past_events,
         )
 
 

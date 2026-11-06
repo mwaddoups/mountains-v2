@@ -12,7 +12,7 @@ from werkzeug.datastructures import FileStorage
 
 from mountains.db import Repository
 from mountains.errors import MountainException
-from mountains.models.users import User
+from mountains.models.users import MemberCategory, User
 from mountains.utils import now_utc, readable_id, slugify
 
 if TYPE_CHECKING:
@@ -97,6 +97,9 @@ class Event:
         popups = []
         if user.discord_id is None:
             popups.append("discord")
+
+        if user.member_category() == MemberCategory.LAPSED:
+            popups.append("trial")
 
         if not user.is_member and self.is_members_only:
             popups.append("members_only")
