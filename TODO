@@ -1,55 +1,22 @@
-# Kit work
+# New signup
 
-[x] Basic editing and display
-[x] Kit requesting framework
+For first minute, we show "join lottery (ends at 19:01)". 
 
-- [x] Basic database with: user id, kit id, date start, date end, request date
-- [] Availability calendar ?
-- [] Good back and forth handling ?
+Assign a lottery ticket to every attendee who joins in lottery period
+Add `lottery_drawn = False` on events
 
-[x] Kit checking and notes framework
+If lottery drawn is false:
+    If < signup + 1 min, do nothing, display the event as "waiting for lottery / join lottery"
+        - Don't allow payment in this window!
+    If >= signup + 1 min, do the draw once with a big lock (setting is_waiting_list as appropriate)
+else:
+    Work as normal
 
-- Kit id
-- Condition
-- Date of check
-- Photo?
-- Notes
+# New membership
 
-[x] Better styling for main list
-[x] Add search for main list
-[x] Better styling for details
-[x] Kit photo sizing
-[x] Requests as dates only
-[x] Outstanding request page
-[x] Import for existing kit
-[x] Actual kit groups that make sense
-[x] Import kit groups
-[x] Show request time
-[x] Add to main nav (committee-only for now)
-[x] Show notes on request page
-[] Error handling / better form validation
-[] Request submitted alert
-[] Requests in details page
-[] Emails or discord on new requests
-[] Request multiple items in one request
-[] Text control by committee?
-
-
-# Accounts work
-
-[x] Add CSV export for the stripe transactions
-[] Add reports by trip
-
-
-# Questions
-
-- How to do availability well?
-- How to do address etc?
-
-# Nice to haves
-
-[] Availability calendar for kit sec
-[] Bulk updates for kit checks
-[] Add "kit holder" with bulk updates
-[] Requests go to discord
-[] Email nags for returning kit
+Add a "trial start date" to each member (which may be missing). This, together with the "membership_expiry_date" we currently have, is then is enough information for us to tell if they are a non-member, trial member, member, or lapsed member.
+i. Expired membership => lapsed member
+ii. Current membership => member
+iii. No membership, trial expired (or more than 4 events) => lapsed member
+iv. No membership, trial valid => trial member
+v. No membership, no trial start => non-member

@@ -408,23 +408,43 @@ def attend_event(event_id: int):
         event = events_repo(conn).get_or_404(id=event_id)
         popup_names = event.popups_for(current_user)
 
-        if request.args.get("trial") != "skip" and not current_user.is_member:
+        # .finished_trial is set dynamically, once, and this is the place.
+        # So we need to check it for all users that try and attend something
+        past_events = None
+        if not current_user.finished_trial:
+            # Either they haven't finished, or it hasn't been updated
             attending = attendees_repo(conn).list_where(
                 user_id=current_user.id, is_waiting_list=False
             )
-            events = [
+            past_events = [
                 e
                 for e in events_repo(conn).get_all(
                     id=set(a.event_id for a in attending)
                 )
-            ]
-            past_events = [
-                e for e in events if not e.is_upcoming() and e.is_part_of_trial()
+                if not e.is_upcoming() and e.is_part_of_trial()
             ]
             if len(past_events) > current_app.config["CMC_MAX_TRIAL_EVENTS"]:
+                logger.info(
+                    f"Setting user {current_user.full_name} ({current_user.id}) to finished trial..."
+                )
+                users_repo(conn).update(id=current_user.id, finished_trial=True)
+
+        new_current_user = users_repo(conn).get_or_404(id=current_user.id)
+        if request.args.get("trial") != "skip" and not current_user.is_member:
+            if new_current_user.finished_trial:
+                # We need to re-request past events here again, to make sure we
+                # can display them to the end user
+                attending = attendees_repo(conn).list_where(
+                    user_id=current_user.id, is_waiting_list=False
+                )
+                past_events = [
+                    e
+                    for e in events_repo(conn).get_all(
+                        id=set(a.event_id for a in attending)
+                    )
+                    if not e.is_upcoming() and e.is_part_of_trial()
+                ]
                 popup_names = ["trial"]
-        else:
-            past_events = None
 
         popups = {name: latest_content(conn, pages[name]) for name in popup_names}
 
@@ -433,7 +453,7 @@ def attend_event(event_id: int):
             "events/_attend.html.j2",
             event=event,
             popups=popups,
-            user=current_user,
+            user=new_current_user,
             past_events=past_events,
         )
     else:
@@ -441,7 +461,7 @@ def attend_event(event_id: int):
             "events/attend.html.j2",
             event=event,
             popups=popups,
-            user=current_user,
+            user=new_current_user,
             past_events=past_events,
         )
 

@@ -20,6 +20,13 @@ if TYPE_CHECKING:
     from werkzeug.datastructures import FileStorage
 
 
+class MemberCategory(enum.IntEnum):
+    MEMBER = 0
+    TRIAL = 1
+    LAPSED = 2
+    NONMEMBER = 3
+
+
 class CommitteeRole(enum.Enum):
     # Numbers should be less than 100 here otherwise member sorting might not work
     CHAIR = 1
@@ -27,6 +34,10 @@ class CommitteeRole(enum.Enum):
     TREASURER = 3
     SECRETARY = 4
     GENERAL = 10
+
+
+def _today_date() -> datetime.date:
+    return datetime.datetime.now(tz=datetime.UTC).replace(tzinfo=None).date()
 
 
 @define(kw_only=True)
@@ -47,6 +58,8 @@ class User:
     is_winter_skills: bool = False
     discord_id: str | None = None
     membership_expiry: datetime.date | None = None
+    trial_start_date: datetime.date | None = None
+    finished_trial: bool = False
     is_dormant: bool = False
     created_on_utc: datetime.datetime = Factory(now_utc)
     last_login_utc: datetime.datetime | None = None
@@ -71,10 +84,7 @@ class User:
         if self.membership_expiry is None:
             return False
         else:
-            return (
-                self.membership_expiry
-                >= datetime.datetime.now(tz=datetime.UTC).replace(tzinfo=None).date()
-            )
+            return self.membership_expiry >= _today_date()
 
     @property
     def is_site_admin(self) -> bool:
@@ -118,6 +128,35 @@ class User:
                 return True
             else:
                 return False
+
+    def member_category(self) -> MemberCategory:
+        """
+        Categorises our members into one of the four categories we care about.
+
+        Non-member => no events, only access trial application form. Can never return
+            to this state.
+        Trial member => can attend up to 4 events or last up to 3 months,
+        Member => has membership
+        Lapsed member => where you end up if all others fail, no events, can buy membership
+        """
+        if self.is_member:
+            return MemberCategory.MEMBER
+        elif self.membership_expiry is not None:
+            # Has held a membership historically, so automatically lapsed
+            return MemberCategory.LAPSED
+        else:
+            # Never been a member
+            if self.trial_start_date is None:
+                # Never joined
+                return MemberCategory.NONMEMBER
+            else:
+                if self.trial_start_date >= _today_date() + datetime.timedelta(days=90):
+                    # Trial expired
+                    return MemberCategory.LAPSED
+                elif self.finished_trial:
+                    return MemberCategory.LAPSED
+                else:
+                    return MemberCategory.TRIAL
 
     @classmethod
     def from_registration(
@@ -173,6 +212,8 @@ def users_repo(conn: sqlite3.Connection) -> Repository[User]:
             "is_winter_skills BOOLEAN NOT NULL",
             "discord_id TEXT",
             "membership_expiry DATE",
+            "trial_start_date DATE",
+            "trial_finished BOOLEAN NOT NULL",
             "is_dormant BOOLEAN NOT NULL",
             "committee_role INTEGER",
             "committee_bio INTEGER NOT NULL",
