@@ -27,8 +27,12 @@
             {{ badge("coordinator") }}
           {% elif member.is_member %}
             {{ badge("member") }}
-          {% else %}
-            {{ badge("guest") }}
+          {% elif member.member_category().name == "TRIAL" %}
+            {{ badge("trial") }}
+          {% elif member.member_category().name == "LAPSED" %}
+            {{ badge("lapsed") }}
+          {% elif member.member_category().name == "NONMEMBER" %}
+            {{ badge("non_member") }}
           {% endif %}
         </article>
       </a>

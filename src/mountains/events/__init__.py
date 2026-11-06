@@ -430,7 +430,7 @@ def attend_event(event_id: int):
                 users_repo(conn).update(id=current_user.id, finished_trial=True)
 
         new_current_user = users_repo(conn).get_or_404(id=current_user.id)
-        if request.args.get("trial") != "skip" and not current_user.is_member:
+        if request.args.get("trial") != "skip" and not new_current_user.is_member:
             if new_current_user.finished_trial:
                 # We need to re-request past events here again, to make sure we
                 # can display them to the end user

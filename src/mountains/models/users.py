@@ -146,11 +146,14 @@ class User:
             return MemberCategory.LAPSED
         else:
             # Never been a member
-            if self.trial_start_date is None:
+            # TODO: Here, we use created date as a proxy for trial start date
+            #   When rolling out the membership change, this should actually use self.trial_start_date
+            trial_start_date = self.created_on_utc.date()
+            if trial_start_date is None:
                 # Never joined
                 return MemberCategory.NONMEMBER
             else:
-                if self.trial_start_date >= _today_date() + datetime.timedelta(days=90):
+                if _today_date() >= trial_start_date + datetime.timedelta(days=90):
                     # Trial expired
                     return MemberCategory.LAPSED
                 elif self.finished_trial:

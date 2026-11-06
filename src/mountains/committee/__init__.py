@@ -61,7 +61,7 @@ def overview():
     member_stats = defaultdict(int)
     for u in user_map.values():
         if not u.is_dormant:
-            member_stats[u.membership_expiry] += 1
+            member_stats[(u.member_category(), u.membership_expiry)] += 1
 
     return render_template(
         "committee/overview.html.j2",

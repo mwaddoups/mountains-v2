@@ -74,7 +74,15 @@
         <div class="member-badges">
           {% if user.is_committee %}{{ badge("committee") }}{% endif %}
           {% if user.is_coordinator %}{{ badge("coordinator") }}{% endif %}
-          {% if user.is_member %}{{ badge("member") }}{% endif %}
+          {% if user.member_category().name == "MEMBER" %}
+            {{ badge("member") }}
+          {% elif user.member_category().name == "TRIAL" %}
+            {{ badge("trial") }}
+          {% elif user.member_category().name == "LAPSED" %}
+            {{ badge("lapsed") }}
+          {% elif user.member_category().name == "NONMEMBER" %}
+            {{ badge("non_member") }}
+          {% endif %}
           {% if user.is_winter_skills %}<span class="badge color-winter-weekend">❄️</span>{% endif %}
         </div>
       </hgroup>

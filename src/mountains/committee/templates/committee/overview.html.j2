@@ -3,12 +3,15 @@
   <h1>Committee</h1>
   <section>
     <h2>Member Statistics</h2>
-    {% for membership_expiry, num_members in member_stats.items() %}
-      {% if membership_expiry %}
-        <p>{{ num_members }} paid members (ending {{ membership_expiry.strftime("%Y-%m-%d") }})</p>
-      {% else %}
-        <p>{{ num_members }} users in trial period</p>
-      {% endif %}
+    {% for (member_category, membership_expiry), num_members in member_stats.items() %}
+      <p>
+        {{ num_members }} "{{ member_category.name | lower | title }}" members
+        {% if membership_expiry %}
+          (ending {{ membership_expiry.strftime("%Y-%m-%d") }})
+        {% else %}
+          (no membership)
+        {% endif %}
+      </p>
     {% endfor %}
   </section>
   <section id="committee-activity">

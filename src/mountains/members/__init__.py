@@ -17,7 +17,13 @@ from werkzeug.security import generate_password_hash
 from mountains.context import current_user, db_conn
 from mountains.discord import DiscordAPI
 from mountains.models.events import attendees_repo, events_repo
-from mountains.models.users import CommitteeRole, User, upload_profile, users_repo
+from mountains.models.users import (
+    CommitteeRole,
+    MemberCategory,
+    User,
+    upload_profile,
+    users_repo,
+)
 from mountains.utils import str_to_bool
 
 logger = logging.getLogger(__name__)
@@ -272,10 +278,16 @@ def _member_sort_key(user: User) -> tuple:
 
     elif user.is_coordinator:
         role_key = 110
-    elif user.is_member:
-        role_key = 120
     else:
-        role_key = 130
+        member_category = user.member_category()
+        if member_category == MemberCategory.MEMBER:
+            role_key = 120
+        elif member_category == MemberCategory.TRIAL:
+            role_key = 130
+        elif member_category == MemberCategory.LAPSED:
+            role_key = 140
+        else:
+            role_key = 150
 
     return (
         role_key,

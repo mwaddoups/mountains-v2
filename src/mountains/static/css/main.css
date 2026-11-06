@@ -33,7 +33,9 @@
   --cmc-color-committee: rgb(192, 132, 252);
   --cmc-color-coordinator: #d97706;
   --cmc-color-member: #3b82f6;
-  --cmc-color-guest: #16a34a;
+  --cmc-color-trial: #16a34a;
+  --cmc-color-lapsed: #869c8e;
+  --cmc-color-non-member: #bd6666;
   --cmc-color-summer-day-walk: #65a30d;
   --cmc-color-summer-weekend: #15803d;
   --cmc-color-winter-day-walk: #3b82f6;
@@ -869,8 +871,8 @@
   .color-member {
     --cmc-highlight: var(--cmc-color-member);
   }
-  .color-guest {
-    --cmc-highlight: var(--cmc-color-guest);
+  .color-trial {
+    --cmc-highlight: var(--cmc-color-trial);
   }
   .color-summer-day-walk {
     --cmc-highlight: var(--cmc-color-summer-day-walk);

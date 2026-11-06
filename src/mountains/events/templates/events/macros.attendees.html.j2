@@ -11,7 +11,8 @@
     {% elif user.is_member %}
       {% set color = "color-member" %}
     {% else %}
-      {% set color = "color-guest" %}
+      {# They must be a trial member, since other categories can't join #}
+      {% set color = "color-trial" %}
     {% endif %}
     <span class="attendee-name {{ color }}">
       <a href="{{ url_for('platform.members.member', slug=user.slug) }}">{{ user.full_name }}</a>
