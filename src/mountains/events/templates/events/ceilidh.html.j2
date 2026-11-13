@@ -35,15 +35,8 @@
               <td>{{ 'Yes' if att.paid_deposit else 'NO!' }}</td>
               {% if att.paid_ceilidh_and_meal %}
                 <td>Yes</td>
-              {% elif att.paid_ceilidh_only %}
-                <td></td>
               {% else %}
-                <td>
-                  <form method="post">
-                    <input type="hidden" name="req_type" value="buy_meal" />
-                    <input type="submit" value="Buy Meal+Ceilidh (£43)" />
-                  </form>
-                </td>
+                <td></td>
               {% endif %}
               {% if att.paid_ceilidh_only %}
                 <td>Yes</td>
